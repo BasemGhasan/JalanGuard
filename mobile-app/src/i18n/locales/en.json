@@ -1,0 +1,120 @@
+{
+  "common": {
+    "app_name": "JalanGuard",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "retry": "Retry",
+    "search": "Search",
+    "no_results": "No results found",
+    "required_field": "This field is required"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "confirm_password": "Confirm Password",
+    "forgot_password": "Forgot Password?",
+    "login_button": "Sign In",
+    "register_button": "Create Account",
+    "already_have_account": "Already have an account?",
+    "dont_have_account": "Don't have an account?",
+    "login_success": "Welcome back!",
+    "register_success": "Account created successfully!",
+    "logout_confirm": "Are you sure you want to logout?",
+    "invalid_credentials": "Invalid email or password",
+    "password_mismatch": "Passwords do not match"
+  },
+  "home": {
+    "title": "Home",
+    "welcome_message": "Welcome to JalanGuard",
+    "recent_reports": "Recent Reports",
+    "view_all": "View All",
+    "quick_report": "Quick Report",
+    "my_reports": "My Reports",
+    "no_reports": "No reports yet"
+  },
+  "report": {
+    "title": "Report Defect",
+    "new_report": "New Report",
+    "report_details": "Report Details",
+    "take_photo": "Take Photo",
+    "choose_from_gallery": "Choose from Gallery",
+    "add_description": "Add Description",
+    "description_placeholder": "Describe the road defect...",
+    "select_category": "Select Category",
+    "current_location": "Current Location",
+    "submit_report": "Submit Report",
+    "report_submitted": "Report submitted successfully!",
+    "report_failed": "Failed to submit report",
+    "categories": {
+      "pothole": "Pothole",
+      "crack": "Crack",
+      "erosion": "Erosion",
+      "drainage": "Drainage Issue",
+      "signage": "Damaged Signage",
+      "lighting": "Street Lighting",
+      "other": "Other"
+    },
+    "status": {
+      "pending": "Pending",
+      "under_review": "Under Review",
+      "in_progress": "In Progress",
+      "resolved": "Resolved",
+      "rejected": "Rejected"
+    }
+  },
+  "map": {
+    "title": "Map",
+    "your_location": "Your Location",
+    "defect_location": "Defect Location",
+    "enable_location": "Enable Location Services",
+    "location_permission_denied": "Location permission denied"
+  },
+  "profile": {
+    "title": "Profile",
+    "edit_profile": "Edit Profile",
+    "my_reports": "My Reports",
+    "settings": "Settings",
+    "notifications": "Notifications",
+    "language": "Language",
+    "about": "About",
+    "help": "Help & Support",
+    "total_reports": "Total Reports",
+    "resolved_reports": "Resolved"
+  },
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "dark_mode": "Dark Mode",
+    "language": "Language",
+    "notifications": "Notifications",
+    "push_notifications": "Push Notifications",
+    "email_notifications": "Email Notifications",
+    "privacy": "Privacy",
+    "terms": "Terms of Service",
+    "version": "Version"
+  },
+  "errors": {
+    "network_error": "Network error. Please check your connection.",
+    "server_error": "Server error. Please try again later.",
+    "unknown_error": "An unknown error occurred.",
+    "session_expired": "Your session has expired. Please login again.",
+    "permission_denied": "Permission denied"
+  },
+  "validation": {
+    "email_invalid": "Please enter a valid email address",
+    "password_min_length": "Password must be at least 8 characters",
+    "field_required": "This field is required"
+  }
+}

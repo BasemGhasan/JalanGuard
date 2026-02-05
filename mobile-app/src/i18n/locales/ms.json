@@ -1,0 +1,120 @@
+{
+  "common": {
+    "app_name": "JalanGuard",
+    "loading": "Memuatkan...",
+    "error": "Ralat",
+    "success": "Berjaya",
+    "cancel": "Batal",
+    "confirm": "Sahkan",
+    "save": "Simpan",
+    "delete": "Padam",
+    "edit": "Edit",
+    "back": "Kembali",
+    "next": "Seterusnya",
+    "done": "Selesai",
+    "retry": "Cuba Semula",
+    "search": "Cari",
+    "no_results": "Tiada hasil dijumpai",
+    "required_field": "Ruangan ini diperlukan"
+  },
+  "auth": {
+    "login": "Log Masuk",
+    "register": "Daftar",
+    "logout": "Log Keluar",
+    "email": "E-mel",
+    "password": "Kata Laluan",
+    "confirm_password": "Sahkan Kata Laluan",
+    "forgot_password": "Lupa Kata Laluan?",
+    "login_button": "Log Masuk",
+    "register_button": "Cipta Akaun",
+    "already_have_account": "Sudah ada akaun?",
+    "dont_have_account": "Tiada akaun?",
+    "login_success": "Selamat kembali!",
+    "register_success": "Akaun berjaya dicipta!",
+    "logout_confirm": "Adakah anda pasti mahu log keluar?",
+    "invalid_credentials": "E-mel atau kata laluan tidak sah",
+    "password_mismatch": "Kata laluan tidak sepadan"
+  },
+  "home": {
+    "title": "Utama",
+    "welcome_message": "Selamat Datang ke JalanGuard",
+    "recent_reports": "Laporan Terkini",
+    "view_all": "Lihat Semua",
+    "quick_report": "Laporan Pantas",
+    "my_reports": "Laporan Saya",
+    "no_reports": "Tiada laporan lagi"
+  },
+  "report": {
+    "title": "Lapor Kecacatan",
+    "new_report": "Laporan Baru",
+    "report_details": "Butiran Laporan",
+    "take_photo": "Ambil Gambar",
+    "choose_from_gallery": "Pilih dari Galeri",
+    "add_description": "Tambah Penerangan",
+    "description_placeholder": "Terangkan kecacatan jalan...",
+    "select_category": "Pilih Kategori",
+    "current_location": "Lokasi Semasa",
+    "submit_report": "Hantar Laporan",
+    "report_submitted": "Laporan berjaya dihantar!",
+    "report_failed": "Gagal menghantar laporan",
+    "categories": {
+      "pothole": "Lubang",
+      "crack": "Retak",
+      "erosion": "Hakisan",
+      "drainage": "Masalah Saliran",
+      "signage": "Papan Tanda Rosak",
+      "lighting": "Lampu Jalan",
+      "other": "Lain-lain"
+    },
+    "status": {
+      "pending": "Menunggu",
+      "under_review": "Dalam Semakan",
+      "in_progress": "Dalam Proses",
+      "resolved": "Selesai",
+      "rejected": "Ditolak"
+    }
+  },
+  "map": {
+    "title": "Peta",
+    "your_location": "Lokasi Anda",
+    "defect_location": "Lokasi Kecacatan",
+    "enable_location": "Aktifkan Perkhidmatan Lokasi",
+    "location_permission_denied": "Kebenaran lokasi ditolak"
+  },
+  "profile": {
+    "title": "Profil",
+    "edit_profile": "Edit Profil",
+    "my_reports": "Laporan Saya",
+    "settings": "Tetapan",
+    "notifications": "Pemberitahuan",
+    "language": "Bahasa",
+    "about": "Tentang",
+    "help": "Bantuan & Sokongan",
+    "total_reports": "Jumlah Laporan",
+    "resolved_reports": "Selesai"
+  },
+  "settings": {
+    "title": "Tetapan",
+    "appearance": "Penampilan",
+    "dark_mode": "Mod Gelap",
+    "language": "Bahasa",
+    "notifications": "Pemberitahuan",
+    "push_notifications": "Pemberitahuan Push",
+    "email_notifications": "Pemberitahuan E-mel",
+    "privacy": "Privasi",
+    "terms": "Terma Perkhidmatan",
+    "version": "Versi"
+  },
+  "errors": {
+    "network_error": "Ralat rangkaian. Sila semak sambungan anda.",
+    "server_error": "Ralat pelayan. Sila cuba lagi kemudian.",
+    "unknown_error": "Ralat tidak diketahui berlaku.",
+    "session_expired": "Sesi anda telah tamat. Sila log masuk semula.",
+    "permission_denied": "Kebenaran ditolak"
+  },
+  "validation": {
+    "email_invalid": "Sila masukkan alamat e-mel yang sah",
+    "password_min_length": "Kata laluan mestilah sekurang-kurangnya 8 aksara",
+    "field_required": "Ruangan ini diperlukan"
+  }
+}
