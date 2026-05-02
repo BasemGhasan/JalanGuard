@@ -1,120 +1,227 @@
 {
   "common": {
-    "app_name": "JalanGuard",
+    "appName": "JalanGuard",
     "loading": "Loading...",
-    "error": "Error",
-    "success": "Success",
-    "cancel": "Cancel",
-    "confirm": "Confirm",
-    "save": "Save",
-    "delete": "Delete",
-    "edit": "Edit",
-    "back": "Back",
-    "next": "Next",
-    "done": "Done",
-    "retry": "Retry",
-    "search": "Search",
-    "no_results": "No results found",
-    "required_field": "This field is required"
+    "actions": {
+      "skip": "Skip",
+      "next": "Next",
+      "getStarted": "Get Started",
+      "login": "Login",
+      "logout": "Logout",
+      "backToLogin": "Back to Login",
+      "viewDetails": "View Details",
+      "submitReport": "Submit Report",
+      "sendResetLink": "Send Reset Link",
+      "yesFixed": "Yes, fixed",
+      "stillBroken": "Still broken"
+    },
+    "tabs": {
+      "home": "Home",
+      "map": "Map",
+      "history": "History",
+      "profile": "Profile"
+    }
   },
   "auth": {
-    "login": "Login",
-    "register": "Register",
-    "logout": "Logout",
-    "email": "Email",
-    "password": "Password",
-    "confirm_password": "Confirm Password",
-    "forgot_password": "Forgot Password?",
-    "login_button": "Sign In",
-    "register_button": "Create Account",
-    "already_have_account": "Already have an account?",
-    "dont_have_account": "Don't have an account?",
-    "login_success": "Welcome back!",
-    "register_success": "Account created successfully!",
-    "logout_confirm": "Are you sure you want to logout?",
-    "invalid_credentials": "Invalid email or password",
-    "password_mismatch": "Passwords do not match"
+    "titles": {
+      "welcomeBack": "Welcome Back",
+      "createAccount": "Create Account",
+      "resetPassword": "Reset Password",
+      "splashTagline": "AI-Powered Road Safety",
+      "welcome": "Welcome"
+    },
+    "subtitles": {
+      "login": "Login to continue reporting hazards",
+      "register": "Join the community and help make roads safer",
+      "resetPassword": "Enter your email and we will send a reset link."
+    },
+    "placeholders": {
+      "fullName": "Full Name",
+      "email": "Email Address",
+      "password": "Password"
+    },
+    "buttons": {
+      "login": "Login",
+      "signingIn": "Signing in...",
+      "createAccount": "Create Account",
+      "creating": "Creating..."
+    },
+    "links": {
+      "forgotPassword": "Forgot Password?",
+      "noAccount": "Do not have an account? Sign up",
+      "hasAccount": "Already have an account? Login"
+    },
+    "alerts": {
+      "invalidEmailTitle": "Invalid email",
+      "invalidEmailMessage": "Please enter a valid email address.",
+      "invalidPasswordTitle": "Invalid password",
+      "invalidPasswordMessage": "Password should be at least 6 characters.",
+      "invalidNameTitle": "Invalid name",
+      "invalidNameMessage": "Please enter your full name.",
+      "resetEmailSentTitle": "Reset email sent",
+      "resetEmailSentMessage": "Please check your inbox for reset instructions."
+    }
+  },
+  "onboarding": {
+    "slides": {
+      "one": {
+        "title": "Report Hazards Instantly",
+        "description": "Snap a photo and let AI detect road defects, estimate severity, and tag your location automatically."
+      },
+      "two": {
+        "title": "Navigate Safely",
+        "description": "View nearby hazards on the live community map and avoid high-risk roads before you drive."
+      },
+      "three": {
+        "title": "Verify & Update",
+        "description": "Help keep reports accurate by voting whether hazards are still active or already fixed."
+      },
+      "four": {
+        "title": "Earn Trust Badges",
+        "description": "Contribute consistently, gain trust points, and unlock contributor badges in your profile."
+      }
+    },
+    "alreadyHaveAccount": "Already have an account? Login"
   },
   "home": {
-    "title": "Home",
-    "welcome_message": "Welcome to JalanGuard",
-    "recent_reports": "Recent Reports",
-    "view_all": "View All",
-    "quick_report": "Quick Report",
-    "my_reports": "My Reports",
-    "no_reports": "No reports yet"
-  },
-  "report": {
-    "title": "Report Defect",
-    "new_report": "New Report",
-    "report_details": "Report Details",
-    "take_photo": "Take Photo",
-    "choose_from_gallery": "Choose from Gallery",
-    "add_description": "Add Description",
-    "description_placeholder": "Describe the road defect...",
-    "select_category": "Select Category",
-    "current_location": "Current Location",
-    "submit_report": "Submit Report",
-    "report_submitted": "Report submitted successfully!",
-    "report_failed": "Failed to submit report",
-    "categories": {
-      "pothole": "Pothole",
-      "crack": "Crack",
-      "erosion": "Erosion",
-      "drainage": "Drainage Issue",
-      "signage": "Damaged Signage",
-      "lighting": "Street Lighting",
-      "other": "Other"
+    "greeting": "Good morning",
+    "helloUser": "Hello, User!",
+    "contributions": "Your Contributions",
+    "stats": {
+      "reports": "Reports",
+      "votes": "Votes",
+      "trust": "Trust"
     },
-    "status": {
+    "communityMap": "Community Map",
+    "hazardsNearby": "5 hazards nearby",
+    "recentActivity": "Recent Activity",
+    "activity": {
+      "potholeReported": "Pothole reported",
+      "potholeSubtitle": "Jl. Sudirman · 2h ago",
+      "voteConfirmed": "Vote confirmed",
+      "voteSubtitle": "Jl. Thamrin · 5h ago",
+      "badgeEarned": "Badge earned",
+      "badgeSubtitle": "Road Hero · 1d ago"
+    },
+    "badges": {
       "pending": "Pending",
-      "under_review": "Under Review",
-      "in_progress": "In Progress",
-      "resolved": "Resolved",
-      "rejected": "Rejected"
+      "verified": "Verified",
+      "reward": "Reward"
     }
   },
   "map": {
-    "title": "Map",
-    "your_location": "Your Location",
-    "defect_location": "Defect Location",
-    "enable_location": "Enable Location Services",
-    "location_permission_denied": "Location permission denied"
+    "searchPlaceholder": "Search hazards...",
+    "bottomTitle": "Severe Pothole",
+    "bottomSubtitle": "Jl. Sudirman - 0.3 km away"
+  },
+  "history": {
+    "title": "My Reports",
+    "summary": "{{count}} total reports",
+    "reports": {
+      "severePothole": {
+        "title": "Severe Pothole",
+        "location": "Jl. Sudirman, Jakarta",
+        "severity": "High",
+        "status": "Pending"
+      },
+      "roadCrack": {
+        "title": "Road Crack",
+        "location": "Jl. Thamrin, Jakarta",
+        "severity": "Medium",
+        "status": "Verified"
+      },
+      "brokenPavement": {
+        "title": "Broken Pavement",
+        "location": "Jl. Tun Razak, Kuala Lumpur",
+        "severity": "High",
+        "status": "Pending"
+      }
+    }
   },
   "profile": {
     "title": "Profile",
-    "edit_profile": "Edit Profile",
-    "my_reports": "My Reports",
-    "settings": "Settings",
-    "notifications": "Notifications",
-    "language": "Language",
-    "about": "About",
-    "help": "Help & Support",
-    "total_reports": "Total Reports",
-    "resolved_reports": "Resolved"
+    "userName": "JalanGuard User",
+    "level": "Trusted Contributor",
+    "stats": {
+      "reports": "Reports",
+      "verifies": "Verifies",
+      "rank": "Rank"
+    }
+  },
+  "camera": {
+    "live": "LIVE",
+    "highSeverity": "High Severity",
+    "hint": "Tap capture to continue",
+    "coordinates": "-6.2088, 106.8456"
+  },
+  "hazardDetail": {
+    "title": "Hazard Detail",
+    "hazardName": "Severe Pothole",
+    "hazardLocation": "Jl. Sudirman, Jakarta",
+    "communityVerification": "Community Verification",
+    "verificationQuestion": "Has this hazard been resolved?",
+    "reporterTitle": "Reporter",
+    "reporterValue": "Trusted contributor Ahmad R."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "items": {
+      "trustPoints": {
+        "title": "You earned 50 trust points!",
+        "subtitle": "Great contribution this week.",
+        "type": "Reward"
+      },
+      "reportFixed": {
+        "title": "Report marked as fixed",
+        "subtitle": "Jalan Gasing pothole is now resolved.",
+        "type": "Update"
+      },
+      "photoUpdate": {
+        "title": "Photo update requested",
+        "subtitle": "Please verify a hazard near Jalan Ampang.",
+        "type": "Action"
+      }
+    }
   },
   "settings": {
     "title": "Settings",
-    "appearance": "Appearance",
-    "dark_mode": "Dark Mode",
-    "language": "Language",
-    "notifications": "Notifications",
-    "push_notifications": "Push Notifications",
-    "email_notifications": "Email Notifications",
-    "privacy": "Privacy",
-    "terms": "Terms of Service",
-    "version": "Version"
+    "items": {
+      "account": {
+        "label": "Account",
+        "subtitle": "Manage your profile"
+      },
+      "notifications": {
+        "label": "Notifications",
+        "subtitle": "Alerts and push settings"
+      },
+      "privacy": {
+        "label": "Privacy",
+        "subtitle": "Permissions and visibility"
+      },
+      "help": {
+        "label": "Help & Support",
+        "subtitle": "FAQs and contact options"
+      }
+    }
   },
-  "errors": {
-    "network_error": "Network error. Please check your connection.",
-    "server_error": "Server error. Please try again later.",
-    "unknown_error": "An unknown error occurred.",
-    "session_expired": "Your session has expired. Please login again.",
-    "permission_denied": "Permission denied"
+  "submission": {
+    "title": "Submit Report",
+    "gpsCoordinates": "GPS Coordinates",
+    "gpsValue": "-6.2088, 106.8456",
+    "aiSeverityAssessment": "AI Severity Assessment",
+    "aiSeverityValue": "High Severity (92% confidence)",
+    "hazardType": "Hazard Type",
+    "hazardTags": {
+      "pothole": "Pothole",
+      "crack": "Crack",
+      "debris": "Debris"
+    }
   },
-  "validation": {
-    "email_invalid": "Please enter a valid email address",
-    "password_min_length": "Password must be at least 8 characters",
-    "field_required": "This field is required"
+  "navigation": {
+    "auth": {
+      "login": "Login",
+      "register": "Register",
+      "resetPassword": "Reset Password"
+    }
   }
 }

@@ -1,120 +1,227 @@
 {
   "common": {
-    "app_name": "JalanGuard",
+    "appName": "JalanGuard",
     "loading": "Memuatkan...",
-    "error": "Ralat",
-    "success": "Berjaya",
-    "cancel": "Batal",
-    "confirm": "Sahkan",
-    "save": "Simpan",
-    "delete": "Padam",
-    "edit": "Edit",
-    "back": "Kembali",
-    "next": "Seterusnya",
-    "done": "Selesai",
-    "retry": "Cuba Semula",
-    "search": "Cari",
-    "no_results": "Tiada hasil dijumpai",
-    "required_field": "Ruangan ini diperlukan"
+    "actions": {
+      "skip": "Langkau",
+      "next": "Seterusnya",
+      "getStarted": "Mula",
+      "login": "Log Masuk",
+      "logout": "Log Keluar",
+      "backToLogin": "Kembali ke Log Masuk",
+      "viewDetails": "Lihat Butiran",
+      "submitReport": "Hantar Laporan",
+      "sendResetLink": "Hantar Pautan Tetapan Semula",
+      "yesFixed": "Ya, sudah dibaiki",
+      "stillBroken": "Masih rosak"
+    },
+    "tabs": {
+      "home": "Laman Utama",
+      "map": "Peta",
+      "history": "Sejarah",
+      "profile": "Profil"
+    }
   },
   "auth": {
-    "login": "Log Masuk",
-    "register": "Daftar",
-    "logout": "Log Keluar",
-    "email": "E-mel",
-    "password": "Kata Laluan",
-    "confirm_password": "Sahkan Kata Laluan",
-    "forgot_password": "Lupa Kata Laluan?",
-    "login_button": "Log Masuk",
-    "register_button": "Cipta Akaun",
-    "already_have_account": "Sudah ada akaun?",
-    "dont_have_account": "Tiada akaun?",
-    "login_success": "Selamat kembali!",
-    "register_success": "Akaun berjaya dicipta!",
-    "logout_confirm": "Adakah anda pasti mahu log keluar?",
-    "invalid_credentials": "E-mel atau kata laluan tidak sah",
-    "password_mismatch": "Kata laluan tidak sepadan"
+    "titles": {
+      "welcomeBack": "Selamat Kembali",
+      "createAccount": "Cipta Akaun",
+      "resetPassword": "Tetapkan Semula Kata Laluan",
+      "splashTagline": "Keselamatan Jalan Berkuasa AI",
+      "welcome": "Selamat Datang"
+    },
+    "subtitles": {
+      "login": "Log masuk untuk terus melaporkan bahaya jalan",
+      "register": "Sertai komuniti dan bantu jadikan jalan lebih selamat",
+      "resetPassword": "Masukkan emel anda dan kami akan hantar pautan tetapan semula."
+    },
+    "placeholders": {
+      "fullName": "Nama Penuh",
+      "email": "Alamat Emel",
+      "password": "Kata Laluan"
+    },
+    "buttons": {
+      "login": "Log Masuk",
+      "signingIn": "Sedang log masuk...",
+      "createAccount": "Cipta Akaun",
+      "creating": "Sedang mencipta..."
+    },
+    "links": {
+      "forgotPassword": "Lupa Kata Laluan?",
+      "noAccount": "Belum ada akaun? Daftar",
+      "hasAccount": "Sudah ada akaun? Log masuk"
+    },
+    "alerts": {
+      "invalidEmailTitle": "Emel tidak sah",
+      "invalidEmailMessage": "Sila masukkan alamat emel yang sah.",
+      "invalidPasswordTitle": "Kata laluan tidak sah",
+      "invalidPasswordMessage": "Kata laluan mesti sekurang-kurangnya 6 aksara.",
+      "invalidNameTitle": "Nama tidak sah",
+      "invalidNameMessage": "Sila masukkan nama penuh anda.",
+      "resetEmailSentTitle": "Emel tetapan semula dihantar",
+      "resetEmailSentMessage": "Sila semak peti masuk anda untuk arahan tetapan semula."
+    }
+  },
+  "onboarding": {
+    "slides": {
+      "one": {
+        "title": "Lapor Bahaya Serta-Merta",
+        "description": "Ambil gambar dan biarkan AI mengesan kerosakan jalan, anggar tahap bahaya, dan tanda lokasi anda secara automatik."
+      },
+      "two": {
+        "title": "Navigasi Dengan Selamat",
+        "description": "Lihat bahaya berdekatan pada peta komuniti langsung dan elakkan jalan berisiko tinggi sebelum memandu."
+      },
+      "three": {
+        "title": "Sahkan & Kemas Kini",
+        "description": "Bantu pastikan laporan tepat dengan mengundi sama ada bahaya masih aktif atau sudah dibaiki."
+      },
+      "four": {
+        "title": "Dapatkan Lencana Kepercayaan",
+        "description": "Sumbang secara konsisten, kumpul mata kepercayaan, dan buka lencana penyumbang dalam profil anda."
+      }
+    },
+    "alreadyHaveAccount": "Sudah ada akaun? Log masuk"
   },
   "home": {
-    "title": "Utama",
-    "welcome_message": "Selamat Datang ke JalanGuard",
-    "recent_reports": "Laporan Terkini",
-    "view_all": "Lihat Semua",
-    "quick_report": "Laporan Pantas",
-    "my_reports": "Laporan Saya",
-    "no_reports": "Tiada laporan lagi"
-  },
-  "report": {
-    "title": "Lapor Kecacatan",
-    "new_report": "Laporan Baru",
-    "report_details": "Butiran Laporan",
-    "take_photo": "Ambil Gambar",
-    "choose_from_gallery": "Pilih dari Galeri",
-    "add_description": "Tambah Penerangan",
-    "description_placeholder": "Terangkan kecacatan jalan...",
-    "select_category": "Pilih Kategori",
-    "current_location": "Lokasi Semasa",
-    "submit_report": "Hantar Laporan",
-    "report_submitted": "Laporan berjaya dihantar!",
-    "report_failed": "Gagal menghantar laporan",
-    "categories": {
-      "pothole": "Lubang",
-      "crack": "Retak",
-      "erosion": "Hakisan",
-      "drainage": "Masalah Saliran",
-      "signage": "Papan Tanda Rosak",
-      "lighting": "Lampu Jalan",
-      "other": "Lain-lain"
+    "greeting": "Selamat pagi",
+    "helloUser": "Hai, Pengguna!",
+    "contributions": "Sumbangan Anda",
+    "stats": {
+      "reports": "Laporan",
+      "votes": "Undian",
+      "trust": "Kepercayaan"
     },
-    "status": {
+    "communityMap": "Peta Komuniti",
+    "hazardsNearby": "5 bahaya berhampiran",
+    "recentActivity": "Aktiviti Terkini",
+    "activity": {
+      "potholeReported": "Lubang jalan dilaporkan",
+      "potholeSubtitle": "Jl. Sudirman · 2j lalu",
+      "voteConfirmed": "Undian disahkan",
+      "voteSubtitle": "Jl. Thamrin · 5j lalu",
+      "badgeEarned": "Lencana diperoleh",
+      "badgeSubtitle": "Road Hero · 1h lalu"
+    },
+    "badges": {
       "pending": "Menunggu",
-      "under_review": "Dalam Semakan",
-      "in_progress": "Dalam Proses",
-      "resolved": "Selesai",
-      "rejected": "Ditolak"
+      "verified": "Disahkan",
+      "reward": "Ganjaran"
     }
   },
   "map": {
-    "title": "Peta",
-    "your_location": "Lokasi Anda",
-    "defect_location": "Lokasi Kecacatan",
-    "enable_location": "Aktifkan Perkhidmatan Lokasi",
-    "location_permission_denied": "Kebenaran lokasi ditolak"
+    "searchPlaceholder": "Cari bahaya...",
+    "bottomTitle": "Lubang Jalan Teruk",
+    "bottomSubtitle": "Jl. Sudirman - 0.3 km dari sini"
+  },
+  "history": {
+    "title": "Laporan Saya",
+    "summary": "{{count}} jumlah laporan",
+    "reports": {
+      "severePothole": {
+        "title": "Lubang Jalan Teruk",
+        "location": "Jl. Sudirman, Jakarta",
+        "severity": "Tinggi",
+        "status": "Menunggu"
+      },
+      "roadCrack": {
+        "title": "Retakan Jalan",
+        "location": "Jl. Thamrin, Jakarta",
+        "severity": "Sederhana",
+        "status": "Disahkan"
+      },
+      "brokenPavement": {
+        "title": "Turapan Rosak",
+        "location": "Jl. Tun Razak, Kuala Lumpur",
+        "severity": "Tinggi",
+        "status": "Menunggu"
+      }
+    }
   },
   "profile": {
     "title": "Profil",
-    "edit_profile": "Edit Profil",
-    "my_reports": "Laporan Saya",
-    "settings": "Tetapan",
-    "notifications": "Pemberitahuan",
-    "language": "Bahasa",
-    "about": "Tentang",
-    "help": "Bantuan & Sokongan",
-    "total_reports": "Jumlah Laporan",
-    "resolved_reports": "Selesai"
+    "userName": "Pengguna JalanGuard",
+    "level": "Penyumbang Dipercayai",
+    "stats": {
+      "reports": "Laporan",
+      "verifies": "Pengesahan",
+      "rank": "Kedudukan"
+    }
+  },
+  "camera": {
+    "live": "LANGSUNG",
+    "highSeverity": "Tahap Tinggi",
+    "hint": "Tekan rakam untuk teruskan",
+    "coordinates": "-6.2088, 106.8456"
+  },
+  "hazardDetail": {
+    "title": "Butiran Bahaya",
+    "hazardName": "Lubang Jalan Teruk",
+    "hazardLocation": "Jl. Sudirman, Jakarta",
+    "communityVerification": "Pengesahan Komuniti",
+    "verificationQuestion": "Adakah bahaya ini telah dibaiki?",
+    "reporterTitle": "Pelapor",
+    "reporterValue": "Penyumbang dipercayai Ahmad R."
+  },
+  "notifications": {
+    "title": "Notifikasi",
+    "items": {
+      "trustPoints": {
+        "title": "Anda mendapat 50 mata kepercayaan!",
+        "subtitle": "Sumbangan hebat minggu ini.",
+        "type": "Ganjaran"
+      },
+      "reportFixed": {
+        "title": "Laporan ditanda selesai",
+        "subtitle": "Lubang jalan Jalan Gasing telah dibaiki.",
+        "type": "Kemas Kini"
+      },
+      "photoUpdate": {
+        "title": "Kemaskini gambar diminta",
+        "subtitle": "Sila sahkan bahaya berhampiran Jalan Ampang.",
+        "type": "Tindakan"
+      }
+    }
   },
   "settings": {
     "title": "Tetapan",
-    "appearance": "Penampilan",
-    "dark_mode": "Mod Gelap",
-    "language": "Bahasa",
-    "notifications": "Pemberitahuan",
-    "push_notifications": "Pemberitahuan Push",
-    "email_notifications": "Pemberitahuan E-mel",
-    "privacy": "Privasi",
-    "terms": "Terma Perkhidmatan",
-    "version": "Versi"
+    "items": {
+      "account": {
+        "label": "Akaun",
+        "subtitle": "Urus profil anda"
+      },
+      "notifications": {
+        "label": "Notifikasi",
+        "subtitle": "Tetapan amaran dan pemberitahuan"
+      },
+      "privacy": {
+        "label": "Privasi",
+        "subtitle": "Kebenaran dan keterlihatan"
+      },
+      "help": {
+        "label": "Bantuan & Sokongan",
+        "subtitle": "Soalan lazim dan pilihan hubungan"
+      }
+    }
   },
-  "errors": {
-    "network_error": "Ralat rangkaian. Sila semak sambungan anda.",
-    "server_error": "Ralat pelayan. Sila cuba lagi kemudian.",
-    "unknown_error": "Ralat tidak diketahui berlaku.",
-    "session_expired": "Sesi anda telah tamat. Sila log masuk semula.",
-    "permission_denied": "Kebenaran ditolak"
+  "submission": {
+    "title": "Hantar Laporan",
+    "gpsCoordinates": "Koordinat GPS",
+    "gpsValue": "-6.2088, 106.8456",
+    "aiSeverityAssessment": "Penilaian Tahap AI",
+    "aiSeverityValue": "Tahap Tinggi (92% keyakinan)",
+    "hazardType": "Jenis Bahaya",
+    "hazardTags": {
+      "pothole": "Lubang Jalan",
+      "crack": "Retakan",
+      "debris": "Halangan"
+    }
   },
-  "validation": {
-    "email_invalid": "Sila masukkan alamat e-mel yang sah",
-    "password_min_length": "Kata laluan mestilah sekurang-kurangnya 8 aksara",
-    "field_required": "Ruangan ini diperlukan"
+  "navigation": {
+    "auth": {
+      "login": "Log Masuk",
+      "register": "Daftar",
+      "resetPassword": "Tetapkan Semula Kata Laluan"
+    }
   }
 }

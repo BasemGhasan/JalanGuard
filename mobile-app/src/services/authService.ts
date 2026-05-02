@@ -1,77 +1,41 @@
-/**
- * Authentication API Service
- * Handles login, register, logout, and token management
- */
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthState, UserProfile } from '../types';
 
-import apiClient from './apiClient';
-import {
-    LoginRequest,
-    RegisterRequest,
-    AuthResponse,
-    User,
-    ApiResponse
-} from '../types';
+const AUTH_KEY = 'jalanguard.auth';
 
-const AUTH_ENDPOINTS = {
-    LOGIN: '/auth/login',
-    REGISTER: '/auth/register',
-    LOGOUT: '/auth/logout',
-    REFRESH: '/auth/refresh',
-    ME: '/auth/me',
-    FORGOT_PASSWORD: '/auth/forgot-password',
-    RESET_PASSWORD: '/auth/reset-password',
+const defaultState: AuthState = {
+  isAuthenticated: false,
+  user: null,
 };
 
-/**
- * Login user with email and password
- */
-export const login = async (credentials: LoginRequest): Promise<AuthResponse> => {
-    const response = await apiClient.post<ApiResponse<AuthResponse>>(
-        AUTH_ENDPOINTS.LOGIN,
-        credentials
-    );
-    return response.data.data;
-};
+export async function getAuthState(): Promise<AuthState> {
+  const raw = await AsyncStorage.getItem(AUTH_KEY);
+  if (!raw) return defaultState;
 
-/**
- * Register a new user account
- */
-export const register = async (userData: RegisterRequest): Promise<AuthResponse> => {
-    const response = await apiClient.post<ApiResponse<AuthResponse>>(
-        AUTH_ENDPOINTS.REGISTER,
-        userData
-    );
-    return response.data.data;
-};
+  try {
+    return JSON.parse(raw) as AuthState;
+  } catch {
+    return defaultState;
+  }
+}
 
-/**
- * Logout current user
- */
-export const logout = async (): Promise<void> => {
-    await apiClient.post(AUTH_ENDPOINTS.LOGOUT);
-};
+export async function signIn(email: string): Promise<AuthState> {
+  const user: UserProfile = {
+    id: `user-${Date.now()}`,
+    name: email.split('@')[0] || 'User',
+    email,
+  };
 
-/**
- * Get current authenticated user
- */
-export const getCurrentUser = async (): Promise<User> => {
-    const response = await apiClient.get<ApiResponse<User>>(AUTH_ENDPOINTS.ME);
-    return response.data.data;
-};
+  const state: AuthState = {
+    isAuthenticated: true,
+    user,
+  };
 
-/**
- * Request password reset email
- */
-export const forgotPassword = async (email: string): Promise<void> => {
-    await apiClient.post(AUTH_ENDPOINTS.FORGOT_PASSWORD, { email });
-};
+  await AsyncStorage.setItem(AUTH_KEY, JSON.stringify(state));
+  return state;
+}
 
-/**
- * Reset password with token
- */
-export const resetPassword = async (
-    token: string,
-    newPassword: string
-): Promise<void> => {
-    await apiClient.post(AUTH_ENDPOINTS.RESET_PASSWORD, { token, newPassword });
-};
+export async function signOut(): Promise<AuthState> {
+  await AsyncStorage.removeItem(AUTH_KEY);
+  return defaultState;
+}

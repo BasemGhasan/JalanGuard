@@ -1,8 +1,9 @@
-/**
- * Main screens barrel export
- */
-
 export * from './HomeScreen';
 export * from './MapScreen';
-export * from './ReportScreen';
+export * from './HistoryScreen';
 export * from './ProfileScreen';
+export * from './CameraScreen';
+export * from './SubmissionScreen';
+export * from './HazardDetailScreen';
+export * from './NotificationsScreen';
+export * from './SettingsScreen';

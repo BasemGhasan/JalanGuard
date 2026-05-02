@@ -1,258 +1,106 @@
-/**
- * RegisterScreen Component
- * User registration page
- */
-
-import React, { useState, useCallback, useMemo } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    SafeAreaView,
-    KeyboardAvoidingView,
-    Platform,
-    TouchableOpacity,
-    ScrollView,
-} from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Alert, Pressable, Text, TextInput, View } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { CustomButton, CustomInput } from '../../components';
-import { useAuth } from '../../hooks';
-import { COLORS, SPACING, FONT_SIZES } from '../../constants/theme';
-import { isValidEmail, isValidPassword } from '../../utils';
-import { AuthStackParamList } from '../../navigation/types';
+import { AuthStackParamList } from '../../types';
+import { COLORS } from '../../constants';
+import { PrimaryButton } from '../../components';
+import { isValidEmail } from '../../utils';
+import { registerScreenStyles } from '../../styles/screens';
 
-type RegisterScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Register'>;
-
-export const RegisterScreen: React.FC = () => {
-    const { t } = useTranslation();
-    const navigation = useNavigation<RegisterScreenNavigationProp>();
-    const { handleRegister, loadingState, error } = useAuth();
-
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-
-    const [firstNameError, setFirstNameError] = useState('');
-    const [lastNameError, setLastNameError] = useState('');
-    const [emailError, setEmailError] = useState('');
-    const [passwordError, setPasswordError] = useState('');
-    const [confirmPasswordError, setConfirmPasswordError] = useState('');
-
-    const isLoading = useMemo(() => loadingState === 'loading', [loadingState]);
-
-    const validateForm = useCallback((): boolean => {
-        let isValid = true;
-        setFirstNameError('');
-        setLastNameError('');
-        setEmailError('');
-        setPasswordError('');
-        setConfirmPasswordError('');
-
-        if (!firstName.trim()) {
-            setFirstNameError(t('validation.field_required'));
-            isValid = false;
-        }
-
-        if (!lastName.trim()) {
-            setLastNameError(t('validation.field_required'));
-            isValid = false;
-        }
-
-        if (!email.trim()) {
-            setEmailError(t('validation.field_required'));
-            isValid = false;
-        } else if (!isValidEmail(email)) {
-            setEmailError(t('validation.email_invalid'));
-            isValid = false;
-        }
-
-        if (!password) {
-            setPasswordError(t('validation.field_required'));
-            isValid = false;
-        } else if (!isValidPassword(password)) {
-            setPasswordError(t('validation.password_min_length'));
-            isValid = false;
-        }
-
-        if (!confirmPassword) {
-            setConfirmPasswordError(t('validation.field_required'));
-            isValid = false;
-        } else if (password !== confirmPassword) {
-            setConfirmPasswordError(t('auth.password_mismatch'));
-            isValid = false;
-        }
-
-        return isValid;
-    }, [firstName, lastName, email, password, confirmPassword, t]);
-
-    const handleSubmit = useCallback(async () => {
-        if (!validateForm()) return;
-
-        await handleRegister({ firstName, lastName, email, password });
-    }, [validateForm, handleRegister, firstName, lastName, email, password]);
-
-    const navigateToLogin = useCallback(() => {
-        navigation.navigate('Login');
-    }, [navigation]);
-
-    return (
-        <SafeAreaView style={styles.container}>
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={styles.keyboardView}
-            >
-                <ScrollView
-                    contentContainerStyle={styles.scrollContent}
-                    keyboardShouldPersistTaps="handled"
-                >
-                    <View style={styles.headerContainer}>
-                        <Text style={styles.title}>{t('auth.register')}</Text>
-                        <Text style={styles.subtitle}>{t('auth.register_button')}</Text>
-                    </View>
-
-                    <View style={styles.formContainer}>
-                        <View style={styles.nameRow}>
-                            <View style={styles.nameInput}>
-                                <CustomInput
-                                    label={t('common.first_name') || 'First Name'}
-                                    placeholder="John"
-                                    value={firstName}
-                                    onChangeText={setFirstName}
-                                    error={firstNameError}
-                                    autoCapitalize="words"
-                                />
-                            </View>
-                            <View style={styles.nameInput}>
-                                <CustomInput
-                                    label={t('common.last_name') || 'Last Name'}
-                                    placeholder="Doe"
-                                    value={lastName}
-                                    onChangeText={setLastName}
-                                    error={lastNameError}
-                                    autoCapitalize="words"
-                                />
-                            </View>
-                        </View>
-
-                        <CustomInput
-                            label={t('auth.email')}
-                            placeholder={t('auth.email')}
-                            value={email}
-                            onChangeText={setEmail}
-                            error={emailError}
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                            autoComplete="email"
-                            leftIcon="mail-outline"
-                        />
-
-                        <CustomInput
-                            label={t('auth.password')}
-                            placeholder={t('auth.password')}
-                            value={password}
-                            onChangeText={setPassword}
-                            error={passwordError}
-                            secureTextEntry
-                            autoComplete="password-new"
-                            leftIcon="lock-closed-outline"
-                        />
-
-                        <CustomInput
-                            label={t('auth.confirm_password')}
-                            placeholder={t('auth.confirm_password')}
-                            value={confirmPassword}
-                            onChangeText={setConfirmPassword}
-                            error={confirmPasswordError}
-                            secureTextEntry
-                            leftIcon="lock-closed-outline"
-                        />
-
-                        {error && <Text style={styles.errorText}>{error}</Text>}
-
-                        <CustomButton
-                            title={t('auth.register_button')}
-                            onPress={handleSubmit}
-                            loading={isLoading}
-                            fullWidth
-                            style={styles.registerButton}
-                        />
-                    </View>
-
-                    <View style={styles.footerContainer}>
-                        <Text style={styles.footerText}>{t('auth.already_have_account')}</Text>
-                        <TouchableOpacity onPress={navigateToLogin}>
-                            <Text style={styles.loginLink}>{t('auth.login')}</Text>
-                        </TouchableOpacity>
-                    </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
-        </SafeAreaView>
-    );
+type Props = NativeStackScreenProps<AuthStackParamList, 'Register'> & {
+  onRegister: (email: string) => Promise<void>;
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: COLORS.background,
-    },
-    keyboardView: {
-        flex: 1,
-    },
-    scrollContent: {
-        flexGrow: 1,
-        justifyContent: 'center',
-        padding: SPACING.lg,
-    },
-    headerContainer: {
-        alignItems: 'center',
-        marginBottom: SPACING.xl,
-    },
-    title: {
-        fontSize: FONT_SIZES.xxl,
-        fontWeight: 'bold',
-        color: COLORS.primary,
-        marginBottom: SPACING.xs,
-    },
-    subtitle: {
-        fontSize: FONT_SIZES.md,
-        color: COLORS.accent,
-    },
-    formContainer: {
-        marginBottom: SPACING.lg,
-    },
-    nameRow: {
-        flexDirection: 'row',
-        gap: SPACING.md,
-    },
-    nameInput: {
-        flex: 1,
-    },
-    errorText: {
-        fontSize: FONT_SIZES.sm,
-        color: COLORS.error,
-        textAlign: 'center',
-        marginBottom: SPACING.md,
-    },
-    registerButton: {
-        marginTop: SPACING.sm,
-    },
-    footerContainer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    footerText: {
-        fontSize: FONT_SIZES.md,
-        color: COLORS.accent,
-    },
-    loginLink: {
-        fontSize: FONT_SIZES.md,
-        color: COLORS.secondary,
-        fontWeight: '600',
-        marginLeft: SPACING.xs,
-    },
-});
+export function RegisterScreen({ navigation, onRegister }: Props) {
+  const { t } = useTranslation();
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const buttonLabel = useMemo(
+    () => (submitting ? t('auth.buttons.creating') : t('auth.buttons.createAccount')),
+    [submitting, t],
+  );
+
+  const handleRegister = useCallback(async () => {
+    if (fullName.trim().length < 3) {
+      Alert.alert(t('auth.alerts.invalidNameTitle'), t('auth.alerts.invalidNameMessage'));
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      Alert.alert(t('auth.alerts.invalidEmailTitle'), t('auth.alerts.invalidEmailMessage'));
+      return;
+    }
+
+    if (password.trim().length < 6) {
+      Alert.alert(t('auth.alerts.invalidPasswordTitle'), t('auth.alerts.invalidPasswordMessage'));
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await onRegister(email);
+    } finally {
+      setSubmitting(false);
+    }
+  }, [email, fullName, onRegister, password, t]);
+
+  return (
+    <View style={registerScreenStyles.container}>
+      <Text style={registerScreenStyles.title}>{t('auth.titles.createAccount')}</Text>
+      <Text style={registerScreenStyles.subtitle}>{t('auth.subtitles.register')}</Text>
+
+      <View style={registerScreenStyles.inputWrap}>
+        <MaterialIcons name="person-outline" size={20} color={COLORS.disabled} />
+        <TextInput
+          value={fullName}
+          onChangeText={setFullName}
+          placeholder={t('auth.placeholders.fullName')}
+          placeholderTextColor={COLORS.disabled}
+          autoCapitalize="words"
+          style={registerScreenStyles.input}
+        />
+      </View>
+
+      <View style={[registerScreenStyles.inputWrap, registerScreenStyles.inputSpacing]}>
+        <MaterialIcons name="mail-outline" size={20} color={COLORS.disabled} />
+        <TextInput
+          value={email}
+          onChangeText={setEmail}
+          placeholder={t('auth.placeholders.email')}
+          placeholderTextColor={COLORS.disabled}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          style={registerScreenStyles.input}
+        />
+      </View>
+
+      <View style={[registerScreenStyles.inputWrap, registerScreenStyles.inputSpacing]}>
+        <MaterialIcons name="lock-outline" size={20} color={COLORS.disabled} />
+        <TextInput
+          value={password}
+          onChangeText={setPassword}
+          placeholder={t('auth.placeholders.password')}
+          placeholderTextColor={COLORS.disabled}
+          secureTextEntry={!showPassword}
+          autoCapitalize="none"
+          style={registerScreenStyles.input}
+        />
+        <Pressable onPress={() => setShowPassword((prev) => !prev)}>
+          <MaterialIcons name={showPassword ? 'visibility-off' : 'visibility'} size={20} color={COLORS.disabled} />
+        </Pressable>
+      </View>
+
+      <PrimaryButton label={buttonLabel} onPress={handleRegister} disabled={submitting} icon="chevron-right" />
+
+      <Pressable onPress={() => navigation.navigate('Login')}>
+        <Text style={registerScreenStyles.linkText}>{t('auth.links.hasAccount')}</Text>
+      </Pressable>
+    </View>
+  );
+}
