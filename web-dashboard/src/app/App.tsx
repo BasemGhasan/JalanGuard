@@ -6,6 +6,7 @@ import { MapPage } from "./components/MapPage";
 import { DocsPage } from "./components/DocsPage";
 import { KeyPage } from "./components/KeyPage";
 import { LoginPage, RegisterPage } from "./components/AuthPages";
+import { HeatmapTest } from "./components/HeatmapTest";
 
 export default function App() {
   const [page, setPage] = useState<Page>("map");
@@ -43,6 +44,7 @@ export default function App() {
         {page === "key" && <KeyPage onNavigate={navigate} session={session} />}
         {page === "login" && <LoginPage onNavigate={navigate} />}
         {page === "register" && <RegisterPage onNavigate={navigate} />}
+        {page === "test" && <HeatmapTest />}
       </div>
     </div>
   );

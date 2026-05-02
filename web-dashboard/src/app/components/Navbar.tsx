@@ -1,7 +1,7 @@
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "../../lib/supabase";
 
-export type Page = "map" | "docs" | "key" | "login" | "register";
+export type Page = "map" | "docs" | "key" | "login" | "register" | "test";
 
 export function Navbar({
   active,
@@ -30,6 +30,7 @@ export function Navbar({
       <nav className="flex items-center gap-8">
         <button onClick={() => onNavigate("map")} className={linkClass("map")}>Live Map</button>
         <button onClick={() => onNavigate("docs")} className={linkClass("docs")}>Documentation</button>
+        <button onClick={() => onNavigate("test")} className={linkClass("test")}>DB Test</button>
         {session ? (
           <button onClick={handleLogout} className="text-[#94a3b8] hover:text-white transition-colors">
             Logout
