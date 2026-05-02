@@ -58,3 +58,8 @@ externalPort = 8000
 deploymentTarget = "autoscale"
 run = ["bash", "-c", "cd backend && uvicorn main:app --host 0.0.0.0 --port 5000"]
 build = ["bash", "-c", "cd web-dashboard && npm install --legacy-peer-deps && npm run build"]
+
+[userenv]
+
+[userenv.shared]
+VITE_SUPABASE_URL = "https://kjlxiciskiqezrtmovvw.supabase.co"

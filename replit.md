@@ -38,11 +38,26 @@ A comprehensive road defect reporting system for Malaysia, enabling citizens to 
 - `backend/app/models/database.py` — SQLAlchemy ORM models
 - `backend/.env` — Local backend env overrides (no DATABASE_URL, uses system env)
 
+## Supabase Integration
+
+- **Frontend**: `@supabase/supabase-js` client in `web-dashboard/src/lib/supabase.ts`
+  - Auth: `supabase.auth.signInWithPassword`, `signUp`, `signOut`, `onAuthStateChange`
+  - Session passed from `App.tsx` down to `Navbar`, `KeyPage`
+  - Login/Register pages in `AuthPages.tsx` use real Supabase Auth
+- **Backend**: `supabase` Python client in `backend/app/core/supabase.py`
+  - JWT verification helper in `backend/app/core/supabase_auth.py`
+- **Env vars**: `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `web-dashboard/.env` (safe for frontend — anon key is public by design)
+- **Secrets**: `SUPABASE_URL`, `SUPABASE_ANON_KEY` stored in Replit Secrets
+
 ## Environment Variables
 
 Set automatically by Replit:
 - `DATABASE_URL` — PostgreSQL connection string
 - `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`
+
+Supabase (set as Replit Secrets):
+- `SUPABASE_URL` — Project URL (e.g. `https://xxxx.supabase.co`)
+- `SUPABASE_ANON_KEY` — Public anon/API key
 
 ## Tech Stack
 
