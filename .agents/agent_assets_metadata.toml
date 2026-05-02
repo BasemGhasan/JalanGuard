@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "O7xwypxU19jz623wJ2y5B"
+uri = "file://scripts/supabase_seed_malaysian_states.zip"
+type = "unspecified"
+title = "Malaysian States Seed SQL"
