@@ -11,17 +11,55 @@ interface HeatmapLayerProps {
   stats: StateHeatmapStat[];
 }
 
-// 3. Helpers (defined outside component to avoid recreating on every render)
-/** Returns per-feature fill colour based on dominant severity tier. */
+// 3. Helpers — defined outside the component to prevent recreation on every render
+
+/** Returns per-feature fill colour based on the dominant severity tier. */
 function styleFeature(feature: Feature<Geometry, HeatmapFeatureProps> | undefined): PathOptions {
   if (!feature?.properties) return defaultPolyStyle;
-  return {
-    ...defaultPolyStyle,
-    fillColor: dominantColor(feature.properties),
-  };
+  return { ...defaultPolyStyle, fillColor: dominantColor(feature.properties) };
 }
 
-/** Binds mouse-enter/leave highlight handlers and a rich tooltip to each layer. */
+/**
+ * Builds the tooltip HTML string for a state polygon.
+ * Colour-coded severity rows with glowing dot indicators mirror the
+ * 3-tier severity palette from src/constants/theme.ts.
+ * CSS classes are defined in src/styles/map.css.
+ */
+function buildTooltipHtml(p: HeatmapFeatureProps): string {
+  return `
+    <div class="map-tooltip">
+      <div class="tt-header">${p.state_name}</div>
+      <div class="tt-divider"></div>
+
+      <div class="tt-total-row">
+        <span class="tt-total-label">Total Reports</span>
+        <span class="tt-total-value">${p.total_reports}</span>
+      </div>
+
+      <div class="tt-sev-row tt-high">
+        <span class="tt-dot"></span>
+        <span class="tt-sev-label">High</span>
+        <span class="tt-count">${p.high_severity_count}</span>
+      </div>
+
+      <div class="tt-sev-row tt-medium">
+        <span class="tt-dot"></span>
+        <span class="tt-sev-label">Medium</span>
+        <span class="tt-count">${p.medium_severity_count}</span>
+      </div>
+
+      <div class="tt-sev-row tt-low">
+        <span class="tt-dot"></span>
+        <span class="tt-sev-label">Low</span>
+        <span class="tt-count">${p.low_severity_count}</span>
+      </div>
+    </div>`;
+}
+
+/**
+ * Binds mouse-enter / mouse-leave highlight handlers and a rich tooltip
+ * to each GeoJSON layer.
+ */
 function onEachFeature(
   feature: Feature<Geometry, HeatmapFeatureProps>,
   layer: Layer,
@@ -29,16 +67,7 @@ function onEachFeature(
   const p = feature.properties;
   if (!p) return;
 
-  const tooltipHtml = `
-    <div class="map-tooltip">
-      <strong>${p.state_name}</strong>
-      <div class="tt-row"><span>Total</span><span>${p.total_reports}</span></div>
-      <div class="tt-row"><span>High</span><span>${p.high_severity_count}</span></div>
-      <div class="tt-row"><span>Medium</span><span>${p.medium_severity_count}</span></div>
-      <div class="tt-row"><span>Low</span><span>${p.low_severity_count}</span></div>
-    </div>`;
-
-  layer.bindTooltip(tooltipHtml, {
+  layer.bindTooltip(buildTooltipHtml(p), {
     className: "leaflet-tooltip-jalanguard",
     direction: "top",
     sticky:    true,
@@ -47,6 +76,7 @@ function onEachFeature(
   layer.on("mouseover", (e: LeafletMouseEvent) => {
     (e.target as { setStyle: (s: PathOptions) => void }).setStyle(hoverPolyStyle);
   });
+
   layer.on("mouseout", (e: LeafletMouseEvent) => {
     (e.target as { setStyle: (s: PathOptions) => void }).setStyle({
       ...defaultPolyStyle,
@@ -61,7 +91,7 @@ function onEachFeature(
  * the dominant severity tier from `state_heatmap_stats`.
  *
  * Memoised so it only re-renders when the stats array reference changes
- * (not on zoom/pan which would cause flicker on the Canvas renderer).
+ * (not on zoom/pan, which would cause flicker on the Canvas renderer).
  */
 export const HeatmapLayer = memo(function HeatmapLayer({ stats }: HeatmapLayerProps) {
   const geoData = useMemo(() => buildGeoJSON(stats), [stats]);
