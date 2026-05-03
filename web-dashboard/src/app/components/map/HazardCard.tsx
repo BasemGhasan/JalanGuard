@@ -27,70 +27,54 @@ function formatDate(iso: string): string {
 /**
  * Floating hazard detail card.
  *
- * Behaviour:
- *  - Draggable while in corner mode; snaps to the nearest corner on release.
- *  - Click anywhere on the card to expand it 2× to the screen centre.
- *  - Click the backdrop (or press Escape — via backdrop) to collapse back.
- *  - The × button closes the card entirely.
+ * Drag from anywhere on the card — snaps to the nearest corner on release.
+ * Click (without dragging) to expand 2× centred on screen.
+ * Click the backdrop to collapse; × to close entirely.
+ *
+ * All drag/snap logic lives in useDraggableCard. This component is pure UI.
  */
 export function HazardCard({ hazard, onClose }: HazardCardProps) {
-  const {
-    corner,
-    isExpanded,
-    isDragging,
-    cardRef,
-    onMouseDown,
-    onCardClick,
-    onCollapse,
-  } = useDraggableCard("bottom-left");
+  const { corner, isExpanded, cardRef, onMouseDown, onCardClick, onCollapse } =
+    useDraggableCard("bottom-left");
 
   const badge = SEVERITY_BADGE[hazard.severity] ?? SEVERITY_BADGE.low;
 
+  /** Stop the close button from triggering a card drag or expand. */
+  const handleCloseBtnMouseDown = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+  }, []);
+
   const handleClose = useCallback(
     (e: React.MouseEvent) => {
-      e.stopPropagation(); // prevent card-click expand
+      e.stopPropagation();
       onClose();
     },
     [onClose],
   );
 
-  const handleHeaderMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      onMouseDown(e);
-    },
-    [onMouseDown],
-  );
-
-  const cardClass = [
-    "hazard-card",
-    isExpanded  ? "is-expanded"  : "",
-    isDragging  ? "is-dragging"  : "",
-  ].filter(Boolean).join(" ");
-
   return (
     <>
-      {/* Full-screen backdrop — click outside to collapse */}
+      {/* Backdrop — click outside to collapse */}
       {isExpanded && (
         <div className="hazard-card-backdrop" onClick={onCollapse} />
       )}
 
       <div
         ref={cardRef}
-        className={cardClass}
         data-corner={corner}
+        className={`hazard-card${isExpanded ? " is-expanded" : ""}`}
+        onMouseDown={onMouseDown}
         onClick={onCardClick}
       >
-        {/* ── Drag handle ───────────────────────────────────────────── */}
-        <div
-          style={styles.dragHandle}
-          onMouseDown={handleHeaderMouseDown}
-          title="Drag to reposition"
-        >
+        {/* ── Drag handle (visual indicator only — whole card is draggable) */}
+        <div style={styles.dragHandle}>
           <GripHorizontal size={14} color={COLORS.textMuted} />
+          {!isExpanded && (
+            <Maximize2 size={11} color={COLORS.textMuted} style={{ opacity: 0.5 }} />
+          )}
         </div>
 
-        {/* ── Header row ────────────────────────────────────────────── */}
+        {/* ── Header */}
         <div style={styles.header}>
           <span
             style={{
@@ -103,21 +87,17 @@ export function HazardCard({ hazard, onClose }: HazardCardProps) {
             {hazard.severity.toUpperCase()}
           </span>
 
-          <div style={styles.headerRight}>
-            {!isExpanded && (
-              <Maximize2 size={12} color={COLORS.textMuted} style={{ marginRight: SPACING.xs }} />
-            )}
-            <button
-              style={styles.closeBtn}
-              onClick={handleClose}
-              aria-label="Close hazard card"
-            >
-              <X size={14} />
-            </button>
-          </div>
+          <button
+            style={styles.closeBtn}
+            onMouseDown={handleCloseBtnMouseDown}
+            onClick={handleClose}
+            aria-label="Close hazard card"
+          >
+            <X size={14} />
+          </button>
         </div>
 
-        {/* ── Thumbnail ─────────────────────────────────────────────── */}
+        {/* ── Thumbnail */}
         {hazard.image_url && (
           <img
             src={hazard.image_url}
@@ -127,7 +107,7 @@ export function HazardCard({ hazard, onClose }: HazardCardProps) {
           />
         )}
 
-        {/* ── Meta grid ─────────────────────────────────────────────── */}
+        {/* ── Meta rows */}
         <div style={styles.meta}>
           <MetaRow label="TYPE"      value={hazard.defect_type.replace(/_/g, " ")} />
           <MetaRow label="STATUS"    value={hazard.status}                         />
@@ -152,16 +132,16 @@ function MetaRow({ label, value }: MetaRowProps) {
   );
 }
 
-// 6. Styles — non-positional styles only; all positioning handled by map.css
+// 6. Styles — visual chrome only; all positioning handled by map.css + JS hook
 const styles = {
   dragHandle: {
     display:        "flex",
     justifyContent: "center",
     alignItems:     "center",
+    gap:            SPACING.xs,
     padding:        `${SPACING.xs}px`,
-    cursor:         "grab",
-    opacity:        0.5,
-    userSelect:     "none" as const,
+    opacity:        0.45,
+    pointerEvents:  "none" as const, // let mousedown fall through to card div
   },
   header: {
     display:        "flex",
@@ -175,10 +155,6 @@ const styles = {
     fontSize:      11,
     fontWeight:    700,
     letterSpacing: "0.06em",
-  },
-  headerRight: {
-    display:    "flex",
-    alignItems: "center",
   },
   closeBtn: {
     background:   "transparent",
@@ -216,9 +192,9 @@ const styles = {
     fontWeight:    600,
   },
   metaValue: {
-    fontSize:    12,
-    color:       COLORS.textPrimary,
-    fontWeight:  500,
+    fontSize:      12,
+    color:         COLORS.textPrimary,
+    fontWeight:    500,
     textTransform: "capitalize" as const,
   },
 } as const;
