@@ -9,7 +9,7 @@ import { LogoutModal }         from "./auth/LogoutModal";
 
 // 2. Types
 /** All navigable pages in the application. */
-export type Page = "map" | "docs" | "key" | "auth" | "test";
+export type Page = "map" | "docs" | "key" | "auth" | "explorer";
 
 // 2. Interfaces
 interface NavbarProps {
@@ -41,10 +41,10 @@ export function Navbar({ active, onNavigate }: NavbarProps) {
   const isLoggedIn = session !== null;
 
   // ── Navigation handlers ──────────────────────────────────────────────────
-  const handleNavToMap  = useCallback(() => onNavigate("map"),  [onNavigate]);
-  const handleNavToDocs = useCallback(() => onNavigate("docs"), [onNavigate]);
-  const handleNavToTest = useCallback(() => onNavigate("test"), [onNavigate]);
-  const handleNavToAuth = useCallback(() => onNavigate("auth"), [onNavigate]);
+  const handleNavToMap      = useCallback(() => onNavigate("map"),      [onNavigate]);
+  const handleNavToDocs     = useCallback(() => onNavigate("docs"),     [onNavigate]);
+  const handleNavToExplorer = useCallback(() => onNavigate("explorer"), [onNavigate]);
+  const handleNavToAuth     = useCallback(() => onNavigate("auth"),     [onNavigate]);
 
   // ── Logout modal handlers ────────────────────────────────────────────────
   const handleOpenLogout  = useCallback(() => setShowLogout(true),  []);
@@ -91,8 +91,8 @@ export function Navbar({ active, onNavigate }: NavbarProps) {
           <button style={linkStyle("docs")} onClick={handleNavToDocs}>
             Documentation
           </button>
-          <button style={linkStyle("test")} onClick={handleNavToTest}>
-            DB Test
+          <button style={linkStyle("explorer")} onClick={handleNavToExplorer}>
+            Data Explorer
           </button>
 
           {/* Auth state: Logout ↔ Login */}

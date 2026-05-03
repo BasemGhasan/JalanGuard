@@ -49,10 +49,11 @@ function cornerXY(
 // 3. Hook ──────────────────────────────────────────────────────────────────
 
 export function useDraggableCard(
-  initial: CardCorner = "bottom-left",
+  initial:         CardCorner = "bottom-left",
+  initialExpanded: boolean    = false,
 ): UseDraggableCardReturn {
   const [corner,     setCorner]     = useState<CardCorner>(initial);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(initialExpanded);
 
   const cardRef    = useRef<HTMLDivElement | null>(null);
   const dragging   = useRef(false);
@@ -82,6 +83,13 @@ export function useDraggableCard(
   // ── Initialise on mount ─────────────────────────────────────────────────
 
   useEffect(() => {
+    /**
+     * When the card starts in expanded mode (modal / DataExplorer use),
+     * CSS `position:fixed !important` and `transform:translate(-50%,-50%) !important`
+     * take full control. No JS snap is needed and none should be applied.
+     */
+    if (initialExpanded) return;
+
     const card = cardRef.current;
     if (!card) return;
 

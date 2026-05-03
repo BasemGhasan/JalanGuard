@@ -39,6 +39,14 @@ export interface Hazard {
 
 export type MapView = "heatmap" | "pins";
 
+/**
+ * Hazard row with the joined `malaysian_states` relation.
+ * Returned by: supabase.from('hazards').select('*, malaysian_states(state_name)')
+ */
+export interface HazardWithState extends Hazard {
+  malaysian_states: { state_name: string } | null;
+}
+
 /** Properties embedded in each GeoJSON feature for the heatmap layer. */
 export interface HeatmapFeatureProps {
   state_name: string;

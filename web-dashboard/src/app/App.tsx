@@ -13,7 +13,7 @@ import { MapPage }     from "./components/MapPage";
 import { DocsPage }    from "./components/DocsPage";
 import { KeyPage }     from "./components/KeyPage";
 import { AuthPage }    from "./components/auth/AuthPage";
-import { HeatmapTest } from "./components/HeatmapTest";
+import { DataExplorer } from "./components/dataExplorer/DataExplorer";
 
 // 1. Imports — Constants
 import { COLORS } from "../constants/theme";
@@ -93,7 +93,7 @@ function AppInner() {
           onNavigate={navigate}
         />
       )}
-      {page === "test" && <HeatmapTest />}
+      {page === "explorer" && <DataExplorer />}
 
       <Toaster
         richColors

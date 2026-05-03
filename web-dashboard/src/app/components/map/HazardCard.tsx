@@ -10,8 +10,14 @@ import type { Hazard }                     from "../../../types/map";
 
 // 2. Interfaces
 interface HazardCardProps {
-  hazard:  Hazard;
-  onClose: () => void;
+  hazard:        Hazard;
+  onClose:       () => void;
+  /**
+   * When true the card opens already in expanded/centred mode — used by the
+   * DataExplorer modal overlay.  In this mode the backdrop click calls
+   * `onClose` (removes the card) rather than `onCollapse` (shrink to compact).
+   */
+  startExpanded?: boolean;
 }
 
 // 3. Helpers
@@ -37,9 +43,9 @@ function formatDate(iso: string): string {
  *
  * All drag/snap/expand logic lives in useDraggableCard.
  */
-export function HazardCard({ hazard, onClose }: HazardCardProps) {
+export function HazardCard({ hazard, onClose, startExpanded = false }: HazardCardProps) {
   const { corner, isExpanded, cardRef, onMouseDown, onCardClick, onCollapse } =
-    useDraggableCard("bottom-left");
+    useDraggableCard("bottom-left", startExpanded);
 
   const badge = SEVERITY_BADGE[hazard.severity] ?? SEVERITY_BADGE.low;
 
@@ -68,9 +74,12 @@ export function HazardCard({ hazard, onClose }: HazardCardProps) {
 
   return (
     <>
-      {/* Backdrop — click outside to collapse */}
+      {/* Backdrop — click outside to collapse (map) or close entirely (modal) */}
       {isExpanded && (
-        <div className="hazard-card-backdrop" onClick={onCollapse} />
+        <div
+          className="hazard-card-backdrop"
+          onClick={startExpanded ? onClose : onCollapse}
+        />
       )}
 
       <div
