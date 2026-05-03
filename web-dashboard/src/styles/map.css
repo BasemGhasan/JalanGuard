@@ -1,8 +1,7 @@
 /*
  * map.css — JalanGuard Leaflet overrides & map component styles.
  *
- * Design tokens are defined as CSS custom properties here so they mirror
- * src/constants/theme.ts without creating a TypeScript dependency in CSS.
+ * Design tokens are CSS custom properties mirroring src/constants/theme.ts.
  * Update both files together if a colour changes.
  */
 
@@ -11,30 +10,48 @@
   --jg-surface:        #1E293B;
   --jg-bg-deep:        #0B0F19;
   --jg-border-soft:    rgba(255, 255, 255, 0.10);
+  --jg-border-faint:   rgba(255, 255, 255, 0.05);
   --jg-shadow-deep:    0 8px 32px rgba(0, 0, 0, 0.60);
+  --jg-shadow-xl:      0 24px 64px rgba(0, 0, 0, 0.80);
   --jg-text-primary:   #FFFFFF;
   --jg-text-muted:     #94A3B8;
   --jg-accent:         #D97706;
+  --jg-overlay-dark:   rgba(15, 23, 42, 0.90);
   --jg-sev-high:       #D42424;
   --jg-sev-medium:     #EF551D;
   --jg-sev-low:        #F1B70B;
   --jg-sev-high-bg:    rgba(212, 36,  36,  0.15);
   --jg-sev-medium-bg:  rgba(239, 85,  29,  0.15);
   --jg-sev-low-bg:     rgba(241, 183, 11,  0.15);
+
+  /* Card layout */
+  --card-corner-gap:   16px;
+  --card-width:        260px;
+  --card-width-exp:    520px;
+}
+
+/* ── Shared card chrome ───────────────────────────────────────────────────── */
+/*
+ * Shared visual styles used by both .hazard-card and .pin-popup.
+ * Keeps chrome consistent without repeating declarations.
+ */
+.jg-card-chrome {
+  background:     var(--jg-overlay-dark);
+  backdrop-filter: blur(12px);
+  border:         1px solid var(--jg-border-soft);
+  border-radius:  14px;
+  box-shadow:     var(--jg-shadow-deep);
+  color:          var(--jg-text-primary);
+  overflow:       hidden;
 }
 
 /* ── Focus outline ────────────────────────────────────────────────────────── */
-/* Remove browser focus ring on Leaflet SVG paths after click */
-path.leaflet-interactive:focus {
-  outline: none;
-}
+path.leaflet-interactive:focus { outline: none; }
 
-/* ── Heatmap tooltip wrapper ──────────────────────────────────────────────── */
-/*
- * Override base Leaflet tooltip chrome when our custom class is present.
- * The compound selector (.leaflet-tooltip-jalanguard.leaflet-tooltip) is
- * needed because Leaflet always applies .leaflet-tooltip to the element.
- */
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* HEATMAP TOOLTIP                                                            */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
 .leaflet-tooltip-jalanguard.leaflet-tooltip {
   background:    var(--jg-surface);
   border:        1px solid var(--jg-border-soft);
@@ -44,115 +61,71 @@ path.leaflet-interactive:focus {
   color:         var(--jg-text-primary);
 }
 
-/* Hide the default directional arrow */
-.leaflet-tooltip-jalanguard.leaflet-tooltip::before {
-  display: none;
-}
+.leaflet-tooltip-jalanguard.leaflet-tooltip::before { display: none; }
 
-/* ── Tooltip inner layout ─────────────────────────────────────────────────── */
-.map-tooltip {
-  padding:    12px 16px;
-  min-width:  168px;
-}
+.map-tooltip { padding: 12px 16px; min-width: 168px; }
 
-/* State name header */
 .map-tooltip .tt-header {
-  font-size:      14px;
-  font-weight:    700;
-  color:          var(--jg-accent);
-  letter-spacing: 0.01em;
-  margin-bottom:  8px;
+  font-size: 14px; font-weight: 700;
+  color: var(--jg-accent); letter-spacing: 0.01em; margin-bottom: 8px;
 }
 
-/* Hairline divider between header and rows */
 .map-tooltip .tt-divider {
-  height:       1px;
-  background:   var(--jg-border-soft);
-  margin-bottom: 10px;
+  height: 1px; background: var(--jg-border-soft); margin-bottom: 10px;
 }
 
-/* Total reports row */
 .map-tooltip .tt-total-row {
-  display:         flex;
-  justify-content: space-between;
-  align-items:     center;
-  margin-bottom:   10px;
-  font-size:       12px;
+  display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: 10px;
 }
 
 .map-tooltip .tt-total-label {
   color: var(--jg-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.06em; font-size: 10px;
 }
 
 .map-tooltip .tt-total-value {
-  color:       var(--jg-text-primary);
-  font-weight: 700;
-  font-size:   14px;
+  color: var(--jg-text-primary); font-weight: 700; font-size: 14px;
 }
 
-/* Individual severity rows */
 .map-tooltip .tt-sev-row {
-  display:         flex;
-  align-items:     center;
-  gap:             8px;
-  padding:         5px 8px;
-  border-radius:   7px;
-  margin-bottom:   4px;
-  transition:      background 0.15s ease;
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 8px; border-radius: 7px; margin-bottom: 4px;
+  transition: background 0.15s ease;
 }
 
-.map-tooltip .tt-sev-row:last-child {
-  margin-bottom: 0;
-}
+.map-tooltip .tt-sev-row:last-child { margin-bottom: 0; }
 
-/* Coloured dot indicator */
 .map-tooltip .tt-dot {
-  width:        8px;
-  height:       8px;
-  border-radius: 50%;
-  flex-shrink:  0;
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
 }
 
-/* Severity label text */
-.map-tooltip .tt-sev-label {
-  flex:      1;
-  font-size: 12px;
-  color:     var(--jg-text-muted);
-}
+.map-tooltip .tt-sev-label { flex: 1; font-size: 12px; color: var(--jg-text-muted); }
 
-/* Severity count pill — coloured per tier */
 .map-tooltip .tt-count {
-  font-size:    12px;
-  font-weight:  700;
-  padding:      1px 8px;
-  border-radius: 20px;
-  min-width:    28px;
-  text-align:   center;
+  font-size: 12px; font-weight: 700;
+  padding: 1px 8px; border-radius: 20px; min-width: 28px; text-align: center;
 }
 
-/* High tier */
-.map-tooltip .tt-high  .tt-dot   { background: var(--jg-sev-high);   box-shadow: 0 0 6px var(--jg-sev-high); }
-.map-tooltip .tt-high             { background: var(--jg-sev-high-bg); }
-.map-tooltip .tt-high  .tt-count  { color: var(--jg-sev-high); background: var(--jg-sev-high-bg); }
+/* High */
+.map-tooltip .tt-high               { background: var(--jg-sev-high-bg); }
+.map-tooltip .tt-high .tt-dot       { background: var(--jg-sev-high); box-shadow: 0 0 6px var(--jg-sev-high); }
+.map-tooltip .tt-high .tt-count     { color: var(--jg-sev-high); background: var(--jg-sev-high-bg); }
 
-/* Medium tier */
-.map-tooltip .tt-medium .tt-dot  { background: var(--jg-sev-medium); box-shadow: 0 0 6px var(--jg-sev-medium); }
-.map-tooltip .tt-medium            { background: var(--jg-sev-medium-bg); }
-.map-tooltip .tt-medium .tt-count { color: var(--jg-sev-medium); background: var(--jg-sev-medium-bg); }
+/* Medium */
+.map-tooltip .tt-medium             { background: var(--jg-sev-medium-bg); }
+.map-tooltip .tt-medium .tt-dot     { background: var(--jg-sev-medium); box-shadow: 0 0 6px var(--jg-sev-medium); }
+.map-tooltip .tt-medium .tt-count   { color: var(--jg-sev-medium); background: var(--jg-sev-medium-bg); }
 
-/* Low tier */
-.map-tooltip .tt-low   .tt-dot   { background: var(--jg-sev-low);    box-shadow: 0 0 6px var(--jg-sev-low); }
-.map-tooltip .tt-low               { background: var(--jg-sev-low-bg); }
-.map-tooltip .tt-low   .tt-count  { color: var(--jg-sev-low);    background: var(--jg-sev-low-bg); }
+/* Low */
+.map-tooltip .tt-low                { background: var(--jg-sev-low-bg); }
+.map-tooltip .tt-low .tt-dot        { background: var(--jg-sev-low); box-shadow: 0 0 6px var(--jg-sev-low); }
+.map-tooltip .tt-low .tt-count      { color: var(--jg-sev-low); background: var(--jg-sev-low-bg); }
 
-/* ── Pin popup chrome override ────────────────────────────────────────────── */
-/*
- * Strip Leaflet's default white box; replace with the dark surface colour.
- * The triangular tip is hidden — the DivIcon pin serves as the visual pointer.
- */
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* PIN POPUP CHROME (Leaflet popup wrapper)                                   */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
 .jalanguard-popup .leaflet-popup-content-wrapper {
   background:    var(--jg-surface);
   border:        1px solid var(--jg-border-soft);
@@ -162,17 +135,140 @@ path.leaflet-interactive:focus {
   color:         var(--jg-text-primary);
 }
 
-.jalanguard-popup .leaflet-popup-content {
-  margin: 0;
-  color:  var(--jg-text-primary);
+.jalanguard-popup .leaflet-popup-content   { margin: 0; color: var(--jg-text-primary); }
+.jalanguard-popup .leaflet-popup-tip-container { display: none; }
+.jalanguard-popup .leaflet-popup-close-button  { display: none; }
+
+/* ── Pin popup inner content ──────────────────────────────────────────────── */
+
+.pin-popup { padding: 10px 14px 12px; min-width: 180px; }
+
+.pin-popup-header { margin-bottom: 8px; }
+
+.pin-popup-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
 }
 
-/* Hide triangular tip */
-.jalanguard-popup .leaflet-popup-tip-container {
-  display: none;
+.pin-popup-type {
+  font-size: 14px; font-weight: 600;
+  color: var(--jg-text-primary);
+  margin: 0 0 8px;
+  text-transform: capitalize;
 }
 
-/* Hide Leaflet's default × button — HazardCard has its own close control */
-.jalanguard-popup .leaflet-popup-close-button {
-  display: none;
+.pin-popup-divider {
+  height: 1px; background: var(--jg-border-soft); margin-bottom: 8px;
+}
+
+.pin-popup-meta { display: flex; flex-direction: column; gap: 5px; margin-bottom: 8px; }
+
+.pin-popup-row {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+}
+
+.pin-popup-label {
+  font-size: 10px; font-weight: 600;
+  color: var(--jg-text-muted);
+  text-transform: uppercase; letter-spacing: 0.07em;
+}
+
+.pin-popup-value {
+  font-size: 12px; font-weight: 500;
+  color: var(--jg-text-primary);
+  display: flex; align-items: center; gap: 5px;
+  text-transform: capitalize;
+}
+
+.pin-popup-mono { font-family: "JetBrains Mono", "Fira Code", monospace; }
+
+.pin-popup-dot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+}
+
+.pin-popup-hint {
+  font-size: 10px; text-align: center; margin: 0;
+  font-style: italic; opacity: 0.6;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* HAZARD CARD — draggable floating overlay                                   */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+/* Base card — absolute in map container, transition for smooth corner snap */
+.hazard-card {
+  position:        absolute;
+  z-index:         1000;
+  width:           var(--card-width);
+  cursor:          grab;
+  user-select:     none;
+  transition:      top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                   left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                   right 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                   bottom 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                   width 0.3s ease,
+                   box-shadow 0.2s ease;
+
+  background:      var(--jg-overlay-dark);
+  backdrop-filter: blur(14px);
+  border:          1px solid var(--jg-border-soft);
+  border-radius:   14px;
+  box-shadow:      var(--jg-shadow-deep);
+  overflow:        hidden;
+}
+
+/* Corner placement — CSS handles anchor, JS clears overrides after drag */
+.hazard-card[data-corner="top-left"]     { top: var(--card-corner-gap);    left:  var(--card-corner-gap);  }
+.hazard-card[data-corner="top-right"]    { top: var(--card-corner-gap);    right: var(--card-corner-gap);  }
+.hazard-card[data-corner="bottom-left"]  { bottom: var(--card-corner-gap); left:  var(--card-corner-gap);  }
+.hazard-card[data-corner="bottom-right"] { bottom: var(--card-corner-gap); right: var(--card-corner-gap);  }
+
+/* Active drag — suppress transition so card follows cursor exactly */
+.hazard-card.is-dragging {
+  transition:  none;
+  cursor:      grabbing;
+  box-shadow:  var(--jg-shadow-xl);
+  transform:   scale(1.02) !important;
+}
+
+/* Expanded — fixed-position, centred, 2× width, non-draggable */
+.hazard-card.is-expanded {
+  position:    fixed !important;
+  top:         50%  !important;
+  left:        50%  !important;
+  right:       unset !important;
+  bottom:      unset !important;
+  transform:   translate(-50%, -50%) !important;
+  width:       var(--card-width-exp) !important;
+  cursor:      default;
+  z-index:     1100;
+  animation:   card-expand 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Expanded state: taller thumbnail */
+.hazard-card.is-expanded img { height: 220px !important; }
+
+@keyframes card-expand {
+  from { transform: translate(-50%, -50%) scale(0.85); opacity: 0.7; }
+  to   { transform: translate(-50%, -50%) scale(1);    opacity: 1;   }
+}
+
+/* Backdrop — covers viewport behind expanded card */
+.hazard-card-backdrop {
+  position:        fixed;
+  inset:           0;
+  z-index:         1090;
+  background:      rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+  cursor:          default;
+  animation:       backdrop-in 0.2s ease forwards;
+}
+
+@keyframes backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }

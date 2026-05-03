@@ -2,8 +2,8 @@
 import { memo, useCallback } from "react";
 import { Marker, Popup } from "react-leaflet";
 import { markerDivIcon, severityMarkerColor } from "../../../utils/mapHelpers";
-import { COLORS, SEVERITY_BADGE } from "../../../constants/theme";
-import type { Hazard } from "../../../types/map";
+import { COLORS, SEVERITY_BADGE }             from "../../../constants/theme";
+import type { Hazard }                        from "../../../types/map";
 
 // 2. Interfaces
 interface PinsLayerProps {
@@ -14,8 +14,10 @@ interface PinsLayerProps {
 // 3. Component
 /**
  * Renders one DivIcon marker per active hazard.
- * Clicking a marker calls `onSelectHazard` to show the HazardCard overlay;
- * a compact Leaflet Popup also appears for quick context without opening the card.
+ *
+ * Clicking a marker:
+ *  - Opens the Leaflet Popup (compact quick-reference widget).
+ *  - Calls `onSelectHazard` to show the draggable HazardCard overlay.
  *
  * Memoised — only re-renders when the hazards array reference changes.
  */
@@ -28,7 +30,8 @@ export const PinsLayer = memo(function PinsLayer({ hazards, onSelectHazard }: Pi
   return (
     <>
       {hazards.map((hazard) => {
-        const badge = SEVERITY_BADGE[hazard.severity] ?? SEVERITY_BADGE.low;
+        const badge       = SEVERITY_BADGE[hazard.severity] ?? SEVERITY_BADGE.low;
+        const severityClr = severityMarkerColor(hazard.severity);
 
         return (
           <Marker
@@ -38,27 +41,60 @@ export const PinsLayer = memo(function PinsLayer({ hazards, onSelectHazard }: Pi
             eventHandlers={{ click: makeClickHandler(hazard) }}
           >
             <Popup className="jalanguard-popup">
-              <div style={popupStyles.root}>
-                <span
-                  style={{
-                    ...popupStyles.badge,
-                    background: badge.bg,
-                    color:      badge.text,
-                    border:     `1px solid ${badge.border}`,
-                  }}
-                >
-                  {hazard.severity.toUpperCase()}
-                </span>
-                <p style={popupStyles.type}>{hazard.defect_type}</p>
-                <p style={popupStyles.coords}>
-                  {hazard.latitude.toFixed(4)}, {hazard.longitude.toFixed(4)}
+              <div className="pin-popup">
+                {/* Severity badge */}
+                <div className="pin-popup-header">
+                  <span
+                    className="pin-popup-badge"
+                    style={{
+                      background: badge.bg,
+                      color:      badge.text,
+                      border:     `1px solid ${badge.border}`,
+                    }}
+                  >
+                    {hazard.severity.toUpperCase()}
+                  </span>
+                </div>
+
+                {/* Defect type headline */}
+                <p className="pin-popup-type">
+                  {hazard.defect_type.replace(/_/g, " ")}
                 </p>
-                <div
-                  style={{
-                    ...popupStyles.dot,
-                    background: severityMarkerColor(hazard.severity),
-                  }}
-                />
+
+                <div className="pin-popup-divider" />
+
+                {/* Meta rows */}
+                <div className="pin-popup-meta">
+                  <div className="pin-popup-row">
+                    <span className="pin-popup-label">STATUS</span>
+                    <span className="pin-popup-value">
+                      <span
+                        className="pin-popup-dot"
+                        style={{ background: severityClr, boxShadow: `0 0 5px ${severityClr}` }}
+                      />
+                      {hazard.status}
+                    </span>
+                  </div>
+
+                  <div className="pin-popup-row">
+                    <span className="pin-popup-label">LAT</span>
+                    <span className="pin-popup-value pin-popup-mono">
+                      {hazard.latitude.toFixed(4)}
+                    </span>
+                  </div>
+
+                  <div className="pin-popup-row">
+                    <span className="pin-popup-label">LNG</span>
+                    <span className="pin-popup-value pin-popup-mono">
+                      {hazard.longitude.toFixed(4)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Hint */}
+                <p className="pin-popup-hint" style={{ color: COLORS.textMuted }}>
+                  Click pin for full details
+                </p>
               </div>
             </Popup>
           </Marker>
@@ -67,39 +103,3 @@ export const PinsLayer = memo(function PinsLayer({ hazards, onSelectHazard }: Pi
     </>
   );
 });
-
-// 4. Styles
-const popupStyles = {
-  root: {
-    minWidth:   120,
-    padding:    4,
-    background: COLORS.surface,
-    color:      COLORS.textPrimary,
-  },
-  badge: {
-    display:      "inline-block",
-    padding:      "2px 8px",
-    borderRadius: 20,
-    fontSize:     10,
-    fontWeight:   700,
-    letterSpacing: "0.06em",
-    marginBottom: 6,
-  },
-  type: {
-    fontSize:   13,
-    fontWeight: 600,
-    margin:     "0 0 4px",
-    color:      COLORS.textPrimary,
-  },
-  coords: {
-    fontSize: 11,
-    color:    COLORS.textMuted,
-    margin:   0,
-  },
-  dot: {
-    width:        8,
-    height:       8,
-    borderRadius: "50%",
-    marginTop:    6,
-  },
-} as const;

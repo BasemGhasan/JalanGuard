@@ -88,7 +88,7 @@ export const MAP_CONFIG = {
   tileUrl:         "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
   tileAttribution: "&copy; OpenStreetMap contributors &copy; CARTO",
   fallbackImage:   "https://images.unsplash.com/photo-1566207474742-de921626ad0c?w=400",
-  containerHeight: "calc(1024px - 64px)",
+  containerHeight: "calc(100vh - 64px)",
 } as const;
 
 export const POLY_STYLE = {
