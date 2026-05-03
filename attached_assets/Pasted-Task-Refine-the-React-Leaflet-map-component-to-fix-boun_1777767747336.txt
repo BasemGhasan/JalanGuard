@@ -1,0 +1,45 @@
+Task: Refine the React Leaflet map component to fix bounds, rendering lag, focus styling, and color/legend logic.
+
+Context: The JalanGuard dashboard map is working, but it has a few UX and performance issues that need to be resolved to make it feel like a production-grade application.
+
+Requirements:
+
+1. Fix Map Panning & Zoom Boundaries:
+
+The user should not be able to pan away from Malaysia or zoom out to see the whole world.
+
+Apply maxBounds to the <MapContainer> using the rough bounding box coordinates for Malaysia (e.g., [[0.8, 99.6], [7.5, 119.3]]).
+
+Set a strict minZoom (e.g., 6 or 7) so the map stays locked onto the country, while still allowing the user to zoom in.
+
+Add maxBoundsViscosity={1.0} so the map "bounces" back firmly if the user tries to drag outside the bounds.
+
+2. Fix GeoJSON Rendering Lag (Zoom Delay):
+
+Currently, when zooming in and out rapidly, the GeoJSON heatmap layer visibly lags behind the base map tiles.
+
+Solution: Force Leaflet to render the vectors using HTML Canvas instead of SVG. Add the preferCanvas={true} prop to the <MapContainer>. Additionally, ensure the <GeoJSON> component isn't unnecessarily re-rendering on every zoom event (use React.memo or ensure the data reference is stable).
+
+3. Remove SVG Focus Outline:
+
+When a user clicks on a state polygon, browsers apply a default white/blue outline box around the SVG path.
+
+Solution: Add global CSS or component-level styling to target Leaflet's SVG paths: path.leaflet-interactive:focus { outline: none; }.
+
+4. Fix Color Logic & Legend Accuracy:
+
+The current color logic and the bottom-right legend do not match the required specification.
+
+Update the color scale logic to exactly this:
+
+0 Active Reports: Green (e.g., #22c55e or tailwind green-500)
+
+Low Severity Dominant: Light Yellow (e.g., #fef08a or tailwind yellow-200)
+
+Medium Severity Dominant: Orange (e.g., #f97316 or tailwind orange-500)
+
+High Severity Dominant: Red (e.g., #ef4444 or tailwind red-500)
+
+Ensure the visual Legend in the corner of the map exactly mirrors these 4 tiers with the correct text labels.
+
+Goal: A perfectly constrained map of Malaysia with zero render lag during zooming, clean click interactions, and a perfectly synced heatmap logic and legend.

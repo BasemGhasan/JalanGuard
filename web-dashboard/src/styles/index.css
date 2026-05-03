@@ -1,3 +1,19 @@
 @import './fonts.css';
 @import './tailwind.css';
 @import './theme.css';
+
+/* Remove browser focus outline on Leaflet SVG paths after click */
+path.leaflet-interactive:focus {
+  outline: none;
+}
+
+/* Custom Leaflet tooltip — strip default white box */
+.leaflet-tooltip-jalanguard {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+.leaflet-tooltip-jalanguard::before {
+  display: none;
+}
