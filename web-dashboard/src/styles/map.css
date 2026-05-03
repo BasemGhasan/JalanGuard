@@ -109,13 +109,17 @@ path.leaflet-interactive:focus { outline: none; }
 
 .img-slider-track {
   display:    flex;
+  /* width is set via inline style: N × 100% of slider container.
+     translateX then moves by 100%/N per slide — see ImageSlider.tsx. */
   transition: transform 0.28s ease-out;
   will-change: transform;
 }
 
 .img-slider-img {
-  flex-shrink: 0;
-  width:       100%;
+  /* Each image gets an equal share of the explicit track width
+     (flex: 1 0 0 divides the N×100% track into N equal panels). */
+  flex:        1 0 0;
+  min-width:   0;
   height:      200px;
   object-fit:  cover;
   display:     block;

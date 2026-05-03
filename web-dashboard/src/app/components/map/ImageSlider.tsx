@@ -5,51 +5,71 @@ import { COLORS } from "../../../constants/theme";
 
 // 2. Interfaces
 interface ImageSliderProps {
-  /** 1–5 image URLs. If empty the component renders nothing. */
+  /** 1–5 image URLs. Renders nothing if empty. */
   images: string[];
   alt:    string;
 }
 
 // 3. Component
 /**
- * Lightweight image carousel for hazard report photos.
+ * CSS-only image carousel — no external library.
  *
- * Why not an external library: the slider has only two behaviours
- * (prev/next click, dot jump) — a library would add more bundle weight
- * than the logic itself. CSS translateX does all the animation work.
+ * Layout contract:
+ *   - `.img-slider` wrapper: overflow:hidden, width from parent.
+ *   - `.img-slider-track` inline width = N × 100%, so each panel is exactly
+ *     1/N of the track = 100% of the slider container.
+ *   - translateX moves by `current / N × 100%` of track = exactly one panel.
+ *
+ * Why not translateX(-current * 100%):
+ *   CSS translateX percentages are relative to the element itself (the track),
+ *   not its parent. With the track being N× wider, -100% would skip N panels
+ *   at once. Dividing by N gives the correct per-panel translation.
  */
 export function ImageSlider({ images, alt }: ImageSliderProps) {
   const [current, setCurrent] = useState(0);
-
-  const clamp = useCallback(
-    (i: number) => Math.max(0, Math.min(images.length - 1, i)),
-    [images.length],
-  );
+  const N = images.length;
 
   const goPrev = useCallback(
-    (e: React.MouseEvent) => { e.stopPropagation(); setCurrent((i) => clamp(i - 1)); },
-    [clamp],
-  );
-  const goNext = useCallback(
-    (e: React.MouseEvent) => { e.stopPropagation(); setCurrent((i) => clamp(i + 1)); },
-    [clamp],
-  );
-  const goTo = useCallback(
-    (i: number) => (e: React.MouseEvent) => { e.stopPropagation(); setCurrent(i); },
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setCurrent((i) => Math.max(0, i - 1));
+    },
     [],
   );
 
-  const trackStyle = useMemo(
-    () => ({ transform: `translateX(-${current * 100}%)` }),
-    [current],
+  const goNext = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setCurrent((i) => Math.min(N - 1, i + 1));
+    },
+    [N],
   );
 
-  const isMulti = images.length > 1;
+  const goTo = useCallback(
+    (i: number) => (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setCurrent(i);
+    },
+    [],
+  );
 
-  if (images.length === 0) return null;
+  /**
+   * Track must be N×100% wide so each image fills the slider container.
+   * translateX moves exactly one slide = 100%/N of the track.
+   */
+  const trackStyle = useMemo(() => ({
+    width:     `${N * 100}%`,
+    transform: N > 1
+      ? `translateX(calc(-${current} * 100% / ${N}))`
+      : "none",
+  }), [current, N]);
+
+  if (N === 0) return null;
+
+  const isMulti = N > 1;
 
   return (
-    <div className="img-slider">
+    <div className="img-slider" onMouseDown={(e) => e.stopPropagation()}>
       {/* Sliding strip */}
       <div className="img-slider-track" style={trackStyle}>
         {images.map((url, i) => (
@@ -63,34 +83,30 @@ export function ImageSlider({ images, alt }: ImageSliderProps) {
         ))}
       </div>
 
-      {/* Prev / next arrows — only when multiple images */}
+      {/* Nav arrows */}
       {isMulti && current > 0 && (
         <button
           className="img-slider-btn img-slider-prev"
           onClick={goPrev}
           aria-label="Previous image"
-          onMouseDown={(e) => e.stopPropagation()}
         >
           <ChevronLeft size={16} color={COLORS.white} />
         </button>
       )}
-      {isMulti && current < images.length - 1 && (
+      {isMulti && current < N - 1 && (
         <button
           className="img-slider-btn img-slider-next"
           onClick={goNext}
           aria-label="Next image"
-          onMouseDown={(e) => e.stopPropagation()}
         >
           <ChevronRight size={16} color={COLORS.white} />
         </button>
       )}
 
-      {/* Counter badge + dot indicators */}
+      {/* Counter + dots */}
       {isMulti && (
         <>
-          <span className="img-slider-counter">
-            {current + 1} / {images.length}
-          </span>
+          <span className="img-slider-counter">{current + 1} / {N}</span>
           <div className="img-slider-dots">
             {images.map((_, i) => (
               <button
@@ -98,7 +114,6 @@ export function ImageSlider({ images, alt }: ImageSliderProps) {
                 className={`img-slider-dot${i === current ? " active" : ""}`}
                 onClick={goTo(i)}
                 aria-label={`Go to image ${i + 1}`}
-                onMouseDown={(e) => e.stopPropagation()}
               />
             ))}
           </div>
