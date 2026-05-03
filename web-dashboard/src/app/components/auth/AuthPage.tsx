@@ -220,7 +220,16 @@ export function AuthPage({ onNavigate, initialView }: AuthPageProps) {
     const { error: authError } = await supabase.auth.signUp({
       email:    email.trim(),
       password,
-      options:  { data: { full_name: fullName.trim() } },
+      options:  {
+        data:            { full_name: fullName.trim() },
+        /**
+         * Tell Supabase where to redirect after the user clicks the
+         * confirmation link. Without this, Supabase uses the "Site URL"
+         * set in the dashboard — which defaults to localhost during
+         * development and would break confirmation on a deployed domain.
+         */
+        emailRedirectTo: window.location.origin,
+      },
     });
     setLoading(false);
     if (authError) { setError(authError.message); }
