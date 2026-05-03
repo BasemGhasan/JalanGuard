@@ -1,6 +1,5 @@
 // 1. Imports
 import { memo } from "react";
-import { ZoomControl } from "react-leaflet";
 import { HeatmapLayer } from "./HeatmapLayer";
 import { PinsLayer }    from "./PinsLayer";
 import type { Hazard, MapView, StateHeatmapStat } from "../../../types/map";
@@ -29,7 +28,6 @@ export const MapInner = memo(function MapInner({
 }: MapInnerProps) {
   return (
     <>
-      <ZoomControl position="bottomright" />
       {mapView === "heatmap" && <HeatmapLayer stats={stats} />}
       {mapView === "pins"    && <PinsLayer hazards={hazards} onSelectHazard={onSelectHazard} />}
     </>
