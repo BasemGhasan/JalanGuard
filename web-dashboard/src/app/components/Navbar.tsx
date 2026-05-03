@@ -1,52 +1,184 @@
-import type { Session } from "@supabase/supabase-js";
-import { supabase } from "../../lib/supabase";
+// 1. Imports — External
+import { useState, useCallback } from "react";
+import { toast }                 from "sonner";
 
-export type Page = "map" | "docs" | "key" | "login" | "register" | "test";
+// 1. Imports — Local context / hooks / constants / components
+import { COLORS, FONT_SIZES }  from "../../constants/theme";
+import { useAuth }             from "../../context/AuthContext";
+import { LogoutModal }         from "./auth/LogoutModal";
 
-export function Navbar({
-  active,
-  onNavigate,
-  session,
-}: {
-  active: Page;
+// 2. Types
+/** All navigable pages in the application. */
+export type Page = "map" | "docs" | "key" | "auth" | "test";
+
+// 2. Interfaces
+interface NavbarProps {
+  active:     Page;
   onNavigate: (p: Page) => void;
-  session?: Session | null;
-}) {
-  const linkClass = (p: Page) =>
-    active === p
-      ? "text-[#d97706] underline underline-offset-8 decoration-2"
-      : "text-[#94a3b8] hover:text-white transition-colors";
+}
 
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    onNavigate("login");
-  }
+// 3. Component
+/**
+ * Sticky top navigation bar.
+ *
+ * Logged-out state:
+ *   • "Login" text link → navigates to the auth page.
+ *   • "Get API Key" amber button → navigates to the auth page.
+ *
+ * Logged-in state:
+ *   • "Logout" text link → opens the LogoutModal confirmation flow.
+ *   • "My Dashboard" amber button → shows an under-construction toast;
+ *     does NOT navigate away until the dashboard feature is built.
+ *
+ * Logout is a two-step flow: clicking "Logout" only opens the modal.
+ * supabase.auth.signOut() is called inside LogoutModal, only if the user
+ * clicks the final "Log Out" button.
+ */
+export function Navbar({ active, onNavigate }: NavbarProps) {
+  const { session }              = useAuth();
+  const [showLogout, setShowLogout] = useState(false);
+
+  const isLoggedIn = session !== null;
+
+  // ── Navigation handlers ──────────────────────────────────────────────────
+  const handleNavToMap  = useCallback(() => onNavigate("map"),  [onNavigate]);
+  const handleNavToDocs = useCallback(() => onNavigate("docs"), [onNavigate]);
+  const handleNavToTest = useCallback(() => onNavigate("test"), [onNavigate]);
+  const handleNavToAuth = useCallback(() => onNavigate("auth"), [onNavigate]);
+
+  // ── Logout modal handlers ────────────────────────────────────────────────
+  const handleOpenLogout  = useCallback(() => setShowLogout(true),  []);
+  const handleCloseLogout = useCallback(() => setShowLogout(false), []);
+
+  /** After signOut resolves in the modal, return the user to the map. */
+  const handleLoggedOut = useCallback(() => {
+    setShowLogout(false);
+    onNavigate("map");
+  }, [onNavigate]);
+
+  // ── My Dashboard toast ───────────────────────────────────────────────────
+  const handleMyDashboard = useCallback(() => {
+    toast.info("Developer Dashboard under construction.", {
+      description: "Analytics, usage stats, and key management — coming soon.",
+    });
+  }, []);
+
+  // ── Derived: link style per page ─────────────────────────────────────────
+  const linkStyle = useCallback(
+    (p: Page) => ({
+      ...styles.navLink,
+      color:               active === p ? COLORS.secondary : COLORS.textMuted,
+      textDecoration:      active === p ? "underline"      : "none",
+      textUnderlineOffset: active === p ? ("8px" as const) : undefined,
+    }),
+    [active],
+  );
 
   return (
-    <header className="h-16 px-8 flex items-center justify-between border-b border-[#1e293b] bg-[#0b0f19] sticky top-0 z-20">
-      <button onClick={() => onNavigate("map")} className="text-white tracking-tight" style={{ fontWeight: 700, fontSize: "20px" }}>
-        JalanGuard <span className="text-[#94a3b8]" style={{ fontWeight: 400 }}>Open Data</span>
-      </button>
-      <nav className="flex items-center gap-8">
-        <button onClick={() => onNavigate("map")} className={linkClass("map")}>Live Map</button>
-        <button onClick={() => onNavigate("docs")} className={linkClass("docs")}>Documentation</button>
-        <button onClick={() => onNavigate("test")} className={linkClass("test")}>DB Test</button>
-        {session ? (
-          <button onClick={handleLogout} className="text-[#94a3b8] hover:text-white transition-colors">
-            Logout
-          </button>
-        ) : (
-          <button onClick={() => onNavigate("login")} className={linkClass("login")}>Login</button>
-        )}
-        <button
-          onClick={() => onNavigate("key")}
-          className={`px-5 py-2.5 rounded-xl bg-[#d97706] hover:bg-[#b45309] text-white shadow-[0_0_20px_rgba(217,119,6,0.35)] transition-all ${
-            active === "key" ? "ring-2 ring-[#fbbf24] ring-offset-2 ring-offset-[#0b0f19]" : ""
-          }`}
-        >
-          {session ? "Dashboard" : "Get API Key"}
+    <>
+      <header style={styles.header}>
+        {/* Brand */}
+        <button style={styles.brand} onClick={handleNavToMap}>
+          JalanGuard{" "}
+          <span style={styles.brandSub}>Open Data</span>
         </button>
-      </nav>
-    </header>
+
+        {/* Nav links */}
+        <nav style={styles.nav}>
+          <button style={linkStyle("map")}  onClick={handleNavToMap}>
+            Live Map
+          </button>
+          <button style={linkStyle("docs")} onClick={handleNavToDocs}>
+            Documentation
+          </button>
+          <button style={linkStyle("test")} onClick={handleNavToTest}>
+            DB Test
+          </button>
+
+          {/* Auth state: Logout ↔ Login */}
+          {isLoggedIn ? (
+            <button style={styles.navLink} onClick={handleOpenLogout}>
+              Logout
+            </button>
+          ) : (
+            <button style={linkStyle("auth")} onClick={handleNavToAuth}>
+              Login
+            </button>
+          )}
+
+          {/* Auth state: My Dashboard ↔ Get API Key */}
+          <button
+            style={styles.ctaBtn}
+            onClick={isLoggedIn ? handleMyDashboard : handleNavToAuth}
+          >
+            {isLoggedIn ? "My Dashboard" : "Get API Key"}
+          </button>
+        </nav>
+      </header>
+
+      {/* Logout confirmation modal — rendered outside the header flow */}
+      {showLogout && (
+        <LogoutModal
+          onClose={handleCloseLogout}
+          onLoggedOut={handleLoggedOut}
+        />
+      )}
+    </>
   );
 }
+
+// 4. Styles
+const styles = {
+  header: {
+    height:         64,
+    padding:        "0 32px",
+    display:        "flex",
+    alignItems:     "center",
+    justifyContent: "space-between",
+    borderBottom:   `1px solid ${COLORS.surface}`,
+    background:     COLORS.background,
+    position:       "sticky" as const,
+    top:            0,
+    zIndex:         20,
+  },
+  brand: {
+    background:    "transparent",
+    border:        "none",
+    color:         COLORS.textPrimary,
+    fontWeight:    700,
+    fontSize:      FONT_SIZES.lg + 2,
+    cursor:        "pointer",
+    letterSpacing: "-0.02em",
+    padding:       0,
+  },
+  brandSub: {
+    color:      COLORS.textMuted,
+    fontWeight: 400,
+  },
+  nav: {
+    display:    "flex",
+    alignItems: "center",
+    gap:        32,
+  },
+  navLink: {
+    background:  "transparent",
+    border:      "none",
+    color:       COLORS.textMuted,
+    fontSize:    FONT_SIZES.sm + 2,
+    fontWeight:  500,
+    cursor:      "pointer",
+    padding:     0,
+    transition:  "color 0.15s ease",
+  },
+  ctaBtn: {
+    padding:      "10px 20px",
+    borderRadius: 12,
+    background:   COLORS.secondary,
+    border:       "none",
+    color:        COLORS.white,
+    fontSize:     FONT_SIZES.sm + 2,
+    fontWeight:   600,
+    cursor:       "pointer",
+    boxShadow:    `0 0 20px ${COLORS.accentGlow}`,
+  },
+} as const;

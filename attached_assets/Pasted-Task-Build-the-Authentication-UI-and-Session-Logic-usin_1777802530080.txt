@@ -1,0 +1,45 @@
+Task: Build the Authentication UI and Session Logic using Supabase Auth.
+
+Context: We are building the frontend Web Dashboard for "JalanGuard" using React and Tailwind CSS. The design is a dark-theme aesthetic (navy background #0b0f19, amber accents #d97706). I have already set up the Supabase database. The map itself is 100% public, but we need an auth flow for developers who want API keys.
+
+Requirements:
+
+1. Core Authentication Setup & Session Persistence:
+
+Use @supabase/supabase-js.
+
+Implement a central Auth Provider/Context in React to globally track the session and user state.
+
+CRITICAL: Ensure the Supabase client handles session persistence so users stay logged in when they refresh the page.
+
+2. The Navigation Bar Logic (Public Map vs. Protected Actions):
+
+The map and the main dashboard view remain PUBLIC and accessible to everyone.
+
+The top navbar should react to the global auth state.
+
+Logged Out State: Show a "Login" text link and a solid amber button that says "Get API Key". Clicking either routes the user to the Auth Page.
+
+Logged In State:
+
+Change the amber button text to "My Dashboard". For now, clicking "My Dashboard" should just trigger a simple toast notification or alert saying "Developer Dashboard under construction."
+
+Change the "Login" text to "Logout".
+
+Logout Confirmation Flow: When "Logout" is clicked, DO NOT log the user out immediately. Instead, render a clean, dark-themed confirmation modal/popup in the center of the screen that asks: "Are you sure you want to log out?". Provide a "Cancel" button (closes the modal without doing anything) and a "Log Out" button. ONLY trigger supabase.auth.signOut() if the user explicitly clicks the final Log Out button.
+
+3. The Auth Page UI (Login / Sign Up / Forgot Password):
+
+Create a centralized Auth Page that centers a dark-themed form card on the screen.
+
+Implement state to toggle between three views inside this single card: SignUp, Login, and ForgotPassword.
+
+Sign Up View: Fields for Full Name, Email, and Password. Button: "Create Account". Action: supabase.auth.signUp().
+
+Login View: Fields for Email and Password. Button: "Login". Action: supabase.auth.signInWithPassword().
+
+Forgot Password View: Field for Email. Button: "Send Reset Link". Action: supabase.auth.resetPasswordForEmail().
+
+Ensure all forms have proper loading states (e.g., button text changes to "Processing..." and is disabled during API calls) and error handling (displaying Supabase error messages to the user in a red text block or toast).
+
+Goal: A fully functional, secure, and beautifully styled dark-mode authentication flow powered by Supabase, complete with session persistence, dynamic navbar routing, and a protected logout confirmation flow.

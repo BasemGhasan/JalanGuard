@@ -6,7 +6,8 @@
 export const COLORS = {
   // ── Brand ────────────────────────────────────────────────────────────────
   primary:    "#0F172A",
-  secondary:  "#D97706",
+  secondary:      "#D97706",
+  secondaryHover: "#B45309",
   accent:     "#334155",
   background: "#0B0F19",
   surface:    "#1E293B",

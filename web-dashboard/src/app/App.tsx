@@ -1,62 +1,87 @@
-// 1. Imports
-import { useState, useEffect } from "react";
-import { supabase }    from "../lib/supabase";
-import type { Session } from "../lib/supabase";
-import { Navbar, type Page } from "./components/Navbar";
+// 1. Imports — External
+import { useState, useCallback, useEffect } from "react";
+import { Toaster }                          from "sonner";
+
+// 1. Imports — Local context / hooks
+import { AuthProvider, useAuth } from "../context/AuthContext";
+
+// 1. Imports — Components
+import { Navbar }      from "./components/Navbar";
+import type { Page }   from "./components/Navbar";
 import { MapPage }     from "./components/MapPage";
 import { DocsPage }    from "./components/DocsPage";
 import { KeyPage }     from "./components/KeyPage";
-import { LoginPage, RegisterPage } from "./components/AuthPages";
+import { AuthPage }    from "./components/auth/AuthPage";
 import { HeatmapTest } from "./components/HeatmapTest";
 
-// 2. Component
+// 1. Imports — Constants
+import { COLORS } from "../constants/theme";
+
+// 2. Inner shell — must live inside AuthProvider to call useAuth()
 /**
- * Root application shell.
- * Handles auth state and top-level page routing.
- * The map page fills the viewport minus the navbar — no fixed widths or outer padding.
+ * AppInner owns the page routing state.
+ * It reads session from AuthContext (no prop-drilling) and automatically
+ * redirects to the auth page when a protected route is accessed while
+ * the session is null or expires mid-session.
  */
-export default function App() {
-  const [page,    setPage]    = useState<Page>("map");
-  const [session, setSession] = useState<Session | null>(null);
+function AppInner() {
+  const { session } = useAuth();
+  const [page, setPage] = useState<Page>("map");
 
+  // Redirect away from protected pages when the session is lost
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-    });
+    if (!session && page === "key") setPage("auth");
+  }, [session, page]);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, sess) => {
-      setSession(sess);
-      if (!sess && page === "key") setPage("login");
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const navigate = (p: Page) => {
-    if (p === "key" && !session) { setPage("login"); return; }
-    setPage(p);
-  };
+  /** Central navigation handler — guards the "key" route. */
+  const navigate = useCallback(
+    (p: Page) => {
+      if (p === "key" && !session) { setPage("auth"); return; }
+      setPage(p);
+    },
+    [session],
+  );
 
   return (
     <div style={styles.root}>
-      <Navbar active={page} onNavigate={navigate} session={session} />
+      <Navbar active={page} onNavigate={navigate} />
 
-      {page === "map"      && <MapPage />}
-      {page === "docs"     && <DocsPage />}
-      {page === "key"      && <KeyPage onNavigate={navigate} session={session} />}
-      {page === "login"    && <LoginPage onNavigate={navigate} />}
-      {page === "register" && <RegisterPage onNavigate={navigate} />}
-      {page === "test"     && <HeatmapTest />}
+      {page === "map"  && <MapPage />}
+      {page === "docs" && <DocsPage />}
+      {page === "key"  && <KeyPage  onNavigate={navigate} />}
+      {page === "auth" && <AuthPage onNavigate={navigate} />}
+      {page === "test" && <HeatmapTest />}
+
+      <Toaster
+        richColors
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: COLORS.surface,
+            border:     `1px solid ${COLORS.borderSoft}`,
+            color:      COLORS.textPrimary,
+          },
+        }}
+      />
     </div>
   );
 }
 
-// 3. Styles
+// 3. Root App — wraps the whole tree in the auth provider
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppInner />
+    </AuthProvider>
+  );
+}
+
+// 4. Styles
 const styles = {
   root: {
     width:      "100%",
     minHeight:  "100vh",
-    background: "#0B0F19",
+    background: COLORS.background,
     fontFamily: "Inter, system-ui, sans-serif",
     overflow:   "hidden",
   },
