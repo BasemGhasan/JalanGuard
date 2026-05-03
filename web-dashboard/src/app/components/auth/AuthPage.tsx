@@ -4,6 +4,7 @@ import {
   Shield, Mail, Lock, User,
   AlertCircle, Loader2, CheckCircle, ChevronRight,
 } from "lucide-react";
+import { toast } from "sonner";
 
 // 1. Imports — Local constants / hooks / types
 import { COLORS, SPACING, FONT_SIZES } from "../../../constants/theme";
@@ -11,11 +12,24 @@ import { supabase }                    from "../../../lib/supabase";
 import type { Page }                   from "../Navbar";
 
 // 2. Interfaces / Types
-/** Internal view states — "signup-sent" and "forgot-sent" are success screens. */
-type AuthView = "login" | "signup" | "forgot" | "signup-sent" | "forgot-sent";
+
+/**
+ * Internal view states.
+ * "signup-sent" and "forgot-sent" are read-only success screens.
+ * "password-reset" is the set-new-password form (reached via PASSWORD_RECOVERY).
+ */
+export type AuthView =
+  | "login"
+  | "signup"
+  | "forgot"
+  | "signup-sent"
+  | "forgot-sent"
+  | "password-reset";
 
 interface AuthPageProps {
-  onNavigate: (p: Page) => void;
+  onNavigate:   (p: Page) => void;
+  /** Override the starting view — used by AppInner for the password-recovery flow. */
+  initialView?: AuthView;
 }
 
 interface AuthFieldProps {
@@ -32,8 +46,8 @@ interface AuthFieldProps {
 
 /**
  * Labeled input row with a leading icon and amber focus-border feedback.
- * Uses local focus state instead of CSS pseudo-classes so all color tokens
- * stay in the theme file rather than being hardcoded in className strings.
+ * Manages its own focused state so the border color can be driven from
+ * COLORS constants rather than being hardcoded in a Tailwind class.
  */
 function AuthField({
   icon: Icon,
@@ -83,7 +97,7 @@ function ErrorBanner({ message }: { message: string }) {
   );
 }
 
-/** Styles shared between AuthField and ErrorBanner sub-components. */
+/** Styles shared between AuthField and ErrorBanner. */
 const fieldStyles = {
   label: {
     display:      "block",
@@ -126,38 +140,47 @@ const fieldStyles = {
 
 // 4. Main Component
 /**
- * Centralized authentication page.
+ * Centralised authentication page.
  *
- * Hosts three distinct form views — Login, Sign Up, Forgot Password — inside
- * a single dark-themed card. View toggling is managed by local state; the
- * parent only receives `onNavigate` to redirect after a successful action.
+ * Hosts all auth views inside a single dark-themed card:
+ *   login          — email + password → signInWithPassword
+ *   signup         — name + email + password → signUp
+ *   forgot         — email → resetPasswordForEmail
+ *   signup-sent    — "check your email" success screen
+ *   forgot-sent    — "reset link sent" success screen
+ *   password-reset — new-password + confirm → updateUser (PASSWORD_RECOVERY flow)
  *
- * Success states ("signup-sent", "forgot-sent") replace the form with a
- * confirmation screen without unmounting the card.
+ * The parent passes `initialView` to force the card into a specific view, and
+ * `onNavigate` to redirect the user after a successful action.
  */
-export function AuthPage({ onNavigate }: AuthPageProps) {
-  const [view,     setView]     = useState<AuthView>("login");
-  const [email,    setEmail]    = useState("");
-  const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [loading,  setLoading]  = useState(false);
-  const [error,    setError]    = useState<string | null>(null);
+export function AuthPage({ onNavigate, initialView }: AuthPageProps) {
+  const [view,            setView]            = useState<AuthView>(initialView ?? "login");
+  const [email,           setEmail]           = useState("");
+  const [password,        setPassword]        = useState("");
+  const [fullName,        setFullName]        = useState("");
+  const [newPassword,     setNewPassword]     = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading,         setLoading]         = useState(false);
+  const [error,           setError]           = useState<string | null>(null);
 
   // ── Input change handlers ────────────────────────────────────────────────
-  const handleEmailChange    = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value),
-    [],
+  const handleEmailChange          = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value), [],
   );
-  const handlePasswordChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value),
-    [],
+  const handlePasswordChange       = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value), [],
   );
-  const handleFullNameChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setFullName(e.target.value),
-    [],
+  const handleFullNameChange       = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => setFullName(e.target.value), [],
+  );
+  const handleNewPasswordChange    = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value), [],
+  );
+  const handleConfirmPasswordChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value), [],
   );
 
-  // ── View switching — always clear errors when changing views ────────────
+  // ── View switching — always clear errors on transition ───────────────────
   const switchTo = useCallback((v: AuthView) => {
     setView(v);
     setError(null);
@@ -176,15 +199,11 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
     setLoading(true);
     setError(null);
     const { error: authError } = await supabase.auth.signInWithPassword({
-      email:    email.trim(),
-      password,
+      email: email.trim(), password,
     });
     setLoading(false);
-    if (authError) {
-      setError(authError.message);
-    } else {
-      onNavigate("key");
-    }
+    if (authError) { setError(authError.message); }
+    else           { onNavigate("key"); }
   }, [email, password, onNavigate]);
 
   const handleSignUp = useCallback(async () => {
@@ -204,11 +223,8 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
       options:  { data: { full_name: fullName.trim() } },
     });
     setLoading(false);
-    if (authError) {
-      setError(authError.message);
-    } else {
-      setView("signup-sent");
-    }
+    if (authError) { setError(authError.message); }
+    else           { setView("signup-sent"); }
   }, [fullName, email, password]);
 
   const handleForgot = useCallback(async () => {
@@ -220,54 +236,88 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
     setError(null);
     const { error: authError } = await supabase.auth.resetPasswordForEmail(
       email.trim(),
-      { redirectTo: `${window.location.origin}/auth/reset` },
+      { redirectTo: `${window.location.origin}` },
     );
+    setLoading(false);
+    if (authError) { setError(authError.message); }
+    else           { setView("forgot-sent"); }
+  }, [email]);
+
+  /**
+   * PASSWORD_RECOVERY flow: user clicked the reset-email link and arrived with
+   * a live recovery session. updateUser() commits the new password; the
+   * USER_UPDATED event clears needsPasswordReset in AuthContext automatically.
+   */
+  const handlePasswordReset = useCallback(async () => {
+    if (!newPassword) {
+      setError("Please enter a new password.");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    const { error: authError } = await supabase.auth.updateUser({ password: newPassword });
     setLoading(false);
     if (authError) {
       setError(authError.message);
     } else {
-      setView("forgot-sent");
+      toast.success("Password updated!", {
+        description: "You're now signed in with your new password.",
+      });
+      onNavigate("key");
     }
-  }, [email]);
+  }, [newPassword, confirmPassword, onNavigate]);
 
-  /** Submit the active form when the user presses Enter. */
+  /** Submit the active form on Enter key. */
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key !== "Enter" || loading) return;
-      if (view === "login")  void handleLogin();
-      if (view === "signup") void handleSignUp();
-      if (view === "forgot") void handleForgot();
+      if (view === "login")          void handleLogin();
+      if (view === "signup")         void handleSignUp();
+      if (view === "forgot")         void handleForgot();
+      if (view === "password-reset") void handlePasswordReset();
     },
-    [view, loading, handleLogin, handleSignUp, handleForgot],
+    [view, loading, handleLogin, handleSignUp, handleForgot, handlePasswordReset],
   );
 
-  // ── Derived: card title and subtitle per view ────────────────────────────
+  // ── Derived: card title / subtitle per view ──────────────────────────────
   const { title, subtitle } = useMemo(() => {
     const map: Record<AuthView, { title: string; subtitle: string }> = {
-      "login":       { title: "Welcome Back",       subtitle: "Sign in to your developer account."          },
-      "signup":      { title: "Create Account",     subtitle: "Join the open-source road safety ecosystem." },
-      "forgot":      { title: "Reset Password",     subtitle: "We'll email you a secure reset link."        },
-      "signup-sent": { title: "Check Your Email",   subtitle: "Tap the confirmation link to activate."      },
-      "forgot-sent": { title: "Reset Link Sent",    subtitle: "Check your inbox and click the link."        },
+      "login":          { title: "Welcome Back",       subtitle: "Sign in to your developer account."               },
+      "signup":         { title: "Create Account",     subtitle: "Join the open-source road safety ecosystem."      },
+      "forgot":         { title: "Reset Password",     subtitle: "We'll email you a secure reset link."             },
+      "signup-sent":    { title: "Check Your Email",   subtitle: "Tap the confirmation link to activate."           },
+      "forgot-sent":    { title: "Reset Link Sent",    subtitle: "Check your inbox and click the link."             },
+      "password-reset": { title: "Set New Password",   subtitle: "Choose a strong password for your account."      },
     };
     return map[view];
   }, [view]);
 
-  // ── Derived: CTA button label ────────────────────────────────────────────
+  // ── Derived: CTA label ───────────────────────────────────────────────────
   const ctaLabel = useMemo(() => {
-    if (view === "signup") return "Create Account";
-    if (view === "forgot") return "Send Reset Link";
+    if (view === "signup")         return "Create Account";
+    if (view === "forgot")         return "Send Reset Link";
+    if (view === "password-reset") return "Set New Password";
     return "Login";
   }, [view]);
 
-  // ── Derived: which action the CTA button fires ───────────────────────────
+  // ── Derived: which action the CTA fires ─────────────────────────────────
   const handleCta = useMemo(() => {
-    if (view === "signup") return handleSignUp;
-    if (view === "forgot") return handleForgot;
+    if (view === "signup")         return handleSignUp;
+    if (view === "forgot")         return handleForgot;
+    if (view === "password-reset") return handlePasswordReset;
     return handleLogin;
-  }, [view, handleSignUp, handleForgot, handleLogin]);
+  }, [view, handleSignUp, handleForgot, handlePasswordReset, handleLogin]);
 
-  const isFormView = view === "login" || view === "signup" || view === "forgot";
+  const isFormView   = view === "login" || view === "signup" || view === "forgot" || view === "password-reset";
+  const isSuccessView = view === "signup-sent" || view === "forgot-sent";
 
   return (
     <div style={styles.page}>
@@ -284,7 +334,7 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
         </div>
 
         {/* ── Success states ────────────────────────────────────────────── */}
-        {!isFormView && (
+        {isSuccessView && (
           <div style={styles.successWrap}>
             <div style={styles.successIcon}>
               <CheckCircle size={28} color={COLORS.success} />
@@ -304,48 +354,50 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
             {/* Sign Up only: Full Name */}
             {view === "signup" && (
               <AuthField
-                icon={User}
-                label="Full Name"
-                type="text"
+                icon={User} label="Full Name" type="text"
                 placeholder="Ada Lovelace"
-                value={fullName}
-                onChange={handleFullNameChange}
-                disabled={loading}
+                value={fullName} onChange={handleFullNameChange} disabled={loading}
               />
             )}
 
-            {/* All views: Email */}
-            <AuthField
-              icon={Mail}
-              label="Email Address"
-              type="email"
-              placeholder="developer@example.com"
-              value={email}
-              onChange={handleEmailChange}
-              disabled={loading}
-            />
+            {/* Login + Sign Up + Forgot: Email */}
+            {view !== "password-reset" && (
+              <AuthField
+                icon={Mail} label="Email Address" type="email"
+                placeholder="developer@example.com"
+                value={email} onChange={handleEmailChange} disabled={loading}
+              />
+            )}
 
-            {/* Login + Sign Up only: Password */}
+            {/* Login + Sign Up: Password */}
             {(view === "login" || view === "signup") && (
               <AuthField
-                icon={Lock}
-                label="Password"
-                type="password"
+                icon={Lock} label="Password" type="password"
                 placeholder={view === "signup" ? "At least 8 characters" : "••••••••••••"}
-                value={password}
-                onChange={handlePasswordChange}
-                disabled={loading}
+                value={password} onChange={handlePasswordChange} disabled={loading}
               />
+            )}
+
+            {/* Password Reset: New Password + Confirm */}
+            {view === "password-reset" && (
+              <>
+                <AuthField
+                  icon={Lock} label="New Password" type="password"
+                  placeholder="At least 8 characters"
+                  value={newPassword} onChange={handleNewPasswordChange} disabled={loading}
+                />
+                <AuthField
+                  icon={Lock} label="Confirm Password" type="password"
+                  placeholder="Repeat your new password"
+                  value={confirmPassword} onChange={handleConfirmPasswordChange} disabled={loading}
+                />
+              </>
             )}
 
             {/* Login only: forgot-password link */}
             {view === "login" && (
               <div style={{ textAlign: "right" }}>
-                <button
-                  style={styles.linkBtn}
-                  onClick={handleSwitchToForgot}
-                  disabled={loading}
-                >
+                <button style={styles.linkBtn} onClick={handleSwitchToForgot} disabled={loading}>
                   Forgot password?
                 </button>
               </div>
@@ -362,39 +414,36 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
               disabled={loading}
             >
               {loading ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  Processing…
-                </>
-              ) : (
-                ctaLabel
-              )}
+                <><Loader2 size={16} className="animate-spin" />Processing…</>
+              ) : ctaLabel}
             </button>
 
-            {/* Footer: view toggle links */}
-            <div style={styles.footer}>
-              {view === "login" && (
-                <>
-                  <span style={styles.footerText}>Don't have an account?</span>
-                  <button style={styles.footerLink} onClick={handleSwitchToSignUp}>
-                    Register here
-                  </button>
-                </>
-              )}
-              {view === "signup" && (
-                <>
-                  <span style={styles.footerText}>Already have an account?</span>
+            {/* Footer: view toggle links (not shown for password-reset) */}
+            {view !== "password-reset" && (
+              <div style={styles.footer}>
+                {view === "login" && (
+                  <>
+                    <span style={styles.footerText}>Don't have an account?</span>
+                    <button style={styles.footerLink} onClick={handleSwitchToSignUp}>
+                      Register here
+                    </button>
+                  </>
+                )}
+                {view === "signup" && (
+                  <>
+                    <span style={styles.footerText}>Already have an account?</span>
+                    <button style={styles.footerLink} onClick={handleSwitchToLogin}>
+                      Login here
+                    </button>
+                  </>
+                )}
+                {view === "forgot" && (
                   <button style={styles.footerLink} onClick={handleSwitchToLogin}>
-                    Login here
+                    ← Back to Login
                   </button>
-                </>
-              )}
-              {view === "forgot" && (
-                <button style={styles.footerLink} onClick={handleSwitchToLogin}>
-                  ← Back to Login
-                </button>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

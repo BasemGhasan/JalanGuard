@@ -9,21 +9,28 @@ import { supabase } from "../lib/supabase";
 // 2. Interfaces
 interface AuthContextValue {
   /** Active Supabase session, or null when logged out. */
-  session: Session | null;
+  session:            Session | null;
   /** Convenience alias for session.user — null when logged out. */
-  user:    User | null;
+  user:               User | null;
   /**
    * True only during the initial getSession() call on first mount.
-   * Use this to avoid rendering protected content before the auth state is known.
+   * Prevents rendering protected content before the auth state is known.
    */
-  loading: boolean;
+  loading:            boolean;
+  /**
+   * True while the user is in a PASSWORD_RECOVERY session — i.e. they clicked
+   * the password-reset link in their email and arrived at the app with a
+   * short-lived recovery token. Cleared when USER_UPDATED or SIGNED_OUT fires.
+   */
+  needsPasswordReset: boolean;
 }
 
 // 3. Context — default assumes "logged out, not yet loaded"
 const AuthContext = createContext<AuthContextValue>({
-  session: null,
-  user:    null,
-  loading: true,
+  session:            null,
+  user:               null,
+  loading:            true,
+  needsPasswordReset: false,
 });
 
 // 4. Provider
@@ -34,11 +41,16 @@ const AuthContext = createContext<AuthContextValue>({
  * Supabase JS client (localStorage) so users stay logged in on page refresh.
  *
  * During runtime: subscribes to onAuthStateChange to propagate login, logout,
- * and token-refresh events to all consumers.
+ * token-refresh, and password-recovery events to all consumers.
+ *
+ * needsPasswordReset lifecycle:
+ *   PASSWORD_RECOVERY → true
+ *   USER_UPDATED | SIGNED_OUT → false
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [session,            setSession]            = useState<Session | null>(null);
+  const [loading,            setLoading]            = useState(true);
+  const [needsPasswordReset, setNeedsPasswordReset] = useState(false);
 
   useEffect(() => {
     // Rehydrate any persisted session — resolves immediately from localStorage
@@ -47,19 +59,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    // Keep session current for login / logout / token-refresh events
+    // Keep session current for all auth events
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, sess) => {
+    } = supabase.auth.onAuthStateChange((event, sess) => {
       setSession(sess);
+
+      if (event === "PASSWORD_RECOVERY") {
+        // User arrived via a password-reset email link
+        setNeedsPasswordReset(true);
+      } else if (event === "USER_UPDATED" || event === "SIGNED_OUT") {
+        // Password was changed or user signed out — recovery session is over
+        setNeedsPasswordReset(false);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ session, user: session?.user ?? null, loading }),
-    [session, loading],
+    () => ({ session, user: session?.user ?? null, loading, needsPasswordReset }),
+    [session, loading, needsPasswordReset],
   );
 
   return (
