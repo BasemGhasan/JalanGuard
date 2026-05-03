@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.routers import auth, reports, users
+from app.routers.authEmail import router as auth_email_router
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -26,10 +27,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
-app.include_router(reports.router, prefix="/api/v1/reports", tags=["Reports"])
-app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
+# ── Routers ──────────────────────────────────────────────────────────────────
+app.include_router(auth.router,             prefix="/api/v1/auth",       tags=["Authentication"])
+app.include_router(auth_email_router,       prefix="/api/v1/auth",       tags=["Auth — Email"])
+app.include_router(reports.router,          prefix="/api/v1/reports",    tags=["Reports"])
+app.include_router(users.router,            prefix="/api/v1/users",      tags=["Users"])
 
 
 @app.get("/")
