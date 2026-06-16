@@ -1,18 +1,18 @@
 // 1. Imports — External
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Toaster }                                   from "sonner";
+import { Toaster } from "sonner";
 
 // 1. Imports — Local context / hooks
-import { AuthProvider, useAuth }   from "../context/AuthContext";
-import { INITIAL_HASH_TYPE }       from "../lib/supabase";
+import { AuthProvider, useAuth } from "../context/AuthContext";
+import { INITIAL_HASH_TYPE, IS_SUPABASE_CONFIGURED } from "../lib/supabase";
 
 // 1. Imports — Components
-import { Navbar }      from "./components/Navbar";
-import type { Page }   from "./components/Navbar";
-import { MapPage }     from "./components/MapPage";
-import { DocsPage }    from "./components/DocsPage";
-import { KeyPage }     from "./components/KeyPage";
-import { AuthPage }    from "./components/auth/AuthPage";
+import { Navbar } from "./components/Navbar";
+import type { Page } from "./components/Navbar";
+import { MapPage } from "./components/MapPage";
+import { DocsPage } from "./components/DocsPage";
+import { KeyPage } from "./components/KeyPage";
+import { AuthPage } from "./components/auth/AuthPage";
 import { DataExplorer } from "./components/dataExplorer/DataExplorer";
 
 // 1. Imports — Constants
@@ -78,9 +78,15 @@ function AppInner() {
     <div style={styles.root}>
       <Navbar active={page} onNavigate={navigate} />
 
-      {page === "map"  && <MapPage />}
+      {!IS_SUPABASE_CONFIGURED && (
+        <div style={styles.notice}>
+          Supabase env vars are missing. The dashboard shell still loads, but auth and live data stay disabled until VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.
+        </div>
+      )}
+
+      {page === "map" && <MapPage />}
       {page === "docs" && <DocsPage />}
-      {page === "key"  && <KeyPage  onNavigate={navigate} />}
+      {page === "key" && <KeyPage onNavigate={navigate} />}
       {page === "auth" && (
         <AuthPage
           /**
@@ -101,8 +107,8 @@ function AppInner() {
         toastOptions={{
           style: {
             background: COLORS.surface,
-            border:     `1px solid ${COLORS.borderSoft}`,
-            color:      COLORS.textPrimary,
+            border: `1px solid ${COLORS.borderSoft}`,
+            color: COLORS.textPrimary,
           },
         }}
       />
@@ -122,10 +128,18 @@ export default function App() {
 // 4. Styles
 const styles = {
   root: {
-    width:      "100%",
-    minHeight:  "100vh",
+    width: "100%",
+    minHeight: "100vh",
     background: COLORS.background,
     fontFamily: "Inter, system-ui, sans-serif",
-    overflow:   "hidden",
+    overflow: "hidden",
+  },
+  notice: {
+    padding: "12px 32px",
+    background: COLORS.surface,
+    borderBottom: `1px solid ${COLORS.borderSoft}`,
+    color: COLORS.textMuted,
+    fontSize: 14,
+    lineHeight: 1.5,
   },
 } as const;

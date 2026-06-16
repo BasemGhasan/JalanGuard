@@ -12,7 +12,7 @@ const LEGEND_TIERS: LegendTier[] = [
   { color: COLORS.sevHigh,   label: "High severity dominant"   },
   { color: COLORS.sevMedium, label: "Medium severity dominant" },
   { color: COLORS.sevLow,    label: "Low severity dominant"    },
-  { color: COLORS.sevNone,   label: "0 active reports"         },
+  { color: COLORS.sevNone,   label: "No active reports"         },
 ];
 
 // 4. Styles

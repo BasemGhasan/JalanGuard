@@ -1,10 +1,54 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl     = import.meta.env.VITE_SUPABASE_URL     as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim();
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim();
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error("Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY environment variables");
+export const IS_SUPABASE_CONFIGURED = Boolean(supabaseUrl && supabaseAnonKey);
+
+function createSupabaseUnavailableError() {
+  return new Error(
+    "Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to enable auth and data loading.",
+  );
+}
+
+function createMissingQuery() {
+  const query: any = {
+    select() {
+      return query;
+    },
+    eq() {
+      return query;
+    },
+    order() {
+      return query;
+    },
+    limit() {
+      return query;
+    },
+    single() {
+      return Promise.resolve({ data: null, error: createSupabaseUnavailableError() });
+    },
+    maybeSingle() {
+      return Promise.resolve({ data: null, error: createSupabaseUnavailableError() });
+    },
+    upsert() {
+      return query;
+    },
+    insert() {
+      return query;
+    },
+    update() {
+      return query;
+    },
+    delete() {
+      return query;
+    },
+    then(onFulfilled: (value: { data: unknown[]; error: null }) => unknown, onRejected?: (reason: unknown) => unknown) {
+      return Promise.resolve({ data: [], error: null }).then(onFulfilled, onRejected);
+    },
+  };
+
+  return query;
 }
 
 /**
@@ -23,8 +67,26 @@ if (!supabaseUrl || !supabaseAnonKey) {
  *   null           — normal page load with no Supabase redirect
  */
 export const INITIAL_HASH_TYPE: string | null =
-  new URLSearchParams(window.location.hash.slice(1)).get("type");
+  typeof window !== "undefined"
+    ? new URLSearchParams(window.location.hash.slice(1)).get("type")
+    : null;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const fallbackSupabase: any = {
+  auth: {
+    getSession: async () => ({ data: { session: null }, error: null }),
+    onAuthStateChange: () => ({ data: { subscription: { unsubscribe() { } } } }),
+    signInWithPassword: async () => ({ data: { user: null, session: null }, error: createSupabaseUnavailableError() }),
+    updateUser: async () => ({ data: { user: null }, error: createSupabaseUnavailableError() }),
+    signOut: async () => ({ error: null }),
+  },
+  from() {
+    return createMissingQuery();
+  },
+  rpc: async () => ({ data: null, error: createSupabaseUnavailableError() }),
+};
+
+export const supabase = IS_SUPABASE_CONFIGURED && supabaseUrl && supabaseAnonKey
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : fallbackSupabase;
 
 export type { User, Session } from "@supabase/supabase-js";
