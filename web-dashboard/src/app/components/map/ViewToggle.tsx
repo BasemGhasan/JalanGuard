@@ -20,38 +20,8 @@ interface ViewToggleProps<T extends ToggleValue> {
   position?: "left" | "right";
 }
 
-// 3. Styles
-const styles = {
-  wrapper: {
-    position: "absolute" as const,
-    top: 16,
-    right: 16,
-    zIndex: 1000,
-    display: "flex",
-    borderRadius: 12,
-    overflow: "hidden",
-    background: COLORS.surface,
-    border: `1px solid ${COLORS.borderSoft}`,
-    boxShadow: "0 8px 32px rgba(0,0,0,0.50)",
-  },
-  wrapperLeft: {
-    left: 16,
-    right: "auto" as const,
-  },
-  btnBase: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    padding: "10px 20px",
-    fontSize: 14,
-    fontWeight: 500,
-    border: "none",
-    cursor: "pointer",
-    transition: "all 0.15s ease",
-  },
-} as const;
 
-// 4. Component
+// 3. Component
 /** Toggle control that switches between Choropleth and Pins views. */
 export function ViewToggle<T extends ToggleValue>({
   value,
@@ -86,3 +56,35 @@ export function ViewToggle<T extends ToggleValue>({
     </div>
   );
 }
+
+// 4. Styles
+const styles = {
+  wrapper: {
+    position: "absolute",
+    top: 16,
+    right: 16,
+    zIndex: 1000,
+    display: "flex",
+    borderRadius: 12,
+    overflow: "hidden",
+    background: COLORS.surface,
+    border: `1px solid ${COLORS.borderSoft}`,
+    boxShadow: "0 8px 32px rgba(0,0,0,0.50)",
+  },
+  wrapperLeft: {
+    left: 16,
+    right: "auto" as const,
+  },
+  btnBase: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    padding: "10px 20px",
+    fontSize: 14,
+    fontWeight: 500,
+    border: "none",
+    cursor: "pointer",
+    transition: "all 0.15s ease",
+  },
+} as const;
+

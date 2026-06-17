@@ -36,8 +36,8 @@ export interface FilterBarProps {
   dateRange:  string;
   /** Unique defect_type values from the loaded data, already sorted. */
   defectTypes: string[];
-  /** Unique state_name values from the joined relation, already sorted. */
-  states:      string[];
+  /** Unique location_name values from the joined relation, already sorted. */
+  location:      string[];
   onSeverity:   (v: string) => void;
   onStatus:     (v: string) => void;
   onDefectType: (v: string) => void;
@@ -45,6 +45,7 @@ export interface FilterBarProps {
   onDateRange:  (v: string) => void;
   filteredCount: number;
   totalCount:    number;
+  admLevel:      number;
 }
 
 // 3. Sub-component — reusable labeled dropdown
@@ -104,9 +105,9 @@ const selectStyles = {
 
 export function FilterBar({
   severity, status, defectType, state, dateRange,
-  defectTypes, states,
+  defectTypes, location,
   onSeverity, onStatus, onDefectType, onState, onDateRange,
-  filteredCount, totalCount,
+  filteredCount, totalCount, admLevel,
 }: FilterBarProps) {
 
   // ── Static option lists (no deps — only created once) ───────────────────
@@ -139,10 +140,10 @@ export function FilterBar({
     })),
   ], [defectTypes]);
 
-  const stateOptions = useMemo(() => [
-    { value: "all", label: "All States" },
-    ...states.map((s) => ({ value: s, label: s })),
-  ], [states]);
+  const locationOptions = useMemo(() => [
+    { value: "all", label: "All Locations" },
+    ...location.map((l) => ({ value: l, label: l })),
+  ], [location]);
 
   // ── Derived: is any filter active? ───────────────────────────────────────
   const isFiltered = filteredCount !== totalCount;
@@ -157,8 +158,10 @@ export function FilterBar({
           label="Status"        value={status}     options={statusOptions}      onChange={onStatus}     />
         <FilterSelect
           label="Defect Type"   value={defectType} options={defectTypeOptions}  onChange={onDefectType} />
-        <FilterSelect
-          label="State"         value={state}      options={stateOptions}       onChange={onState}      />
+        {admLevel !== 0 && (
+          <FilterSelect
+            label="Location"      value={state}      options={locationOptions}    onChange={onState}      />
+        )}
         <FilterSelect
           label="Date Reported" value={dateRange}  options={dateRangeOptions}   onChange={onDateRange}  />
       </div>

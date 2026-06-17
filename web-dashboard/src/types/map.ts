@@ -40,11 +40,11 @@ export interface Hazard {
 export type MapView = "choropleth" | "pins";
 
 /**
- * Hazard row with the joined `malaysian_states` relation.
- * Returned by: supabase.from('hazards').select('*, malaysian_states(state_name)')
+ * Hazard row with the joined `malaysian_location` relation.
+ * Returned by: supabase.from('hazards').select('*, malaysian_location(location_name)')
  */
 export interface HazardWithState extends Hazard {
-  malaysian_states: { state_name: string } | null;
+  malaysian_location: { location_name: string } | null;
 }
 
 /** Properties embedded in each GeoJSON feature for the choropleth layer. */

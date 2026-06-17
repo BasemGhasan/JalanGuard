@@ -13,6 +13,7 @@
 
 // 1. Imports — External
 import { useState, useCallback, useMemo } from "react";
+import { Globe, MapPin, Map } from "lucide-react";
 
 // 1. Imports — Local constants
 import { COLORS, FONT_SIZES, SPACING } from "../../../constants/theme";
@@ -21,15 +22,22 @@ import { COLORS, FONT_SIZES, SPACING } from "../../../constants/theme";
 import { useDataExplorer } from "../../../hooks/useDataExplorer";
 
 // 1. Imports — Components
-import { HazardCard }  from "../map/HazardCard";
-import { FilterBar }   from "./filterBar";
+import { HazardCard } from "../map/HazardCard";
+import { FilterBar } from "./filterBar";
 import { HazardTable } from "./hazardTable";
 
 // 1. Imports — Types
 import type { HazardWithState } from "../../../types/map";
+import { ViewToggle, type ToggleOption } from "../map/ViewToggle";
 
 // 2. Types — internal filter state
 type DateRange = "all" | "7" | "30";
+
+const ADM_LEVEL_OPTIONS: ToggleOption<0 | 1 | 2>[] = [
+  { value: 0, label: "Country", Icon: Globe },
+  { value: 1, label: "States", Icon: Map },
+  { value: 2, label: "Districts", Icon: MapPin },
+];
 
 // 3. Component
 
@@ -40,7 +48,7 @@ type DateRange = "all" | "7" | "30";
  *   severity   — exact match on hazard.severity
  *   status     — exact match on hazard.status
  *   defectType — exact match on hazard.defect_type
- *   state      — exact match on joined malaysian_states.state_name
+ *   location      — exact match on joined malaysian_location.state_name
  *   dateRange  — created_at must be within the last N days (cutoff from Date.now())
  *
  * Modal:
@@ -50,27 +58,30 @@ type DateRange = "all" | "7" | "30";
  *   removing the card from the DOM instantly.
  */
 export function DataExplorer() {
+  // ── Administration level ────────────────────────────────────────────────────────────
+  const [admLevel, setAdmLevel] = useState<0 | 1 | 2>(0);
+
   // ── Data layer ────────────────────────────────────────────────────────────
-  const { hazards, loading, error } = useDataExplorer();
+  const { hazards, loading, error } = useDataExplorer(admLevel);
 
   // ── Filter state ──────────────────────────────────────────────────────────
-  const [severity,   setSeverity  ] = useState("all");
-  const [status,     setStatus    ] = useState("all");
+  const [severity, setSeverity] = useState("all");
+  const [status, setStatus] = useState("all");
   const [defectType, setDefectType] = useState("all");
-  const [state,      setState     ] = useState("all");
-  const [dateRange,  setDateRange ] = useState<DateRange>("all");
+  const [state, setState] = useState("all");
+  const [dateRange, setDateRange] = useState<DateRange>("all");
 
   // ── Selected hazard (detail modal) ────────────────────────────────────────
   const [selectedHazard, setSelectedHazard] = useState<HazardWithState | null>(null);
 
   // ── Handlers (all stable via useCallback) ─────────────────────────────────
-  const handleSeverity      = useCallback((v: string) => setSeverity(v),            []);
-  const handleStatus        = useCallback((v: string) => setStatus(v),              []);
-  const handleDefectType    = useCallback((v: string) => setDefectType(v),          []);
-  const handleState         = useCallback((v: string) => setState(v),               []);
-  const handleDateRange     = useCallback((v: string) => setDateRange(v as DateRange), []);
-  const handleSelectHazard  = useCallback((h: HazardWithState) => setSelectedHazard(h), []);
-  const handleCloseHazard   = useCallback(() => setSelectedHazard(null),            []);
+  const handleSeverity = useCallback((v: string) => setSeverity(v), []);
+  const handleStatus = useCallback((v: string) => setStatus(v), []);
+  const handleDefectType = useCallback((v: string) => setDefectType(v), []);
+  const handleState = useCallback((v: string) => setState(v), []);
+  const handleDateRange = useCallback((v: string) => setDateRange(v as DateRange), []);
+  const handleSelectHazard = useCallback((h: HazardWithState) => setSelectedHazard(h), []);
+  const handleCloseHazard = useCallback(() => setSelectedHazard(null), []);
 
   // ── Derived: unique filter option lists ──────────────────────────────────
   const defectTypes = useMemo(
@@ -78,11 +89,11 @@ export function DataExplorer() {
     [hazards],
   );
 
-  const states = useMemo(
+  const location = useMemo(
     () =>
       [...new Set(
         hazards
-          .map((h) => h.malaysian_states?.state_name)
+          .map((h) => h.malaysian_location?.location_name)
           .filter((s): s is string => Boolean(s)),
       )].sort(),
     [hazards],
@@ -92,15 +103,15 @@ export function DataExplorer() {
   const filteredHazards = useMemo(() => {
     const DAY_MS = 86_400_000;
     const cutoff =
-      dateRange === "7"  ? Date.now() - 7  * DAY_MS :
-      dateRange === "30" ? Date.now() - 30 * DAY_MS : 0;
+      dateRange === "7" ? Date.now() - 7 * DAY_MS :
+        dateRange === "30" ? Date.now() - 30 * DAY_MS : 0;
 
     return hazards.filter((h) => {
-      if (severity   !== "all" && h.severity              !== severity)   return false;
-      if (status     !== "all" && h.status                !== status)     return false;
-      if (defectType !== "all" && h.defect_type           !== defectType) return false;
-      if (state      !== "all" && h.malaysian_states?.state_name !== state) return false;
-      if (cutoff > 0 && new Date(h.created_at).getTime() < cutoff)       return false;
+      if (severity !== "all" && h.severity !== severity) return false;
+      if (status !== "all" && h.status !== status) return false;
+      if (defectType !== "all" && h.defect_type !== defectType) return false;
+      if (state !== "all" && h.malaysian_location?.location_name !== state) return false;
+      if (cutoff > 0 && new Date(h.created_at).getTime() < cutoff) return false;
       return true;
     });
   }, [hazards, severity, status, defectType, state, dateRange]);
@@ -110,23 +121,35 @@ export function DataExplorer() {
 
       {/* ── Page header ─────────────────────────────────────────────────── */}
       <div style={styles.header}>
-        <h1 style={styles.title}>Data Explorer</h1>
-        <p style={styles.subtitle}>
-          Browse, filter, and inspect every hazard report in the JalanGuard database.
-        </p>
+        <div>
+          <h1 style={styles.title}>Data Explorer</h1>
+          <p style={styles.subtitle}>
+            Browse, filter, and inspect every hazard report in the JalanGuard database.
+          </p>
+        </div>
+
+        {/* ── Page toggler ─────────────────────────────────────────────────── */}
+        <div style={styles.viewToggleContainer}>
+          <ViewToggle
+            value={admLevel}
+            onChange={setAdmLevel}
+            options={ADM_LEVEL_OPTIONS}
+          />
+        </div>
       </div>
 
       {/* ── Filter controls ───────────────────────────────────────────────── */}
       <FilterBar
-        severity={severity}     onSeverity={handleSeverity}
-        status={status}         onStatus={handleStatus}
+        severity={severity} onSeverity={handleSeverity}
+        status={status} onStatus={handleStatus}
         defectType={defectType} onDefectType={handleDefectType}
-        state={state}           onState={handleState}
-        dateRange={dateRange}   onDateRange={handleDateRange}
+        state={state} onState={handleState}
+        dateRange={dateRange} onDateRange={handleDateRange}
         defectTypes={defectTypes}
-        states={states}
+        location={location}
         filteredCount={filteredHazards.length}
         totalCount={hazards.length}
+        admLevel={admLevel}
       />
 
       {/* ── Data table ────────────────────────────────────────────────────── */}
@@ -161,29 +184,37 @@ export function DataExplorer() {
 // 4. Styles
 const styles = {
   page: {
-    minHeight:  "calc(100vh - 64px)",
+    minHeight: "calc(100vh - 64px)",
     background: COLORS.background,
-    padding:    `${SPACING.xl}px`,
+    padding: `${SPACING.xl}px`,
   },
   header: {
     marginBottom: SPACING.xl,
+    display: "flex",        
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  viewToggleContainer: {
+    position: "relative",   
+    height: "50px",         
+    width: "300px",         
   },
   title: {
-    color:         COLORS.textPrimary,
-    fontSize:      FONT_SIZES.xl + 4,
-    fontWeight:    700,
-    margin:        `0 0 ${SPACING.xs}px`,
+    color: COLORS.textPrimary,
+    fontSize: FONT_SIZES.xl + 4,
+    fontWeight: 700,
+    margin: `0 0 ${SPACING.xs}px`,
     letterSpacing: "-0.02em",
   },
   subtitle: {
-    color:    COLORS.textMuted,
+    color: COLORS.textMuted,
     fontSize: FONT_SIZES.sm + 2,
-    margin:   0,
+    margin: 0,
   },
   tableWrap: {
-    background:   COLORS.surface,
+    background: COLORS.surface,
     borderRadius: 16,
-    border:       `1px solid ${COLORS.borderSoft}`,
-    overflow:     "hidden",
+    border: `1px solid ${COLORS.borderSoft}`,
+    overflow: "hidden",
   },
 } as const;

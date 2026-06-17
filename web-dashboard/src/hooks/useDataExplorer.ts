@@ -2,13 +2,7 @@
  * useDataExplorer
  *
  * Data-layer hook for the Data Explorer page.
- * Fetches all hazard reports with their joined state names via Supabase's
- * relational select syntax and returns them in reverse-chronological order.
- *
- * Separation of concerns:
- *   - This hook owns ALL Supabase calls and data-loading state.
- *   - The DataExplorer component owns filter state and derived/filtered arrays.
- *   - No UI logic lives here.
+ * Upgraded to dynamically fetch boundary names based on the selected ADM level.
  */
 
 // 1. Imports — External
@@ -26,23 +20,25 @@ interface UseDataExplorerReturn {
 }
 
 // 3. Hook
-export function useDataExplorer(): UseDataExplorerReturn {
+export function useDataExplorer(admLevel: 0 | 1 | 2 = 0): UseDataExplorerReturn {
   const [hazards, setHazards] = useState<HazardWithState[]>([]);
   const [loading, setLoading] = useState(true);
   const [error,   setError  ] = useState<string | null>(null);
 
   useEffect(() => {
-    /** Cancellation flag — prevents state updates if the component unmounts
-     *  before the async fetch resolves. */
     let cancelled = false;
 
     async function fetchHazards() {
       setLoading(true);
       setError(null);
 
+      // Dynamically select the correct foreign key based on the current admLevel
+      const fkColumn = `adm${admLevel}_id`;
+      const selectQuery = `*, boundary_data:administrative_boundaries!${fkColumn}(name)`;
+
       const { data, error: sbError } = await supabase
         .from("hazards")
-        .select("*, malaysian_states(state_name)")
+        .select(selectQuery)
         .order("created_at", { ascending: false });
 
       if (cancelled) return;
@@ -50,7 +46,15 @@ export function useDataExplorer(): UseDataExplorerReturn {
       if (sbError) {
         setError(sbError.message);
       } else {
-        setHazards((data as HazardWithState[]) ?? []);
+        const normalizedData = (data || []).map((hazard: any) => ({
+          ...hazard,
+          boundary_name: hazard.boundary_data?.name || "Unknown Area",
+          malaysian_location: {
+            location_name: hazard.boundary_data?.name || "Unknown Area"
+          }
+        }));
+
+        setHazards(normalizedData as HazardWithState[]);
       }
 
       setLoading(false);
@@ -59,7 +63,7 @@ export function useDataExplorer(): UseDataExplorerReturn {
     fetchHazards();
 
     return () => { cancelled = true; };
-  }, []); // fetch once on mount — the table is read-only from this page
+  }, [admLevel]); // Refetch whenever the ADM level toggle changes
 
   return { hazards, loading, error };
 }

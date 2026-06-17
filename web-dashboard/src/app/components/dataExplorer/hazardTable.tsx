@@ -5,7 +5,7 @@
  * Each row is its own component (TableRow) so hover state is local
  * and never causes the whole table to re-render.
  *
- * Columns: Date | State | Type | Severity | Status
+ * Columns: Date | Location | Type | Severity | Status
  *
  * Separation of concerns:
  *   - This component owns ONLY table rendering and per-row hover state.
@@ -142,7 +142,7 @@ function TableRow({ hazard, onRowClick }: TableRowProps) {
       onClick={handleClick}
     >
       <td style={tdStyle}>{formatDate(hazard.created_at)}</td>
-      <td style={tdStyle}>{hazard.malaysian_states?.state_name ?? "—"}</td>
+      <td style={tdStyle}>{hazard.malaysian_location?.location_name ?? "—"}</td>
       <td style={{ ...tdStyle, textTransform: "capitalize", maxWidth: 200 }}>
         {hazard.defect_type.replace(/_/g, " ")}
       </td>
@@ -165,7 +165,7 @@ const tdStyle = {
 } as const;
 
 // 6. Column header definitions
-const COLUMNS = ["Date", "State", "Type", "Severity", "Status"] as const;
+const COLUMNS = ["Date", "Location", "Type", "Severity", "Status"] as const;
 
 // 7. Main component
 
