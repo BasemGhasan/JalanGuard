@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "../lib/supabase";
-import type { Hazard, StateHeatmapStat } from "../types/map";
+import type { Hazard, StateChoroplethStat } from "../types/map";
 
 const CACHE_TTL_MS = 10 * 60 * 1000;
 
@@ -23,7 +23,7 @@ interface RawChoroplethRow {
 }
 
 interface StatsCacheEntry {
-  data: StateHeatmapStat[];
+  data: StateChoroplethStat[];
   fetchedAt: number;
 }
 
@@ -36,7 +36,7 @@ function isFresh(fetchedAt: number, now: number): boolean {
   return now - fetchedAt < CACHE_TTL_MS;
 }
 
-function normalizeChoroplethRows(rows: RawChoroplethRow[]): StateHeatmapStat[] {
+function normalizeChoroplethRows(rows: RawChoroplethRow[]): StateChoroplethStat[] {
   return rows
     .filter((row) => Boolean(row.geojson))
     .map((row) => ({
@@ -54,7 +54,7 @@ function normalizeChoroplethRows(rows: RawChoroplethRow[]): StateHeatmapStat[] {
     }));
 }
 
-async function fetchStats(viewName: string): Promise<StateHeatmapStat[]> {
+async function fetchStats(viewName: string): Promise<StateChoroplethStat[]> {
   const { data, error } = await supabase.from(viewName).select("*");
   if (error) throw new Error(error.message);
   return normalizeChoroplethRows((data as RawChoroplethRow[] | null) ?? []);
@@ -67,7 +67,7 @@ async function fetchHazards(): Promise<Hazard[]> {
 }
 
 interface UseMapDataReturn {
-  stats: StateHeatmapStat[];
+  stats: StateChoroplethStat[];
   hazards: Hazard[];
   loading: boolean;
   error: Error | null;
@@ -79,7 +79,7 @@ interface UseMapDataReturn {
  * @param admLevel 0 (Country), 1 (States), or 2 (Districts). Defaults to 1.
  */
 export function useMapData(admLevel: 0 | 1 | 2 = 1): UseMapDataReturn {
-  const [stats, setStats] = useState<StateHeatmapStat[]>([]);
+  const [stats, setStats] = useState<StateChoroplethStat[]>([]);
   const [hazards, setHazards] = useState<Hazard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -119,7 +119,7 @@ export function useMapData(admLevel: 0 | 1 | 2 = 1): UseMapDataReturn {
         const statsFresh = cachedStatsEntry ? isFresh(cachedStatsEntry.fetchedAt, now) : false;
         const hazardsFresh = cachedHazardsEntry ? isFresh(cachedHazardsEntry.fetchedAt, now) : false;
 
-        // If hazards need a refresh, refresh stats too so the heatmap counts stay aligned.
+        // If hazards need a refresh, refresh stats too so the Choropleth counts stay aligned.
         const needsHazards = !hazardsFresh || isManualRefresh;
         const needsStats = !statsFresh || needsHazards || isManualRefresh;
 

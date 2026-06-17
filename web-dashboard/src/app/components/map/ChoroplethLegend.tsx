@@ -57,7 +57,7 @@ const styles = {
 
 // 5. Component
 /** Legend panel synced exactly to the dominantColor() severity tiers. */
-export function HeatmapLegend() {
+export function ChoroplethLegend() {
   return (
     <div style={styles.wrapper}>
       <p style={styles.heading}>Dominant Severity</p>

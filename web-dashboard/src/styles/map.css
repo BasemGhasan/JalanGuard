@@ -32,7 +32,7 @@
 path.leaflet-interactive:focus { outline: none; }
 
 /* ══════════════════════════════════════════════════════════════════════════ */
-/* HEATMAP TOOLTIP                                                            */
+/* Choropleth Tooltip                                                            */
 /* ══════════════════════════════════════════════════════════════════════════ */
 
 .leaflet-tooltip-jalanguard.leaflet-tooltip {

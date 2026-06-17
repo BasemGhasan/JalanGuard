@@ -52,7 +52,7 @@ const styles = {
 } as const;
 
 // 4. Component
-/** Toggle control that switches between Heatmap and Pins views. */
+/** Toggle control that switches between Choropleth and Pins views. */
 export function ViewToggle<T extends ToggleValue>({
   value,
   onChange,

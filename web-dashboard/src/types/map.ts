@@ -3,7 +3,7 @@
  * No external runtime dependencies — pure type definitions.
  */
 
-export interface StateHeatmapStat {
+export interface StateChoroplethStat {
   id: string;
   state_name: string;
   iso_code: string;
@@ -37,7 +37,7 @@ export interface Hazard {
   reporter_name: string | null;
 }
 
-export type MapView = "heatmap" | "pins";
+export type MapView = "choropleth" | "pins";
 
 /**
  * Hazard row with the joined `malaysian_states` relation.
@@ -47,8 +47,8 @@ export interface HazardWithState extends Hazard {
   malaysian_states: { state_name: string } | null;
 }
 
-/** Properties embedded in each GeoJSON feature for the heatmap layer. */
-export interface HeatmapFeatureProps {
+/** Properties embedded in each GeoJSON feature for the choropleth layer. */
+export interface ChoroplethFeatureProps {
   state_name: string;
   iso_code: string;
   total_reports: number;

@@ -4,17 +4,17 @@ import { GeoJSON } from "react-leaflet";
 import type { Layer, LeafletMouseEvent, PathOptions } from "leaflet";
 import type { Feature, Geometry } from "geojson";
 import { buildGeoJSON, dominantColor, defaultPolyStyle, hoverPolyStyle } from "../../../utils/mapHelpers";
-import type { HeatmapFeatureProps, StateHeatmapStat } from "../../../types/map";
+import type { ChoroplethFeatureProps, StateChoroplethStat } from "../../../types/map";
 
 // 2. Interfaces
-interface HeatmapLayerProps {
-  stats: StateHeatmapStat[];
+interface ChoroplethLayerProps {
+  stats: StateChoroplethStat[];
 }
 
 // 3. Helpers — defined outside the component to prevent recreation on every render
 
 /** Returns per-feature fill colour based on the dominant severity tier. */
-function styleFeature(feature: Feature<Geometry, HeatmapFeatureProps> | undefined): PathOptions {
+function styleFeature(feature: Feature<Geometry, ChoroplethFeatureProps> | undefined): PathOptions {
   if (!feature?.properties) return defaultPolyStyle;
   return { ...defaultPolyStyle, fillColor: dominantColor(feature.properties) };
 }
@@ -25,7 +25,7 @@ function styleFeature(feature: Feature<Geometry, HeatmapFeatureProps> | undefine
  * 3-tier severity palette from src/constants/theme.ts.
  * CSS classes are defined in src/styles/map.css.
  */
-function buildTooltipHtml(p: HeatmapFeatureProps): string {
+function buildTooltipHtml(p: ChoroplethFeatureProps): string {
   return `
     <div class="map-tooltip">
       <div class="tt-header">${p.state_name}</div>
@@ -61,7 +61,7 @@ function buildTooltipHtml(p: HeatmapFeatureProps): string {
  * to each GeoJSON layer.
  */
 function onEachFeature(
-  feature: Feature<Geometry, HeatmapFeatureProps>,
+  feature: Feature<Geometry, ChoroplethFeatureProps>,
   layer: Layer,
 ): void {
   const p = feature.properties;
@@ -88,16 +88,16 @@ function onEachFeature(
 // 4. Component
 /**
  * Choropleth GeoJSON layer — one polygon per Malaysian state, coloured by
- * the dominant severity tier from `state_heatmap_stats`.
+ * the dominant severity tier from `state_Choropleth_stats`.
  *
  * Memoised so it only re-renders when the stats array reference changes
  * (not on zoom/pan, which would cause flicker on the Canvas renderer).
  */
-export const HeatmapLayer = memo(function HeatmapLayer({ stats }: HeatmapLayerProps) {
+export const ChoroplethLayer = memo(function ChoroplethLayer({ stats }: ChoroplethLayerProps) {
   const geoData = useMemo(() => buildGeoJSON(stats), [stats]);
 
   const style = useCallback(
-    (f: Feature<Geometry, HeatmapFeatureProps> | undefined) => styleFeature(f),
+    (f: Feature<Geometry, ChoroplethFeatureProps> | undefined) => styleFeature(f),
     [],
   );
 

@@ -1,20 +1,20 @@
 // 1. Imports
 import { memo } from "react";
-import { HeatmapLayer } from "./HeatmapLayer";
+import { ChoroplethLayer } from "./ChoroplethLayer";
 import { PinsLayer }    from "./PinsLayer";
-import type { Hazard, MapView, StateHeatmapStat } from "../../../types/map";
+import type { Hazard, MapView, StateChoroplethStat } from "../../../types/map";
 
 // 2. Interfaces
 interface MapInnerProps {
   mapView:        MapView;
-  stats:          StateHeatmapStat[];
+  stats:          StateChoroplethStat[];
   hazards:        Hazard[];
   onSelectHazard: (hazard: Hazard) => void;
 }
 
 // 3. Component
 /**
- * Renders the active layer (heatmap or pins) plus map controls.
+ * Renders the active layer (Choropleth or pins) plus map controls.
  * Separated from MapPage so that react-leaflet hooks (useMap etc.) are
  * only called inside the MapContainer context.
  *
@@ -28,7 +28,7 @@ export const MapInner = memo(function MapInner({
 }: MapInnerProps) {
   return (
     <>
-      {mapView === "heatmap" && <HeatmapLayer stats={stats} />}
+      {mapView === "choropleth" && <ChoroplethLayer stats={stats} />}
       {mapView === "pins"    && <PinsLayer hazards={hazards} onSelectHazard={onSelectHazard} />}
     </>
   );

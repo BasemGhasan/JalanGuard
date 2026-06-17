@@ -2,7 +2,7 @@
 import { useState, useCallback } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { Globe, Layers, MapPin } from "lucide-react";
+import { Globe, Layers, MapPin, MapPinned, Map } from "lucide-react";
 
 // 1. Imports — Local constants / hooks / types
 import { MAP_CONFIG, COLORS } from "../../constants/theme";
@@ -15,17 +15,17 @@ import { MapFallback } from "./map/MapFallback";
 import { LoadingOverlay } from "./map/LoadingOverlay";
 import { MapInner } from "./map/MapInner";
 import { ViewToggle, type ToggleOption } from "./map/ViewToggle";
-import { HeatmapLegend } from "./map/HeatmapLegend";
+import { ChoroplethLegend } from "./map/ChoroplethLegend";
 import { HazardCard } from "./map/HazardCard";
 
 const MAP_VIEW_OPTIONS: ToggleOption<MapView>[] = [
-  { value: "heatmap", label: "Heatmap", Icon: Layers },
-  { value: "pins", label: "Pins", Icon: MapPin },
+  { value: "choropleth", label: "Choropleth", Icon: Layers },
+  { value: "pins", label: "Pins", Icon: MapPinned },
 ];
 
 const ADM_LEVEL_OPTIONS: ToggleOption<0 | 1 | 2>[] = [
   { value: 0, label: "Country", Icon: Globe },
-  { value: 1, label: "States", Icon: Layers },
+  { value: 1, label: "States", Icon: Map },
   { value: 2, label: "Districts", Icon: MapPin },
 ];
 
@@ -39,7 +39,7 @@ export function MapPage() {
   const [admLevel, setAdmLevel] = useState<0 | 1 | 2>(1);
   const { stats, hazards, loading, error, retry } = useMapData(admLevel);
 
-  const [mapView, setMapView] = useState<MapView>("heatmap");
+  const [mapView, setMapView] = useState<MapView>("choropleth");
   const [selectedHazard, setSelectedHazard] = useState<Hazard | null>(null);
   /** Bumped to force the ErrorBoundary to remount after a retry. */
   const [boundaryKey, setBoundaryKey] = useState(0);
@@ -102,8 +102,8 @@ export function MapPage() {
         <ViewToggle value={mapView} onChange={handleViewChange} options={MAP_VIEW_OPTIONS} position="right" />
         <ViewToggle value={admLevel} onChange={setAdmLevel} options={ADM_LEVEL_OPTIONS} position="left" />
 
-        {mapView === "heatmap" && !loading && stats.length > 0 && (
-          <HeatmapLegend />
+        {mapView === "choropleth" && !loading && stats.length > 0 && (
+          <ChoroplethLegend />
         )}
 
         {mapView === "pins" && selectedHazard !== null && (

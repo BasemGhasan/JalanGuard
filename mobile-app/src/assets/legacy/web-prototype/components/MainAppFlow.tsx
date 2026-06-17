@@ -329,7 +329,7 @@ function MapScreen({ showSheet, onPinTap }: { showSheet: boolean; onPinTap: () =
         <div className="absolute" style={{ top: "100px", left: "130px", width: "3px", height: "600px", backgroundColor: "#475569", opacity: 0.5 }} />
         <div className="absolute" style={{ top: "50px", left: "260px", width: "3px", height: "500px", backgroundColor: "#475569", opacity: 0.4 }} />
 
-        {/* Heatmap zones (visible in both modes but more prominent in zones mode) */}
+        {/* Choropleth zones (visible in both modes but more prominent in zones mode) */}
         {(mapMode === "zones" ? [
           { top: "22%", left: "15%", w: 140, h: 120 },
           { top: "50%", left: "40%", w: 160, h: 130 },

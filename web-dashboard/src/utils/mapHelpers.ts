@@ -5,7 +5,7 @@
 
 import L from "leaflet";
 import { COLORS, POLY_STYLE } from "../constants/theme";
-import type { HeatmapFeatureProps, Hazard, StateHeatmapStat } from "../types/map";
+import type { ChoroplethFeatureProps, Hazard, StateChoroplethStat } from "../types/map";
 
 /**
  * Returns a fill colour for a state polygon based on which severity tier
@@ -14,7 +14,7 @@ import type { HeatmapFeatureProps, Hazard, StateHeatmapStat } from "../types/map
  * Why dominant instead of ratio: a state with 1 high + 10 low reports is
  * NOT a "high severity" state; the dominant tier reflects ground reality.
  */
-export function dominantColor(props: HeatmapFeatureProps): string {
+export function dominantColor(props: ChoroplethFeatureProps): string {
   const { total_reports, high_severity_count, medium_severity_count, low_severity_count } = props;
 
   if (total_reports === 0) return COLORS.sevNone;
@@ -65,13 +65,13 @@ export function markerDivIcon(severity: Hazard["severity"]): L.DivIcon {
 }
 
 /**
- * Converts an array of StateHeatmapStat rows into a typed GeoJSON FeatureCollection.
+ * Converts an array of StateChoroplethStat rows into a typed GeoJSON FeatureCollection.
  * The geojson column (ST_AsGeoJSON result) is already a parsed JS object from
  * supabase-js and can be used directly as the geometry.
  */
 export function buildGeoJSON(
-  stats: StateHeatmapStat[],
-): GeoJSON.FeatureCollection<GeoJSON.Geometry, HeatmapFeatureProps> {
+  stats: StateChoroplethStat[],
+): GeoJSON.FeatureCollection<GeoJSON.Geometry, ChoroplethFeatureProps> {
   return {
     type: "FeatureCollection",
     features: stats.map((s) => ({

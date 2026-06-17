@@ -228,7 +228,7 @@ function Screen2Content() {
           <div className="absolute" style={{ top: '60px', left: '80px', width: '3px', height: '380px', backgroundColor: '#475569' }} />
           <div className="absolute" style={{ top: '40px', left: '160px', width: '3px', height: '350px', backgroundColor: '#334155' }} />
 
-          {/* Heatmap zones */}
+          {/* Choropleth zones */}
           <div className="absolute" style={{ top: '80px', left: '50px', width: '80px', height: '80px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(220,38,38,0.4) 0%, transparent 70%)' }} />
           <div className="absolute" style={{ top: '250px', left: '100px', width: '100px', height: '100px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(220,38,38,0.3) 0%, transparent 70%)' }} />
           <div className="absolute" style={{ top: '180px', left: '20px', width: '60px', height: '60px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(245,158,11,0.35) 0%, transparent 70%)' }} />
