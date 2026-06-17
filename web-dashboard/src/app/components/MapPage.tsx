@@ -1,22 +1,33 @@
 // 1. Imports — External
 import { useState, useCallback } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
-import type { LatLngBoundsExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { Globe, Layers, MapPin } from "lucide-react";
 
 // 1. Imports — Local constants / hooks / types
 import { MAP_CONFIG, COLORS } from "../../constants/theme";
-import { useMapData }         from "../../hooks/useMapData";
+import { useMapData } from "../../hooks/useMapData";
 import type { Hazard, MapView } from "../../types/map";
 
 // 1. Imports — Child components
 import { MapErrorBoundary } from "./map/MapErrorBoundary";
-import { MapFallback }      from "./map/MapFallback";
-import { LoadingOverlay }   from "./map/LoadingOverlay";
-import { MapInner }         from "./map/MapInner";
-import { ViewToggle }       from "./map/ViewToggle";
-import { HeatmapLegend }    from "./map/HeatmapLegend";
-import { HazardCard }       from "./map/HazardCard";
+import { MapFallback } from "./map/MapFallback";
+import { LoadingOverlay } from "./map/LoadingOverlay";
+import { MapInner } from "./map/MapInner";
+import { ViewToggle, type ToggleOption } from "./map/ViewToggle";
+import { HeatmapLegend } from "./map/HeatmapLegend";
+import { HazardCard } from "./map/HazardCard";
+
+const MAP_VIEW_OPTIONS: ToggleOption<MapView>[] = [
+  { value: "heatmap", label: "Heatmap", Icon: Layers },
+  { value: "pins", label: "Pins", Icon: MapPin },
+];
+
+const ADM_LEVEL_OPTIONS: ToggleOption<0 | 1 | 2>[] = [
+  { value: 0, label: "Country", Icon: Globe },
+  { value: 1, label: "States", Icon: Layers },
+  { value: 2, label: "Districts", Icon: MapPin },
+];
 
 // 2. Component
 /**
@@ -25,12 +36,13 @@ import { HazardCard }       from "./map/HazardCard";
  * This component owns only UI state and error/retry coordination.
  */
 export function MapPage() {
-  const { stats, hazards, loading, error, retry } = useMapData();
+  const [admLevel, setAdmLevel] = useState<0 | 1 | 2>(1);
+  const { stats, hazards, loading, error, retry } = useMapData(admLevel);
 
-  const [mapView,        setMapView]        = useState<MapView>("heatmap");
+  const [mapView, setMapView] = useState<MapView>("heatmap");
   const [selectedHazard, setSelectedHazard] = useState<Hazard | null>(null);
   /** Bumped to force the ErrorBoundary to remount after a retry. */
-  const [boundaryKey,    setBoundaryKey]    = useState(0);
+  const [boundaryKey, setBoundaryKey] = useState(0);
 
   const handleRetry = useCallback(() => {
     setBoundaryKey((k) => k + 1);
@@ -64,7 +76,7 @@ export function MapPage() {
           center={MAP_CONFIG.center}
           zoom={MAP_CONFIG.zoom}
           minZoom={MAP_CONFIG.minZoom}
-          maxBounds={MAP_CONFIG.bounds as LatLngBoundsExpression}
+          maxBounds={MAP_CONFIG.bounds}
           maxBoundsViscosity={MAP_CONFIG.boundsViscosity}
           preferCanvas
           zoomControl={false}
@@ -87,7 +99,8 @@ export function MapPage() {
           )}
         </MapContainer>
 
-        <ViewToggle view={mapView} onChange={handleViewChange} />
+        <ViewToggle value={mapView} onChange={handleViewChange} options={MAP_VIEW_OPTIONS} position="right" />
+        <ViewToggle value={admLevel} onChange={setAdmLevel} options={ADM_LEVEL_OPTIONS} position="left" />
 
         {mapView === "heatmap" && !loading && stats.length > 0 && (
           <HeatmapLegend />
@@ -104,13 +117,13 @@ export function MapPage() {
 // 3. Styles
 const styles = {
   root: {
-    position:   "relative" as const,
-    width:      "100%",
-    height:     MAP_CONFIG.containerHeight,
+    position: "relative" as const,
+    width: "100%",
+    height: MAP_CONFIG.containerHeight,
     background: COLORS.background,
   },
   map: {
-    width:  "100%",
+    width: "100%",
     height: "100%",
   },
 } as const;

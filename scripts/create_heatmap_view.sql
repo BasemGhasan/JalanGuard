@@ -17,15 +17,15 @@ SELECT
 
     -- Aggregate hazard counts (active only)
     COUNT(h.id)                                                          AS total_reports,
-    COUNT(h.id) FILTER (WHERE h.severity = 'high')                      AS high_severity_count,
-    COUNT(h.id) FILTER (WHERE h.severity = 'medium')                    AS medium_severity_count,
-    COUNT(h.id) FILTER (WHERE h.severity = 'low')                       AS low_severity_count,
+    COUNT(h.id) FILTER (WHERE UPPER(h.severity::text) = 'HIGH')         AS high_severity_count,
+    COUNT(h.id) FILTER (WHERE UPPER(h.severity::text) = 'MEDIUM')       AS medium_severity_count,
+    COUNT(h.id) FILTER (WHERE UPPER(h.severity::text) = 'LOW')          AS low_severity_count,
 
     -- Ratio: percentage of active reports that are high severity
     CASE
         WHEN COUNT(h.id) > 0 THEN
             ROUND(
-                (COUNT(h.id) FILTER (WHERE h.severity = 'high')::numeric
+                (COUNT(h.id) FILTER (WHERE UPPER(h.severity::text) = 'HIGH')::numeric
                  / COUNT(h.id)) * 100,
                 1
             )

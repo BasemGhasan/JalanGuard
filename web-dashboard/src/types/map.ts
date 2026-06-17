@@ -4,7 +4,7 @@
  */
 
 export interface StateHeatmapStat {
-  id: number;
+  id: string;
   state_name: string;
   iso_code: string;
   /** Full GeoJSON geometry object returned by ST_AsGeoJSON */
@@ -24,15 +24,15 @@ export interface Hazard {
   latitude: number;
   longitude: number;
   /** Legacy single-image URL — kept for backwards compatibility. */
-  image_url:  string | null;
+  image_url: string | null;
   /** Up to 5 Supabase Storage URLs for multi-image reports. */
   image_urls: string[] | null;
   state_id: number;
   created_at: string;
   /** User-submitted plain-text context for the hazard report. */
-  description:   string | null;
+  description: string | null;
   /** UUID FK to auth.users — not for display, used for auth linkage. */
-  reported_by:   string | null;
+  reported_by: string | null;
   /** Human-readable reporter display name, populated at report creation. */
   reporter_name: string | null;
 }
