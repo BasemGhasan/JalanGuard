@@ -1,11 +1,11 @@
 // 1. Imports — External
 import { useState, useCallback } from "react";
-import { toast }                 from "sonner";
+import { toast } from "sonner";
 
 // 1. Imports — Local context / hooks / constants / components
-import { COLORS, FONT_SIZES }  from "../../constants/theme";
-import { useAuth }             from "../../context/AuthContext";
-import { LogoutModal }         from "./auth/LogoutModal";
+import { COLORS, FONT_SIZES } from "../../constants/theme";
+import { useAuth } from "../../context/AuthContext";
+import { LogoutModal } from "./auth/LogoutModal";
 
 // 2. Types
 /** All navigable pages in the application. */
@@ -13,7 +13,7 @@ export type Page = "map" | "docs" | "key" | "auth" | "explorer";
 
 // 2. Interfaces
 interface NavbarProps {
-  active:     Page;
+  active: Page;
   onNavigate: (p: Page) => void;
 }
 
@@ -35,19 +35,19 @@ interface NavbarProps {
  * clicks the final "Log Out" button.
  */
 export function Navbar({ active, onNavigate }: NavbarProps) {
-  const { session }              = useAuth();
+  const { session } = useAuth();
   const [showLogout, setShowLogout] = useState(false);
 
   const isLoggedIn = session !== null;
 
   // ── Navigation handlers ──────────────────────────────────────────────────
-  const handleNavToMap      = useCallback(() => onNavigate("map"),      [onNavigate]);
-  const handleNavToDocs     = useCallback(() => onNavigate("docs"),     [onNavigate]);
+  const handleNavToMap = useCallback(() => onNavigate("map"), [onNavigate]);
+  const handleNavToDocs = useCallback(() => onNavigate("docs"), [onNavigate]);
   const handleNavToExplorer = useCallback(() => onNavigate("explorer"), [onNavigate]);
-  const handleNavToAuth     = useCallback(() => onNavigate("auth"),     [onNavigate]);
+  const handleNavToAuth = useCallback(() => onNavigate("auth"), [onNavigate]);
 
   // ── Logout modal handlers ────────────────────────────────────────────────
-  const handleOpenLogout  = useCallback(() => setShowLogout(true),  []);
+  const handleOpenLogout = useCallback(() => setShowLogout(true), []);
   const handleCloseLogout = useCallback(() => setShowLogout(false), []);
 
   /** After signOut resolves in the modal, return the user to the map. */
@@ -67,8 +67,8 @@ export function Navbar({ active, onNavigate }: NavbarProps) {
   const linkStyle = useCallback(
     (p: Page) => ({
       ...styles.navLink,
-      color:               active === p ? COLORS.secondary : COLORS.textMuted,
-      textDecoration:      active === p ? "underline"      : "none",
+      color: active === p ? COLORS.secondary : COLORS.textMuted,
+      textDecoration: active === p ? "underline" : "none",
       textUnderlineOffset: active === p ? ("8px" as const) : undefined,
     }),
     [active],
@@ -77,15 +77,19 @@ export function Navbar({ active, onNavigate }: NavbarProps) {
   return (
     <>
       <header style={styles.header}>
-        {/* Brand */}
-        <button style={styles.brand} onClick={handleNavToMap}>
-          JalanGuard{" "}
-          <span style={styles.brandSub}>Open Data</span>
-        </button>
+        <div style={styles.brandContainer}>
+          {/* logo */}
+          <img src="../../../public/assets/images/transparentCircledLogo.PNG" alt="JalanGuard Logo" style={styles.logo} />
+          {/* Brand */}
+          <button style={styles.brand} onClick={() => globalThis.location.reload()}>
+            JalanGuard{" "}
+            <span style={styles.brandSub}>Open Data</span>
+          </button>
+        </div>
 
         {/* Nav links */}
         <nav style={styles.nav}>
-          <button style={linkStyle("map")}  onClick={handleNavToMap}>
+          <button style={linkStyle("map")} onClick={handleNavToMap}>
             Live Map
           </button>
           <button style={linkStyle("docs")} onClick={handleNavToDocs}>
@@ -130,55 +134,64 @@ export function Navbar({ active, onNavigate }: NavbarProps) {
 // 4. Styles
 const styles = {
   header: {
-    height:         64,
-    padding:        "0 32px",
-    display:        "flex",
-    alignItems:     "center",
+    height: 64,
+    padding: "0 32px",
+    display: "flex",
+    alignItems: "center",
     justifyContent: "space-between",
-    borderBottom:   `1px solid ${COLORS.surface}`,
-    background:     COLORS.background,
-    position:       "sticky" as const,
-    top:            0,
-    zIndex:         20,
+    borderBottom: `1px solid ${COLORS.surface}`,
+    background: COLORS.background,
+    position: "sticky" as const,
+    top: 0,
+    zIndex: 20,
+  },
+  brandContainer : {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
   },
   brand: {
-    background:    "transparent",
-    border:        "none",
-    color:         COLORS.textPrimary,
-    fontWeight:    700,
-    fontSize:      FONT_SIZES.lg + 2,
-    cursor:        "pointer",
+    background: "transparent",
+    border: "none",
+    color: COLORS.textPrimary,
+    fontWeight: 700,
+    fontSize: FONT_SIZES.lg + 2,
+    cursor: "pointer",
     letterSpacing: "-0.02em",
-    padding:       0,
+    padding: 0,
   },
   brandSub: {
-    color:      COLORS.textMuted,
+    color: COLORS.textMuted,
     fontWeight: 400,
   },
   nav: {
-    display:    "flex",
+    display: "flex",
     alignItems: "center",
-    gap:        32,
+    gap: 32,
   },
   navLink: {
-    background:  "transparent",
-    border:      "none",
-    color:       COLORS.textMuted,
-    fontSize:    FONT_SIZES.sm + 2,
-    fontWeight:  500,
-    cursor:      "pointer",
-    padding:     0,
-    transition:  "color 0.15s ease",
+    background: "transparent",
+    border: "none",
+    color: COLORS.textMuted,
+    fontSize: FONT_SIZES.sm + 2,
+    fontWeight: 500,
+    cursor: "pointer",
+    padding: 0,
+    transition: "color 0.15s ease",
   },
   ctaBtn: {
-    padding:      "10px 20px",
+    padding: "10px 20px",
     borderRadius: 12,
-    background:   COLORS.secondary,
-    border:       "none",
-    color:        COLORS.white,
-    fontSize:     FONT_SIZES.sm + 2,
-    fontWeight:   600,
-    cursor:       "pointer",
-    boxShadow:    `0 0 20px ${COLORS.accentGlow}`,
+    background: COLORS.secondary,
+    border: "none",
+    color: COLORS.white,
+    fontSize: FONT_SIZES.sm + 2,
+    fontWeight: 600,
+    cursor: "pointer",
+    boxShadow: `0 0 20px ${COLORS.accentGlow}`,
+  },
+  logo: {
+    height: 55,
+    width: "auto",
   },
 } as const;

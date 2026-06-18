@@ -77,7 +77,6 @@ path.leaflet-interactive:focus { outline: none; }
 .jalanguard-popup .leaflet-popup-content-wrapper {
   background: var(--jg-surface); border: 1px solid var(--jg-border-soft);
   border-radius: 12px; box-shadow: var(--jg-shadow-deep);
-  padding: 0; color: var(--jg-text-primary);
 }
 .jalanguard-popup .leaflet-popup-content       { margin: 0; color: var(--jg-text-primary); }
 .jalanguard-popup .leaflet-popup-tip-container { display: none; }

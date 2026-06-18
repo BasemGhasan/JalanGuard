@@ -1,7 +1,20 @@
 // 1. Imports
 import { COLORS } from "../../../constants/theme";
 
-// 2. Styles
+// 2. Component
+/** Transparent pointer-events overlay shown while map data is fetching. */
+export function LoadingOverlay() {
+  return (
+    <div style={styles.wrapper}>
+      <div style={styles.pill}>
+        <div style={styles.spinner} className="animate-spin" />
+        <span style={styles.label}>Loading map data…</span>
+      </div>
+    </div>
+  );
+}
+
+// 3. Styles
 const styles = {
   wrapper: {
     position:       "absolute" as const,
@@ -35,16 +48,3 @@ const styles = {
     color:    COLORS.textMuted,
   },
 } as const;
-
-// 3. Component
-/** Transparent pointer-events overlay shown while map data is fetching. */
-export function LoadingOverlay() {
-  return (
-    <div style={styles.wrapper}>
-      <div style={styles.pill}>
-        <div style={styles.spinner} className="animate-spin" />
-        <span style={styles.label}>Loading map data…</span>
-      </div>
-    </div>
-  );
-}

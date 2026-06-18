@@ -122,7 +122,6 @@ export function FilterBar({
     { value: "all",      label: "All Statuses" },
     { value: "active",   label: "Active"       },
     { value: "fixed",    label: "Fixed"        },
-    { value: "rejected", label: "Rejected"     },
   ], []);
 
   const dateRangeOptions = useMemo(() => [

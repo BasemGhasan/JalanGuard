@@ -1,10 +1,9 @@
 // 1. Imports — External
-import { useCallback, useMemo } from "react";
-import { X, Maximize2, GripHorizontal } from "lucide-react";
+import { useState, useMemo, useCallback } from "react";
+import { X } from "lucide-react";
 
 // 1. Imports — Local
 import { COLORS, SEVERITY_BADGE, SPACING } from "../../../constants/theme";
-import { useDraggableCard }                from "../../../hooks/useDraggableCard";
 import { ImageSlider }                     from "./ImageSlider";
 import type { Hazard }                     from "../../../types/map";
 
@@ -12,16 +11,10 @@ import type { Hazard }                     from "../../../types/map";
 interface HazardCardProps {
   hazard:        Hazard;
   onClose:       () => void;
-  /**
-   * When true the card opens already in expanded/centred mode — used by the
-   * DataExplorer modal overlay.  In this mode the backdrop click calls
-   * `onClose` (removes the card) rather than `onCollapse` (shrink to compact).
-   */
   startExpanded?: boolean;
 }
 
 // 3. Helpers
-/** Formats an ISO date string to "DD MMM YYYY" in Malaysian locale. */
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-MY", {
     day:   "2-digit",
@@ -31,29 +24,11 @@ function formatDate(iso: string): string {
 }
 
 // 4. Component
-/**
- * Floating hazard detail card.
- *
- * Compact (corner): original layout — drag handle, severity badge + close,
- * image thumbnail, TYPE/STATUS/REPORTED/LAT/LNG meta rows.
- *
- * Expanded (centred): same layout but thumbnail becomes a multi-image slider,
- * a DESCRIPTION block appears above the meta rows, and a REPORTER row is
- * appended. Description and reporter are intentionally hidden in compact mode.
- *
- * All drag/snap/expand logic lives in useDraggableCard.
- */
 export function HazardCard({ hazard, onClose, startExpanded = false }: HazardCardProps) {
-  const { corner, isExpanded, cardRef, onMouseDown, onCardClick, onCollapse } =
-    useDraggableCard("bottom-left", startExpanded);
+  const [isExpanded, setIsExpanded] = useState(startExpanded);
 
   const badge = SEVERITY_BADGE[hazard.severity] ?? SEVERITY_BADGE.low;
 
-  /**
-   * Derived image list — prefers image_urls array (multi-image support),
-   * falls back to the legacy single image_url for older rows.
-   * Capped at 5 per the Supabase Storage contract.
-   */
   const images = useMemo<string[]>(() => {
     if (hazard.image_urls && hazard.image_urls.length > 0)
       return hazard.image_urls.slice(0, 5);
@@ -61,42 +36,37 @@ export function HazardCard({ hazard, onClose, startExpanded = false }: HazardCar
     return [];
   }, [hazard.image_urls, hazard.image_url]);
 
-  /** Stop the close button from triggering a card drag or expand. */
-  const handleCloseBtnMouseDown = useCallback(
-    (e: React.MouseEvent) => e.stopPropagation(),
-    [],
-  );
-
   const handleClose = useCallback(
-    (e: React.MouseEvent) => { e.stopPropagation(); onClose(); },
+    (e: React.MouseEvent) => { 
+      e.stopPropagation(); 
+      onClose(); 
+    },
     [onClose],
   );
 
+  // Click handler for the card to trigger expansion
+  const handleCardClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isExpanded) {
+      setIsExpanded(true);
+    }
+  }, [isExpanded]);
+
   return (
     <>
-      {/* Backdrop — click outside to collapse (map) or close entirely (modal) */}
+      {/* Backdrop — FIXED: clicking the backdrop now completely closes the expanded card */}
       {isExpanded && (
         <div
           className="hazard-card-backdrop"
-          onClick={startExpanded ? onClose : onCollapse}
+          onClick={handleClose}
         />
       )}
 
       <div
-        ref={cardRef}
-        data-corner={corner}
         className={`hazard-card${isExpanded ? " is-expanded" : ""}`}
-        onMouseDown={onMouseDown}
-        onClick={onCardClick}
+        onClick={handleCardClick}
+        style={{ cursor: isExpanded ? "default" : "pointer"}}
       >
-        {/* ── Drag handle ─────────────────────────────────────────────── */}
-        <div style={styles.dragHandle}>
-          <GripHorizontal size={14} color={COLORS.textMuted} />
-          {!isExpanded && (
-            <Maximize2 size={11} color={COLORS.textMuted} style={{ opacity: 0.5 }} />
-          )}
-        </div>
-
         {/* ── Header: severity badge + close button ────────────────────── */}
         <div style={styles.header}>
           <span
@@ -112,7 +82,6 @@ export function HazardCard({ hazard, onClose, startExpanded = false }: HazardCar
 
           <button
             style={styles.closeBtn}
-            onMouseDown={handleCloseBtnMouseDown}
             onClick={handleClose}
             aria-label="Close hazard card"
           >
@@ -148,7 +117,6 @@ export function HazardCard({ hazard, onClose, startExpanded = false }: HazardCar
           <MetaRow label="TYPE"      value={hazard.defect_type.replace(/_/g, " ")} />
           <MetaRow label="STATUS"    value={hazard.status}                         />
           <MetaRow label="REPORTED"  value={formatDate(hazard.created_at)}         />
-          {/* Reporter only shown in expanded view */}
           {isExpanded && (
             <MetaRow label="REPORTER" value={hazard.reporter_name ?? "Anonymous"} />
           )}
@@ -172,22 +140,13 @@ function MetaRow({ label, value }: MetaRowProps) {
   );
 }
 
-// 6. Styles — visual chrome; all positioning handled by map.css + JS hook
+// 6. Styles
 const styles = {
-  dragHandle: {
-    display:        "flex",
-    justifyContent: "center",
-    alignItems:     "center",
-    gap:            SPACING.xs,
-    padding:        `${SPACING.xs}px`,
-    opacity:        0.45,
-    pointerEvents:  "none" as const,
-  },
   header: {
     display:        "flex",
     justifyContent: "space-between",
     alignItems:     "center",
-    padding:        `0 ${SPACING.sm}px ${SPACING.xs}px`,
+    padding:        `${SPACING.sm}px`,
   },
   badge: {
     padding:       `3px ${SPACING.sm}px`,

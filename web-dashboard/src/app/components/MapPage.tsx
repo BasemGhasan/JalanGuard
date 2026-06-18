@@ -107,7 +107,11 @@ export function MapPage() {
         )}
 
         {mapView === "pins" && selectedHazard !== null && (
-          <HazardCard hazard={selectedHazard} onClose={handleCloseHazard} />
+          <HazardCard
+            hazard={selectedHazard}
+            onClose={handleCloseHazard}
+            startExpanded={true}
+          />
         )}
       </div>
     </MapErrorBoundary>

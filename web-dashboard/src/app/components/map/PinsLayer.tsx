@@ -12,18 +12,12 @@ interface PinsLayerProps {
 }
 
 // 3. Component
-/**
- * Renders one DivIcon marker per active hazard.
- *
- * Clicking a marker:
- *  - Opens the Leaflet Popup (compact quick-reference widget).
- *  - Calls `onSelectHazard` to show the draggable HazardCard overlay.
- *
- * Memoised — only re-renders when the hazards array reference changes.
- */
 export const PinsLayer = memo(function PinsLayer({ hazards, onSelectHazard }: PinsLayerProps) {
   const makeClickHandler = useCallback(
-    (hazard: Hazard) => () => onSelectHazard(hazard),
+    (hazard: Hazard) => (e: React.MouseEvent<HTMLDivElement>) => {
+      e.stopPropagation(); 
+      onSelectHazard(hazard);
+    },
     [onSelectHazard],
   );
 
@@ -38,10 +32,13 @@ export const PinsLayer = memo(function PinsLayer({ hazards, onSelectHazard }: Pi
             key={hazard.id}
             position={[hazard.latitude, hazard.longitude]}
             icon={markerDivIcon(hazard.severity)}
-            eventHandlers={{ click: makeClickHandler(hazard) }}
           >
             <Popup className="jalanguard-popup">
-              <div className="pin-popup">
+              <div 
+                className="pin-popup" 
+                onClick={makeClickHandler(hazard)}
+                style={{ cursor: "pointer" }}
+              >
                 {/* Severity badge */}
                 <div className="pin-popup-header">
                   <span
@@ -93,7 +90,7 @@ export const PinsLayer = memo(function PinsLayer({ hazards, onSelectHazard }: Pi
 
                 {/* Hint */}
                 <p className="pin-popup-hint" style={{ color: COLORS.textMuted }}>
-                  Click pin for full details
+                  Click here for full details
                 </p>
               </div>
             </Popup>
