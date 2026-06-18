@@ -12,7 +12,6 @@ import { COLORS } from "../constants/theme";
 // 1. Helper: Flatten the data so it exports cleanly (no nested objects)
 const formatDataForExport = (data: HazardWithState[]) => {
     return data.map((hazard) => ({
-        ID: hazard.id.substring(0, 8), // Just a short ID for cleaner tables
         Type: hazard.defect_type.replace("_", " ").toUpperCase(),
         Severity: hazard.severity.toUpperCase(),
         Status: hazard.status.toUpperCase(),
@@ -80,19 +79,6 @@ export const exportToPDF = async (data: HazardWithState[], filename = "jalanguar
     const flatData = formatDataForExport(data);
     const doc = new jsPDF();
 
-    // Define page dimensions (Standard A4 is 210 x 297 mm)
-    const width = doc.internal.pageSize.getWidth();
-    const height = doc.internal.pageSize.getHeight();
-
-    // Thick outer border
-    doc.setDrawColor(44, 62, 80);
-    doc.setLineWidth(1.5);
-    doc.rect(10, 10, width - 20, height - 20);
-
-    // Thin inner border (1.5mm offset from the outer one)
-    doc.setLineWidth(0.5);
-    doc.rect(11.5, 11.5, width - 23, height - 23);
-
     // Await the conversion process completely before rendering
     const logoBase64 = await imgToBase64(logo);
     // Safely add the image inline
@@ -146,6 +132,20 @@ export const exportToPDF = async (data: HazardWithState[], filename = "jalanguar
                     data.cell.styles.fontStyle = 'bold'; // Optional: makes it stand out
                 }
             }
+        },
+        didDrawPage: () => {
+            // Define page dimensions (Standard A4 is 210 x 297 mm)
+            const width = doc.internal.pageSize.getWidth();
+            const height = doc.internal.pageSize.getHeight();
+
+            // Thick outer border
+            doc.setDrawColor(44, 62, 80);
+            doc.setLineWidth(1.5);
+            doc.rect(10, 10, width - 20, height - 20);
+
+            // Thin inner border
+            doc.setLineWidth(0.5);
+            doc.rect(11.5, 11.5, width - 23, height - 23);
         },
     });
 
