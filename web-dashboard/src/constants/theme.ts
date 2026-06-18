@@ -68,6 +68,7 @@ export const SPACING = {
   md: 16,
   lg: 24,
   xl: 32,
+  xxl: 50,
 } as const;
 
 export const FONT_SIZES = {

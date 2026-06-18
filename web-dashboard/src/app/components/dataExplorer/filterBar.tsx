@@ -15,9 +15,11 @@
 
 // 1. Imports — External
 import { useMemo, useCallback } from "react";
+import { RotateCcw } from "lucide-react";
 
 // 1. Imports — Local constants
 import { COLORS, FONT_SIZES, SPACING } from "../../../constants/theme";
+import { Button } from "../ui/button";
 
 // 2. Interfaces
 
@@ -46,6 +48,7 @@ export interface FilterBarProps {
   filteredCount: number;
   totalCount:    number;
   admLevel:      number;
+  resetFilters:  () => void;
 }
 
 // 3. Sub-component — reusable labeled dropdown
@@ -96,8 +99,7 @@ const selectStyles = {
     padding:      `${SPACING.xs + 2}px ${SPACING.sm + 4}px`,
     cursor:       "pointer",
     outline:      "none",
-    minWidth:     136,
-    appearance:   "auto" as const,
+    minWidth:     140,
   },
 } as const;
 
@@ -107,7 +109,7 @@ export function FilterBar({
   severity, status, defectType, state, dateRange,
   defectTypes, location,
   onSeverity, onStatus, onDefectType, onState, onDateRange,
-  filteredCount, totalCount, admLevel,
+  filteredCount, totalCount, admLevel, resetFilters,
 }: FilterBarProps) {
 
   // ── Static option lists (no deps — only created once) ───────────────────
@@ -163,6 +165,9 @@ export function FilterBar({
         )}
         <FilterSelect
           label="Date Reported" value={dateRange}  options={dateRangeOptions}   onChange={onDateRange}  />
+          <Button style={styles.button} onClick={resetFilters}>
+            <RotateCcw size={16} />
+          </Button>
       </div>
 
       {/* ── Result count ─────────────────────────────────────────────────── */}
@@ -207,5 +212,13 @@ const styles = {
     margin:    0,
     alignSelf: "flex-end" as const,
     flexShrink: 0,
+  },
+  button: {
+    background: COLORS.secondary,
+    color:      COLORS.white,
+    border:     "none",
+    borderRadius: SPACING.xxl,
+    padding:      `${SPACING.sm + 3}px`,
+    cursor:       "pointer",
   },
 } as const;

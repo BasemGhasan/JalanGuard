@@ -100,10 +100,11 @@ export function MapPage() {
         </MapContainer>
 
         <ViewToggle value={mapView} onChange={handleViewChange} options={MAP_VIEW_OPTIONS} position="right" />
-        <ViewToggle value={admLevel} onChange={setAdmLevel} options={ADM_LEVEL_OPTIONS} position="left" />
-
-        {mapView === "choropleth" && !loading && stats.length > 0 && (
-          <ChoroplethLegend />
+        {mapView === "choropleth" && (
+          <>
+            <ViewToggle value={admLevel} onChange={setAdmLevel} options={ADM_LEVEL_OPTIONS} position="left" />
+            <ChoroplethLegend />
+          </>
         )}
 
         {mapView === "pins" && selectedHazard !== null && (

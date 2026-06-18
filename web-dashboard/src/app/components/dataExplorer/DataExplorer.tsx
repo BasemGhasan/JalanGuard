@@ -84,6 +84,14 @@ export function DataExplorer() {
   const handleSelectHazard = useCallback((h: HazardWithState) => setSelectedHazard(h), []);
   const handleCloseHazard = useCallback(() => setSelectedHazard(null), []);
 
+  // ── Reset filters ──────────────────────────────────
+  const resetFilters = useCallback(() => {
+    setSeverity("all");
+    setStatus("all");
+    setDefectType("all");
+    setState("all");
+    setDateRange("all");
+  }, []);
   // ── Derived: unique filter option lists ──────────────────────────────────
   const defectTypes = useMemo(
     () => [...new Set(hazards.map((h) => h.defect_type))].sort(),
@@ -133,7 +141,10 @@ export function DataExplorer() {
         <div style={styles.viewToggleContainer}>
           <ViewToggle
             value={admLevel}
-            onChange={setAdmLevel}
+            onChange={(value) => {
+              setAdmLevel(value);
+              resetFilters();
+            }}
             options={ADM_LEVEL_OPTIONS}
           />
         </div>
@@ -151,9 +162,10 @@ export function DataExplorer() {
         filteredCount={filteredHazards.length}
         totalCount={hazards.length}
         admLevel={admLevel}
+        resetFilters={resetFilters}
       />
       {/* ── Export buttons ─────────────────────────────────────────────────── */}
-      <ExportButtons data={filteredHazards}/>
+      <ExportButtons data={filteredHazards} />
 
       {/* ── Data table ────────────────────────────────────────────────────── */}
       <div style={styles.tableWrap}>
@@ -193,14 +205,14 @@ const styles = {
   },
   header: {
     marginBottom: SPACING.xl,
-    display: "flex",        
+    display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
   },
   viewToggleContainer: {
-    position: "relative",   
-    height: "50px",         
-    width: "300px",         
+    position: "relative",
+    height: "50px",
+    width: "300px",
   },
   title: {
     color: COLORS.textPrimary,
