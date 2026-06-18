@@ -25,6 +25,7 @@ import { useDataExplorer } from "../../../hooks/useDataExplorer";
 import { HazardCard } from "../map/HazardCard";
 import { FilterBar } from "./filterBar";
 import { HazardTable } from "./hazardTable";
+import { ExportButtons } from "./exportButton";
 
 // 1. Imports — Types
 import type { HazardWithState } from "../../../types/map";
@@ -151,6 +152,8 @@ export function DataExplorer() {
         totalCount={hazards.length}
         admLevel={admLevel}
       />
+      {/* ── Export buttons ─────────────────────────────────────────────────── */}
+      <ExportButtons data={filteredHazards}/>
 
       {/* ── Data table ────────────────────────────────────────────────────── */}
       <div style={styles.tableWrap}>

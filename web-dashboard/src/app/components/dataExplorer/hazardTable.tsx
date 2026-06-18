@@ -79,7 +79,6 @@ function SeverityBadge({ severity }: { severity: "high" | "medium" | "low" }) {
 const STATUS_COLOR: Record<string, string> = {
   active:   COLORS.info,
   fixed:    COLORS.success,
-  rejected: COLORS.error,
 };
 
 /**
