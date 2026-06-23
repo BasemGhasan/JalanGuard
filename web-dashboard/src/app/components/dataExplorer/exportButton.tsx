@@ -1,23 +1,21 @@
-import { exportToCSV, exportToExcel, exportToXML, exportToPDF } from "../../../utils/exportUtils";
-import type { HazardWithState } from "../../../types/map";
 import { COLORS } from "../../../constants/theme";
 
 interface ExportButtonsProps {
-    /** The currently filtered array of data from your table */
-    data: HazardWithState[];
+    /** Callback that triggers a server-side export. */
+    readonly onExport: (format: "csv" | "excel" | "xml" | "pdf") => Promise<void>;
 }
 
-export function ExportButtons({ data }: ExportButtonsProps) {
+export function ExportButtons({ onExport }: Readonly<ExportButtonsProps>) {
     return (
         <div style={styles.container}>
             <span style={styles.label}>Export:</span>
-            <button style={styles.linkBtn} onClick={() => exportToCSV(data)}>CSV</button>
+            <button style={styles.linkBtn} onClick={() => onExport("csv")}>CSV</button>
             <span style={styles.separator}>|</span>
-            <button style={styles.linkBtn} onClick={() => exportToExcel(data)}>Excel</button>
+            <button style={styles.linkBtn} onClick={() => onExport("excel")}>Excel</button>
             <span style={styles.separator}>|</span>
-            <button style={styles.linkBtn} onClick={() => exportToXML(data)}>XML</button>
+            <button style={styles.linkBtn} onClick={() => onExport("xml")}>XML</button>
             <span style={styles.separator}>|</span>
-            <button style={styles.linkBtn} onClick={() => exportToPDF(data)}>PDF</button>
+            <button style={styles.linkBtn} onClick={() => onExport("pdf")}>PDF</button>
         </div>
     );
 }

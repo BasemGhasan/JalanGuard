@@ -3,23 +3,24 @@
  * and an inline HazardCard modal for row-detail inspection.
  *
  * Architecture (strict separation of concerns):
- *   useDataExplorer  → data fetching + loading/error state  (hooks layer)
- *   FilterBar        → 5 dropdown controls + result count   (UI, no logic)
- *   HazardTable      → scrollable table + row hover + badges (UI, no logic)
- *   HazardCard       → reused verbatim; `startExpanded` prop opens it as
- *                      a centred modal overlay (map.css handles position)
- *   DataExplorer     → owns filter state, derived arrays, selectedHazard
+ * useDataExplorer  → data fetching + loading/error state  (hooks layer)
+ * FilterBar        → 5 dropdown controls + result count   (UI, no logic)
+ * HazardTable      → scrollable table + row hover + badges (UI, no logic)
+ * HazardCard       → reused verbatim; `startExpanded` prop opens it as
+ * a centred modal overlay (map.css handles position)
+ * DataExplorer     → owns filter state, derived arrays, selectedHazard
  */
 
 // 1. Imports — External
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { Globe, MapPin, Map } from "lucide-react";
 
 // 1. Imports — Local constants
 import { COLORS, FONT_SIZES, SPACING } from "../../../constants/theme";
 
 // 1. Imports — Hooks
-import { useDataExplorer } from "../../../hooks/useDataExplorer";
+import { useDataExplorer, type ExplorerFilters } from "../../../hooks/useDataExplorer";
+import { supabase } from "../../../lib/supabase";
 
 // 1. Imports — Components
 import { HazardCard } from "../map/HazardCard";
@@ -40,47 +41,52 @@ const ADM_LEVEL_OPTIONS: ToggleOption<0 | 1 | 2>[] = [
   { value: 2, label: "Districts", Icon: MapPin },
 ];
 
-// 3. Component
-
-/**
- * Data Explorer page.
- *
- * Filter logic (all inside useMemo):
- *   severity   — exact match on hazard.severity
- *   status     — exact match on hazard.status
- *   defectType — exact match on hazard.defect_type
- *   location      — exact match on joined malaysian_location.state_name
- *   dateRange  — created_at must be within the last N days (cutoff from Date.now())
- *
- * Modal:
- *   Clicking a row sets selectedHazard.
- *   <HazardCard startExpanded> opens already-centered via map.css fixed rules.
- *   Closing (X button or backdrop click) sets selectedHazard back to null,
- *   removing the card from the DOM instantly.
- */
 export function DataExplorer() {
-  // ── Administration level ────────────────────────────────────────────────────────────
+  // ── Administration & Pagination level ─────────────────────────────────────
   const [admLevel, setAdmLevel] = useState<0 | 1 | 2>(0);
-
-  // ── Data layer ────────────────────────────────────────────────────────────
-  const { hazards, loading, error } = useDataExplorer(admLevel);
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 25; // Matches the hook
 
   // ── Filter state ──────────────────────────────────────────────────────────
   const [severity, setSeverity] = useState("all");
   const [status, setStatus] = useState("all");
   const [defectType, setDefectType] = useState("all");
-  const [state, setState] = useState("all");
+  const [stateFilter, setStateFilter] = useState("all");
   const [dateRange, setDateRange] = useState<DateRange>("all");
+  const [defectTypes, setDefectTypes] = useState<string[]>([]);
+  const [location, setLocation] = useState<string[]>([]);
+
+  const sortUniqueStrings = useCallback((values: string[]) => {
+    return [...new Set(values)].sort((left, right) => left.localeCompare(right));
+  }, []);
+
+  // Bundle filters for the hook
+  const filters: ExplorerFilters = useMemo(() => ({
+    severity,
+    status,
+    defectType,
+    state: stateFilter,
+    dateRange,
+  }), [severity, status, defectType, stateFilter, dateRange]);
+
+  // ── Data layer (Server-Side) ──────────────────────────────────────────────
+  const { hazards, totalCount, loading, error, exportData } = useDataExplorer(
+    admLevel,
+    filters,
+    page,
+    itemsPerPage
+  );
 
   // ── Selected hazard (detail modal) ────────────────────────────────────────
   const [selectedHazard, setSelectedHazard] = useState<HazardWithState | null>(null);
 
-  // ── Handlers (all stable via useCallback) ─────────────────────────────────
-  const handleSeverity = useCallback((v: string) => setSeverity(v), []);
-  const handleStatus = useCallback((v: string) => setStatus(v), []);
-  const handleDefectType = useCallback((v: string) => setDefectType(v), []);
-  const handleState = useCallback((v: string) => setState(v), []);
-  const handleDateRange = useCallback((v: string) => setDateRange(v as DateRange), []);
+  // ── Handlers (🚨 CRITICAL: Reset to page 1 when filtering!) ───────────────
+  const handleSeverity = useCallback((v: string) => { setSeverity(v); setPage(1); }, []);
+  const handleStatus = useCallback((v: string) => { setStatus(v); setPage(1); }, []);
+  const handleDefectType = useCallback((v: string) => { setDefectType(v); setPage(1); }, []);
+  const handleState = useCallback((v: string) => { setStateFilter(v); setPage(1); }, []);
+  const handleDateRange = useCallback((v: string) => { setDateRange(v as DateRange); setPage(1); }, []);
+
   const handleSelectHazard = useCallback((h: HazardWithState) => setSelectedHazard(h), []);
   const handleCloseHazard = useCallback(() => setSelectedHazard(null), []);
 
@@ -89,41 +95,45 @@ export function DataExplorer() {
     setSeverity("all");
     setStatus("all");
     setDefectType("all");
-    setState("all");
+    setStateFilter("all");
     setDateRange("all");
+    setPage(1); // Always reset page
   }, []);
-  // ── Derived: unique filter option lists ──────────────────────────────────
-  const defectTypes = useMemo(
-    () => [...new Set(hazards.map((h) => h.defect_type))].sort(),
-    [hazards],
-  );
 
-  const location = useMemo(
-    () =>
-      [...new Set(
-        hazards
-          .map((h) => h.malaysian_location?.location_name)
-          .filter((s): s is string => Boolean(s)),
-      )].sort(),
-    [hazards],
-  );
+  useEffect(() => {
+    let cancelled = false;
 
-  // ── Derived: filtered hazard list ─────────────────────────────────────────
-  const filteredHazards = useMemo(() => {
-    const DAY_MS = 86_400_000;
-    const cutoff =
-      dateRange === "7" ? Date.now() - 7 * DAY_MS :
-        dateRange === "30" ? Date.now() - 30 * DAY_MS : 0;
+    async function loadFilterOptions() {
+      const [{ data: defectTypeData }, { data: boundaryData }] = await Promise.all([
+        supabase
+          .from("hazards")
+          .select("defect_type")
+          .not("defect_type", "is", null),
+        supabase
+          .from("administrative_boundaries")
+          .select("name")
+          .eq("adm_level", admLevel)
+          .order("name", { ascending: true }),
+      ]);
 
-    return hazards.filter((h) => {
-      if (severity !== "all" && h.severity !== severity) return false;
-      if (status !== "all" && h.status !== status) return false;
-      if (defectType !== "all" && h.defect_type !== defectType) return false;
-      if (state !== "all" && h.malaysian_location?.location_name !== state) return false;
-      if (cutoff > 0 && new Date(h.created_at).getTime() < cutoff) return false;
-      return true;
-    });
-  }, [hazards, severity, status, defectType, state, dateRange]);
+      if (cancelled) return;
+
+      const defectRows = (defectTypeData ?? []) as Array<{ defect_type: string | null }>;
+      const boundaryRows = (boundaryData ?? []) as Array<{ name: string | null }>;
+
+      setDefectTypes(sortUniqueStrings(defectRows.map((row) => row.defect_type).filter((value): value is string => Boolean(value))));
+      setLocation(sortUniqueStrings(boundaryRows.map((row) => row.name).filter((value): value is string => Boolean(value))));
+    }
+
+    loadFilterOptions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [admLevel, sortUniqueStrings]);
+
+  // Pagination Math
+  const totalPages = Math.ceil(totalCount / itemsPerPage) || 1;
 
   return (
     <div style={styles.page}>
@@ -155,35 +165,53 @@ export function DataExplorer() {
         severity={severity} onSeverity={handleSeverity}
         status={status} onStatus={handleStatus}
         defectType={defectType} onDefectType={handleDefectType}
-        state={state} onState={handleState}
+        state={stateFilter} onState={handleState}
         dateRange={dateRange} onDateRange={handleDateRange}
         defectTypes={defectTypes}
         location={location}
-        filteredCount={filteredHazards.length}
-        totalCount={hazards.length}
+        filteredCount={totalCount} // Show the true server count!
+        totalCount={totalCount}
         admLevel={admLevel}
         resetFilters={resetFilters}
       />
-      {/* ── Export buttons ─────────────────────────────────────────────────── */}
-      <ExportButtons data={filteredHazards} />
+
+      {/* ── Export buttons ── */}
+      <ExportButtons onExport={exportData} />
 
       {/* ── Data table ────────────────────────────────────────────────────── */}
       <div style={styles.tableWrap}>
         <HazardTable
-          hazards={filteredHazards}
+          hazards={hazards}
           loading={loading}
           error={error}
           onRowClick={handleSelectHazard}
         />
       </div>
 
+      {/* ── Pagination Controls (NEW) ─────────────────────────────────────── */}
+      <div style={styles.pagination}>
+        <button
+          style={{ ...styles.pageBtn, opacity: page === 1 ? 0.5 : 1 }}
+          disabled={page === 1 || loading}
+          onClick={() => setPage(p => p - 1)}
+        >
+          &larr; Previous
+        </button>
+
+        <span style={styles.pageInfo}>
+          Page {page} of {totalPages} <span style={{ color: COLORS.textMuted }}>(Total: {totalCount})</span>
+        </span>
+
+        <button
+          style={{ ...styles.pageBtn, opacity: page >= totalPages ? 0.5 : 1 }}
+          disabled={page >= totalPages || loading}
+          onClick={() => setPage(p => p + 1)}
+        >
+          Next &rarr;
+        </button>
+      </div>
+
       {/* ── Hazard detail modal ───────────────────────────────────────────── */}
-      {/*
-       * HazardCard is reused verbatim from the Pins map view.
-       * `startExpanded` tells it to open already-centred (position:fixed via
-       * map.css) with its own dark backdrop.  Clicking the backdrop or the X
-       * button fires onClose → setSelectedHazard(null) → card unmounts instantly.
-       */}
       {selectedHazard !== null && (
         <HazardCard
           hazard={selectedHazard}
@@ -232,4 +260,27 @@ const styles = {
     border: `1px solid ${COLORS.borderSoft}`,
     overflow: "hidden",
   },
+  pagination: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: SPACING.lg,
+    padding: `0 ${SPACING.sm}px`,
+  },
+  pageBtn: {
+    padding: `${SPACING.sm}px ${SPACING.lg}px`,
+    background: COLORS.surface,
+    border: `1px solid ${COLORS.borderSoft}`,
+    borderRadius: 8,
+    cursor: "pointer",
+    color: COLORS.textPrimary,
+    fontWeight: 600,
+    fontSize: 14,
+    transition: "all 0.2s ease",
+  },
+  pageInfo: {
+    fontSize: 14,
+    color: COLORS.textPrimary,
+    fontWeight: 500,
+  }
 } as const;

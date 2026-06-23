@@ -24,31 +24,31 @@ import { Button } from "../ui/button";
 // 2. Interfaces
 
 interface FilterSelectProps {
-  label:    string;
-  value:    string;
-  options:  { value: string; label: string }[];
-  onChange: (v: string) => void;
+  readonly label: string;
+  readonly value: string;
+  readonly options: { value: string; label: string }[];
+  readonly onChange: (v: string) => void;
 }
 
 export interface FilterBarProps {
-  severity:   string;
-  status:     string;
-  defectType: string;
-  state:      string;
-  dateRange:  string;
+  readonly severity: string;
+  readonly status: string;
+  readonly defectType: string;
+  readonly state: string;
+  readonly dateRange: string;
   /** Unique defect_type values from the loaded data, already sorted. */
-  defectTypes: string[];
+  readonly defectTypes: string[];
   /** Unique location_name values from the joined relation, already sorted. */
-  location:      string[];
-  onSeverity:   (v: string) => void;
-  onStatus:     (v: string) => void;
-  onDefectType: (v: string) => void;
-  onState:      (v: string) => void;
-  onDateRange:  (v: string) => void;
-  filteredCount: number;
-  totalCount:    number;
-  admLevel:      number;
-  resetFilters:  () => void;
+  readonly location: string[];
+  readonly onSeverity: (v: string) => void;
+  readonly onStatus: (v: string) => void;
+  readonly onDefectType: (v: string) => void;
+  readonly onState: (v: string) => void;
+  readonly onDateRange: (v: string) => void;
+  readonly filteredCount: number;
+  readonly totalCount: number;
+  readonly admLevel: number;
+  readonly resetFilters: () => void;
 }
 
 // 3. Sub-component — reusable labeled dropdown
@@ -79,27 +79,27 @@ function FilterSelect({ label, value, options, onChange }: FilterSelectProps) {
 
 const selectStyles = {
   wrap: {
-    display:       "flex",
+    display: "flex",
     flexDirection: "column" as const,
-    gap:           SPACING.xs,
+    gap: SPACING.xs,
   },
   label: {
-    color:         COLORS.textMuted,
-    fontSize:      FONT_SIZES.sm,
-    fontWeight:    600,
+    color: COLORS.textMuted,
+    fontSize: FONT_SIZES.sm,
+    fontWeight: 600,
     letterSpacing: "0.07em",
     textTransform: "uppercase" as const,
   },
   select: {
-    background:   COLORS.primary,
-    border:       `1px solid ${COLORS.borderSoft}`,
+    background: COLORS.primary,
+    border: `1px solid ${COLORS.borderSoft}`,
     borderRadius: 8,
-    color:        COLORS.textPrimary,
-    fontSize:     FONT_SIZES.sm + 2,
-    padding:      `${SPACING.xs + 2}px ${SPACING.sm + 4}px`,
-    cursor:       "pointer",
-    outline:      "none",
-    minWidth:     140,
+    color: COLORS.textPrimary,
+    fontSize: FONT_SIZES.sm + 2,
+    padding: `${SPACING.xs + 2}px ${SPACING.sm + 4}px`,
+    cursor: "pointer",
+    outline: "none",
+    minWidth: 140,
   },
 } as const;
 
@@ -111,34 +111,31 @@ export function FilterBar({
   onSeverity, onStatus, onDefectType, onState, onDateRange,
   filteredCount, totalCount, admLevel, resetFilters,
 }: FilterBarProps) {
-
+  const isFiltered = filteredCount !== totalCount;
   // ── Static option lists (no deps — only created once) ───────────────────
   const severityOptions = useMemo(() => [
-    { value: "all",    label: "All Severities" },
-    { value: "high",   label: "High"           },
-    { value: "medium", label: "Medium"         },
-    { value: "low",    label: "Low"            },
+    { value: "all", label: "All Severities" },
+    { value: "high", label: "High" },
+    { value: "medium", label: "Medium" },
+    { value: "low", label: "Low" },
   ], []);
 
   const statusOptions = useMemo(() => [
-    { value: "all",      label: "All Statuses" },
-    { value: "active",   label: "Active"       },
-    { value: "fixed",    label: "Fixed"        },
+    { value: "all", label: "All Statuses" },
+    { value: "active", label: "Active" },
+    { value: "fixed", label: "Fixed" },
   ], []);
 
   const dateRangeOptions = useMemo(() => [
-    { value: "all", label: "All Time"      },
-    { value: "7",   label: "Last 7 Days"   },
-    { value: "30",  label: "Last 30 Days"  },
+    { value: "all", label: "All Time" },
+    { value: "7", label: "Last 7 Days" },
+    { value: "30", label: "Last 30 Days" },
   ], []);
 
   // ── Dynamic option lists — derived from live data ────────────────────────
   const defectTypeOptions = useMemo(() => [
     { value: "all", label: "All Types" },
-    ...defectTypes.map((t) => ({
-      value: t,
-      label: t.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-    })),
+    ...defectTypes.map((t) => ({ value: t, label: t })),
   ], [defectTypes]);
 
   const locationOptions = useMemo(() => [
@@ -146,41 +143,33 @@ export function FilterBar({
     ...location.map((l) => ({ value: l, label: l })),
   ], [location]);
 
-  // ── Derived: is any filter active? ───────────────────────────────────────
-  const isFiltered = filteredCount !== totalCount;
-
   return (
     <div style={styles.wrap}>
       {/* ── Dropdowns ────────────────────────────────────────────────────── */}
       <div style={styles.filters}>
         <FilterSelect
-          label="Severity"      value={severity}   options={severityOptions}   onChange={onSeverity}   />
+          label="Severity" value={severity} options={severityOptions} onChange={onSeverity} />
         <FilterSelect
-          label="Status"        value={status}     options={statusOptions}      onChange={onStatus}     />
+          label="Status" value={status} options={statusOptions} onChange={onStatus} />
         <FilterSelect
-          label="Defect Type"   value={defectType} options={defectTypeOptions}  onChange={onDefectType} />
+          label="Defect Type" value={defectType} options={defectTypeOptions} onChange={onDefectType} />
         {admLevel !== 0 && (
           <FilterSelect
-            label="Location"      value={state}      options={locationOptions}    onChange={onState}      />
+            label="Location" value={state} options={locationOptions} onChange={onState} />
         )}
         <FilterSelect
-          label="Date Reported" value={dateRange}  options={dateRangeOptions}   onChange={onDateRange}  />
-          <Button style={styles.button} onClick={resetFilters}>
-            <RotateCcw size={16} />
-          </Button>
+          label="Date Reported" value={dateRange} options={dateRangeOptions} onChange={onDateRange} />
+        <Button style={styles.button} onClick={resetFilters}>
+          <RotateCcw size={16} />
+        </Button>
       </div>
 
       {/* ── Result count ─────────────────────────────────────────────────── */}
       <p style={styles.count}>
-        Showing{" "}
         <span style={{ color: isFiltered ? COLORS.secondary : COLORS.textPrimary, fontWeight: 700 }}>
           {filteredCount}
         </span>
-        {" "}of{" "}
-        <span style={{ color: COLORS.textPrimary, fontWeight: 700 }}>
-          {totalCount}
-        </span>
-        {" "}reports
+        {" "}Matching Records Found
       </p>
     </div>
   );
@@ -189,36 +178,36 @@ export function FilterBar({
 // 5. Styles
 const styles = {
   wrap: {
-    display:        "flex",
-    alignItems:     "flex-end",
+    display: "flex",
+    alignItems: "flex-end",
     justifyContent: "space-between",
-    flexWrap:       "wrap" as const,
-    gap:            SPACING.md,
-    marginBottom:   SPACING.md,
-    padding:        `${SPACING.md}px ${SPACING.lg}px`,
-    background:     COLORS.surface,
-    borderRadius:   16,
-    border:         `1px solid ${COLORS.borderSoft}`,
+    flexWrap: "wrap" as const,
+    gap: SPACING.md,
+    marginBottom: SPACING.md,
+    padding: `${SPACING.md}px ${SPACING.lg}px`,
+    background: COLORS.surface,
+    borderRadius: 16,
+    border: `1px solid ${COLORS.borderSoft}`,
   },
   filters: {
-    display:    "flex",
-    flexWrap:   "wrap" as const,
-    gap:        SPACING.md,
+    display: "flex",
+    flexWrap: "wrap" as const,
+    gap: SPACING.md,
     alignItems: "flex-end",
   },
   count: {
-    color:     COLORS.textMuted,
-    fontSize:  FONT_SIZES.sm + 1,
-    margin:    0,
+    color: COLORS.textMuted,
+    fontSize: FONT_SIZES.sm + 1,
+    margin: 0,
     alignSelf: "flex-end" as const,
     flexShrink: 0,
   },
   button: {
     background: COLORS.secondary,
-    color:      COLORS.white,
-    border:     "none",
+    color: COLORS.white,
+    border: "none",
     borderRadius: SPACING.xxl,
-    padding:      `${SPACING.sm + 3}px`,
-    cursor:       "pointer",
+    padding: `${SPACING.sm + 3}px`,
+    cursor: "pointer",
   },
 } as const;
