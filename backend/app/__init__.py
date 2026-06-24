@@ -1,3 +1,0 @@
-"""
-JalanGuard Backend Application
-"""
