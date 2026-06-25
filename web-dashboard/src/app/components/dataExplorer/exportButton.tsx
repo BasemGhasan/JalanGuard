@@ -1,11 +1,10 @@
 import { COLORS } from "../../../constants/theme";
 
-interface ExportButtonsProps {
-    /** Callback that triggers a server-side export. */
-    readonly onExport: (format: "csv" | "excel" | "xml" | "pdf") => Promise<void>;
+export interface ExportButtonsProps {
+    onExport: (format: "csv" | "excel" | "xml" | "pdf") => Promise<void>;
 }
 
-export function ExportButtons({ onExport }: Readonly<ExportButtonsProps>) {
+export function ExportButtons({ onExport }: ExportButtonsProps) {
     return (
         <div style={styles.container}>
             <span style={styles.label}>Export:</span>

@@ -1,8 +1,7 @@
 // 1. Imports — External
 import { useState, useCallback, useMemo } from "react";
 import {
-  Shield, Mail, Lock, User,
-  AlertCircle, Loader2, CheckCircle, ChevronRight,
+  Shield, Mail, Lock, User, Loader2, CheckCircle, ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -10,6 +9,9 @@ import { toast } from "sonner";
 import { COLORS, SPACING, FONT_SIZES } from "../../../constants/theme";
 import { supabase }                    from "../../../lib/supabase";
 import type { Page }                   from "../Navbar";
+
+// 1. Imports — Local components
+import ErrorBanner from "../ui/errorBanner";
 
 // 2. Interfaces / Types
 
@@ -88,16 +90,7 @@ function AuthField({
   );
 }
 
-function ErrorBanner({ message }: { message: string }) {
-  return (
-    <div style={fieldStyles.errorBanner}>
-      <AlertCircle size={15} color={COLORS.error} style={{ flexShrink: 0 }} />
-      <span>{message}</span>
-    </div>
-  );
-}
-
-/** Styles shared between AuthField and ErrorBanner. */
+/** Styles shared between AuthField */
 const fieldStyles = {
   label: {
     display:      "block",
@@ -124,17 +117,6 @@ const fieldStyles = {
     color:      COLORS.textPrimary,
     fontSize:   FONT_SIZES.md - 1,
     fontFamily: "inherit",
-  },
-  errorBanner: {
-    display:      "flex",
-    alignItems:   "center",
-    gap:          SPACING.sm,
-    padding:      `${SPACING.sm + 2}px ${SPACING.md}px`,
-    borderRadius: 12,
-    background:   COLORS.errorBg,
-    border:       `1px solid ${COLORS.errorBorder}`,
-    color:        COLORS.error,
-    fontSize:     FONT_SIZES.sm + 1,
   },
 } as const;
 

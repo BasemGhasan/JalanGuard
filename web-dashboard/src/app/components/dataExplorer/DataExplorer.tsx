@@ -27,6 +27,7 @@ import { HazardCard } from "../map/HazardCard";
 import { FilterBar } from "./filterBar";
 import { HazardTable } from "./hazardTable";
 import { ExportButtons } from "./exportButton";
+import ErrorBanner from "../ui/errorBanner";
 
 // 1. Imports — Types
 import type { HazardWithState } from "../../../types/map";
@@ -55,6 +56,7 @@ export function DataExplorer() {
   const [dateRange, setDateRange] = useState<DateRange>("all");
   const [defectTypes, setDefectTypes] = useState<string[]>([]);
   const [location, setLocation] = useState<string[]>([]);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const sortUniqueStrings = useCallback((values: string[]) => {
     return [...new Set(values)].sort((left, right) => left.localeCompare(right));
@@ -89,6 +91,13 @@ export function DataExplorer() {
 
   const handleSelectHazard = useCallback((h: HazardWithState) => setSelectedHazard(h), []);
   const handleCloseHazard = useCallback(() => setSelectedHazard(null), []);
+
+  const handleExportError = useCallback((count: number) => {
+    if (count === 0) setExportError("⚠️ No data to export. Please adjust your filters.");
+    else if (count > 500) setExportError("⚠️ Export failed. Please adjust your filters to match 1–500 records.");
+    else setExportError(null);
+    setTimeout(() => setExportError(null), 5000);
+  }, []);
 
   // ── Reset filters ──────────────────────────────────
   const resetFilters = useCallback(() => {
@@ -175,8 +184,18 @@ export function DataExplorer() {
         resetFilters={resetFilters}
       />
 
+      {exportError && <ErrorBanner message={exportError} style={{ marginBottom: SPACING.md }} />}
+
       {/* ── Export buttons ── */}
-      <ExportButtons onExport={exportData} />
+      <ExportButtons 
+        onExport={async (format) => {
+          if (totalCount > 0 && totalCount < 501) {
+            await exportData(format);
+          } else {
+            handleExportError(totalCount);
+          }
+        }} 
+      />
 
       {/* ── Data table ────────────────────────────────────────────────────── */}
       <div style={styles.tableWrap}>

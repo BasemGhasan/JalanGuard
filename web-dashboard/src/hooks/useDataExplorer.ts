@@ -136,17 +136,6 @@ export function useDataExplorer(
   const exportData = async (format: "csv" | "excel" | "xml" | "pdf") => {
     const EXPORT_LIMIT = 500;
 
-    // Safety check for large datasets
-    if (totalCount > EXPORT_LIMIT) {
-      const proceed = globalThis.confirm(
-        `⚠️ Your current filters match ${totalCount} records.\n\n` +
-        `To maintain system performance, only the latest ${EXPORT_LIMIT} records will be exported. ` +
-        `Please apply more filters if you need specific older records.\n\n` +
-        `Do you want to proceed?`
-      );
-      if (!proceed) return;
-    }
-
     // Fetch the raw data for the export directly from the server
     const { data, error } = await buildQuery(true).limit(EXPORT_LIMIT);
 

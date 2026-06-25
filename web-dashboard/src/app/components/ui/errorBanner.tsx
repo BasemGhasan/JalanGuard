@@ -1,9 +1,9 @@
 import { AlertCircle } from "lucide-react";
 import { COLORS, FONT_SIZES, SPACING } from "../../../constants/theme";
 
-export default function ErrorBanner({ message }: { message: string }) {
+export default function ErrorBanner({ message, style }: { message: string; style?: React.CSSProperties }) {
     return (
-        <div style={Styles.errorBanner}>
+        <div style={{ ...Styles.errorBanner, ...style }}>
             <AlertCircle size={15} color={COLORS.error} style={{ flexShrink: 0 }} />
             <span>{message}</span>
         </div>
