@@ -75,7 +75,7 @@ export const exportToXML = (data: HazardWithState[], filename = "jalanguard_data
 };
 
 export const exportToPDF = async (data: HazardWithState[], filename = "jalanguard_data") => {
-    const logo = "../../public/assets/images/transparentCircledLogo.PNG";
+    const logo = "/assets/images/transparentCircledLogo.PNG";
     const flatData = formatDataForExport(data);
     const doc = new jsPDF();
 

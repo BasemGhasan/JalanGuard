@@ -217,37 +217,24 @@ export function AuthPage({ onNavigate, initialView }: AuthPageProps) {
     }
     setLoading(true);
     setError(null);
-    try {
-      /**
-       * Route signup through the FastAPI backend so confirmation emails are
-       * sent via our own SMTP server (emailService.py) instead of relying on
-       * Supabase's built-in email delivery pipeline.
-       *
-       * Backend flow:
-       *   1. Creates the user in Supabase (email_confirm: false — no Supabase email)
-       *   2. Generates a one-time confirmation link via Supabase Admin API
-       *   3. Sends that link to the user's inbox via custom SMTP
-       */
-      const res  = await fetch("/api/v1/auth/email/signup", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({
-          email:       email.trim(),
-          password,
-          full_name:   fullName.trim(),
-          redirect_to: window.location.origin,
-        }),
-      });
-      const data = await res.json() as { detail?: string };
-      if (!res.ok) {
-        setError(data.detail ?? "Failed to create account. Please try again.");
-      } else {
-        setView("signup-sent");
-      }
-    } catch {
-      setError("Network error — could not reach the server. Please try again.");
-    } finally {
-      setLoading(false);
+
+    const { error: signUpError } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: {
+        data: {
+          full_name: fullName.trim(),
+        },
+        emailRedirectTo: window.location.origin,
+      },
+    });
+
+    setLoading(false);
+
+    if (signUpError) {
+      setError(signUpError.message);
+    } else {
+      setView("signup-sent");
     }
   }, [fullName, email, password]);
 
@@ -258,29 +245,20 @@ export function AuthPage({ onNavigate, initialView }: AuthPageProps) {
     }
     setLoading(true);
     setError(null);
-    try {
-      /**
-       * Same SMTP routing as handleSignUp: the backend generates a Supabase
-       * Admin recovery link and delivers it via our custom SMTP server.
-       */
-      const res  = await fetch("/api/v1/auth/email/reset-password", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({
-          email:       email.trim(),
-          redirect_to: window.location.origin,
-        }),
-      });
-      const data = await res.json() as { detail?: string };
-      if (!res.ok) {
-        setError(data.detail ?? "Failed to send reset email. Please try again.");
-      } else {
-        setView("forgot-sent");
+
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+      email.trim(),
+      {
+        redirectTo: window.location.origin,
       }
-    } catch {
-      setError("Network error — could not reach the server. Please try again.");
-    } finally {
-      setLoading(false);
+    );
+
+    setLoading(false);
+
+    if (resetError) {
+      setError(resetError.message);
+    } else {
+      setView("forgot-sent");
     }
   }, [email]);
 

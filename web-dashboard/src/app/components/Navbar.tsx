@@ -79,7 +79,7 @@ export function Navbar({ active, onNavigate }: NavbarProps) {
       <header style={styles.header}>
         <div style={styles.brandContainer}>
           {/* logo */}
-          <img src="../../../public/assets/images/transparentCircledLogo.PNG" alt="JalanGuard Logo" style={styles.logo} />
+          <img src="/assets/images/transparentCircledLogo.PNG" alt="JalanGuard Logo" style={styles.logo} />
           {/* Brand */}
           <button style={styles.brand} onClick={() => globalThis.location.reload()}>
             JalanGuard{" "}
