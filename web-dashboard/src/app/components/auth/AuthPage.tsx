@@ -206,6 +206,7 @@ export function AuthPage({ onNavigate, initialView }: AuthPageProps) {
       options: {
         data: {
           full_name: fullName.trim(),
+          role: 'developer',
         },
         emailRedirectTo: window.location.origin,
       },
