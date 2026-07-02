@@ -1,12 +1,13 @@
 // 1. Imports — External
 import { useState, useCallback, useMemo } from "react";
-import { User, Mail, Calendar, Pencil, X, Check, Loader2 } from "lucide-react";
+import { User, Mail, Calendar, Pencil, Check, X, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 // 1. Imports — Local hooks / constants / components
 import { useAuth }        from "../../../context/AuthContext";
 import { useProfile }     from "../../../hooks/useProfile";
 import { ProfileField }   from "./ProfileField";
+import { DeleteAccountModal } from "./DeleteAccountModal";
 import { COLORS, SPACING, FONT_SIZES } from "../../../constants/theme";
 
 // 2. Interfaces
@@ -48,6 +49,7 @@ export function ProfileSection() {
   const { profile, loading, saving, error, saveProfile } = useProfile();
   const [editing,   setEditing]            = useState(false);
   const [draftName, setDraftName]          = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // ── Derived display values (fall back to auth metadata if row is missing) ─
   const displayName = useMemo(
@@ -102,6 +104,9 @@ export function ProfileSection() {
     (e: React.ChangeEvent<HTMLInputElement>) => setDraftName(e.target.value),
     [],
   );
+
+  const handleOpenDeleteModal = useCallback(() => setShowDeleteModal(true), []);
+  const handleCloseDeleteModal = useCallback(() => setShowDeleteModal(false), []);
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -176,9 +181,18 @@ export function ProfileSection() {
         <p style={styles.errorText}>{error}</p>
       )}
 
-      {/* ── Save action (only visible in edit mode) ───────────────────────── */}
-      {editing && (
-        <div style={styles.saveRow}>
+      {/* ── Action buttons ───────────────────────── */}
+      <div style={styles.actionRow}>
+        <button
+          style={styles.deleteLinkBtn}
+          onClick={handleOpenDeleteModal}
+          disabled={loading}
+        >
+          <Trash2 size={13} />
+          Delete Account
+        </button>
+
+        {editing && (
           <button
             style={{
               ...styles.saveBtn,
@@ -194,7 +208,12 @@ export function ProfileSection() {
               <><Check size={14} />Save Profile</>
             )}
           </button>
-        </div>
+        )}
+      </div>
+
+      {/* ── Delete Account Modal ─────────────────────────────────────────── */}
+      {showDeleteModal && (
+        <DeleteAccountModal onClose={handleCloseDeleteModal} />
       )}
     </div>
   );
@@ -320,12 +339,27 @@ const styles = {
     fontSize:  FONT_SIZES.sm + 1,
     marginTop: SPACING.sm,
   },
-  saveRow: {
+  actionRow: {
     display:        "flex",
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
+    alignItems:     "center",
     marginTop:      SPACING.md,
     paddingTop:     SPACING.md,
     borderTop:      `1px solid ${COLORS.borderFaint}`,
+  },
+  deleteLinkBtn: {
+    display:      "flex",
+    alignItems:   "center",
+    gap:          SPACING.xs,
+    padding:      `${SPACING.xs}px ${SPACING.sm}px`,
+    background:   "transparent",
+    border:       "none",
+    color:        COLORS.error,
+    fontSize:     FONT_SIZES.sm + 1,
+    fontWeight:   600,
+    cursor:       "pointer",
+    opacity:      0.8,
+    transition:   "opacity 0.2s ease",
   },
   saveBtn: {
     display:      "flex",
