@@ -200,7 +200,7 @@ export function AuthPage({ onNavigate, initialView }: AuthPageProps) {
     setLoading(true);
     setError(null);
 
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email: email.trim(),
       password,
       options: {
@@ -216,6 +216,8 @@ export function AuthPage({ onNavigate, initialView }: AuthPageProps) {
 
     if (signUpError) {
       setError(signUpError.message);
+    } else if (data?.user?.identities && data.user.identities.length === 0) {
+      setError("This email is already registered.");
     } else {
       setView("signup-sent");
     }
