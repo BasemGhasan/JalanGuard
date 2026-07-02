@@ -7,11 +7,14 @@
 --    id mirrors auth.users so it's the same UUID across both tables.
 --    Cascades on user deletion to avoid orphan rows.
 CREATE TABLE IF NOT EXISTS public.profiles (
-  id         UUID        NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
-  full_name  TEXT,
-  email      TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  id           UUID        NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
+  full_name    TEXT,
+  email        TEXT,
+  trust_score  INT,
+  api_key      TEXT,
+  is_developer BOOLEAN     NOT NULL DEFAULT false,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
   PRIMARY KEY (id)
 );
 
@@ -37,12 +40,26 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
+DECLARE 
+  is_dev BOOLEAN; 
+  initial_trust INT; 
 BEGIN
-  INSERT INTO public.profiles (id, full_name, email)
+  -- Check the hidden metadata passed from the frontend during signup 
+  IF NEW.raw_user_meta_data->>'role' = 'developer' THEN 
+    is_dev := true; 
+    initial_trust := NULL; -- Developers do not get a trust score 
+  ELSE 
+    is_dev := false; 
+    initial_trust := 50;   -- Citizens default to a 50 trust score 
+  END IF; 
+
+  INSERT INTO public.profiles (id, full_name, email, trust_score, is_developer)
   VALUES (
     NEW.id,
     NEW.raw_user_meta_data ->> 'full_name',
-    NEW.email
+    NEW.email,
+    initial_trust,
+    is_dev
   )
   ON CONFLICT (id) DO NOTHING;
   RETURN NEW;

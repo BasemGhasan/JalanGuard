@@ -1,6 +1,5 @@
 // 1. Imports — External
 import { useState, useCallback } from "react";
-import { toast } from "sonner";
 
 // 1. Imports — Local context / hooks / constants / components
 import { COLORS, FONT_SIZES } from "../../constants/theme";
@@ -27,8 +26,7 @@ interface NavbarProps {
  *
  * Logged-in state:
  *   • "Logout" text link → opens the LogoutModal confirmation flow.
- *   • "My Dashboard" amber button → shows an under-construction toast;
- *     does NOT navigate away until the dashboard feature is built.
+ *   • "My Dashboard" amber button → navigates to the key page (Profile Management).
  *
  * Logout is a two-step flow: clicking "Logout" only opens the modal.
  * supabase.auth.signOut() is called inside LogoutModal, only if the user
@@ -56,12 +54,10 @@ export function Navbar({ active, onNavigate }: NavbarProps) {
     onNavigate("map");
   }, [onNavigate]);
 
-  // ── My Dashboard toast ───────────────────────────────────────────────────
+  // ── My Dashboard navigation ──────────────────────────────────────────────
   const handleMyDashboard = useCallback(() => {
-    toast.info("Developer Dashboard under construction.", {
-      description: "Analytics, usage stats, and key management — coming soon.",
-    });
-  }, []);
+    onNavigate("key");
+  }, [onNavigate]);
 
   // ── Derived: link style per page ─────────────────────────────────────────
   const linkStyle = useCallback(
