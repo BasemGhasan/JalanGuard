@@ -94,7 +94,7 @@ export function LogoutModal({ onClose, onLoggedOut }: LogoutModalProps) {
                 Signing out…
               </>
             ) : (
-              "Log Out"
+              "Sign Out"
             )}
           </button>
         </div>

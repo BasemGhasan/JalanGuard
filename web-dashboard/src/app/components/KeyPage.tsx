@@ -1,6 +1,6 @@
 // 1. Imports — External
 import { useState, useCallback } from "react";
-import { Key, Shield, Copy, Check, RefreshCw } from "lucide-react";
+import { Key, Shield, Copy, Check, RefreshCw, LogOut } from "lucide-react";
 
 // 1. Imports — Local context / components / constants
 import { useAuth }         from "../../context/AuthContext";
@@ -98,14 +98,6 @@ export function KeyPage({ onNavigate }: KeyPageProps) {
           {/* ── API key card ──────────────────────────────────────────── */}
           <div style={styles.card}>
 
-            {/* Top-right logout shortcut */}
-            <div style={styles.topRight}>
-              <button style={styles.logoutSmallBtn} onClick={handleOpenLogout}>
-                <RefreshCw size={13} />
-                Logout
-              </button>
-            </div>
-
             <SectionLabel icon={Key} label="Your Access Token" />
 
             {/* Token display row */}
@@ -148,23 +140,10 @@ export function KeyPage({ onNavigate }: KeyPageProps) {
 
             {/* Primary sign-out button */}
             <button style={styles.logoutFullBtn} onClick={handleOpenLogout}>
-              <RefreshCw size={14} />
-              Sign Out &amp; Refresh Session
+              <LogOut size={14} />
+              Sign Out
             </button>
           </div>
-
-          {/* ── Footer ────────────────────────────────────────────────── */}
-          <p style={styles.footer}>
-            Powered by{" "}
-            <a
-              href="https://supabase.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: COLORS.secondary }}
-            >
-              Supabase Auth
-            </a>
-          </p>
         </div>
       </div>
 
