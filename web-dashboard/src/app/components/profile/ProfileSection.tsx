@@ -1,12 +1,13 @@
 // 1. Imports — External
-import { useMemo } from "react";
-import { Calendar, Mail, User } from "lucide-react";
+import { useMemo, useState, useCallback} from "react";
+import { User, Mail, Calendar, Pencil, Check, X, Loader2, Trash2 } from "lucide-react";
 
 // 1. Imports — Local hooks / constants / components
 import { COLORS, FONT_SIZES, SPACING } from "../../../constants/theme";
 import { useAuth } from "../../../context/AuthContext";
 import { useProfile } from "../../../hooks/useProfile";
 import { ProfileField } from "./ProfileField";
+import { DeleteAccountModal } from "./DeleteAccountModal";
 
 interface VerifiedBadgeProps {
   confirmed: boolean;
@@ -36,6 +37,7 @@ function VerifiedBadge({ confirmed }: Readonly<VerifiedBadgeProps>) {
 export function ProfileSection() {
   const { session } = useAuth();
   const { profile, loading, error, saveProfile, requestEmailUpdate, verifyEmailOtp } = useProfile();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const displayName = useMemo(
     () => profile?.full_name ?? (session?.user?.user_metadata?.full_name as string | undefined) ?? "",
@@ -55,6 +57,9 @@ export function ProfileSection() {
 
   const initials = useMemo(() => (displayName || displayEmail).charAt(0).toUpperCase() || "?", [displayName, displayEmail]);
   const isVerified = Boolean(session?.user?.email_confirmed_at);
+
+  const handleOpenDeleteModal = useCallback(() => setShowDeleteModal(true), []);
+  const handleCloseDeleteModal = useCallback(() => setShowDeleteModal(false), []);
 
   return (
     <div style={styles.card}>
@@ -101,6 +106,23 @@ export function ProfileSection() {
       </div>
 
       {error && <p style={styles.errorText}>{error}</p>}
+
+      {/* ── Action buttons ───────────────────────── */}
+      <div style={styles.actionRow}>
+        <button
+          style={styles.deleteLinkBtn}
+          onClick={handleOpenDeleteModal}
+          disabled={loading}
+        >
+          <Trash2 size={14} />
+          Delete Account
+        </button>
+      </div>
+
+      {/* ── Delete Account Modal ─────────────────────────────────────────── */}
+      {showDeleteModal && (
+        <DeleteAccountModal onClose={handleCloseDeleteModal} />
+      )}
     </div>
   );
 }
@@ -197,5 +219,26 @@ const styles = {
     color: COLORS.error,
     fontSize: FONT_SIZES.sm + 1,
     marginTop: SPACING.sm,
+  },
+  actionRow: {
+    display:        "flex",
+    justifyContent: "space-between",
+    alignItems:     "center",
+    marginTop:      SPACING.sm,
+    paddingTop:     SPACING.md,
+  },
+  deleteLinkBtn: {
+    display:      "flex",
+    alignItems:   "center",
+    gap:          SPACING.xs,
+    padding:      `${SPACING.xs}px ${SPACING.sm}px`,
+    background:   "transparent",
+    border:       "none",
+    color:        COLORS.error,
+    fontSize:     FONT_SIZES.sm + 2,
+    fontWeight:   600,
+    cursor:       "pointer",
+    opacity:      0.8,
+    transition:   "opacity 0.2s ease",
   },
 } as const;
