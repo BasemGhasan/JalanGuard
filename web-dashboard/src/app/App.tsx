@@ -65,13 +65,12 @@ function AppInner() {
     if (!session && page === "key") setPage("auth");
   }, [session, page]);
 
-  /** Central navigation handler — guards the "key" route when logged out. */
+  /** Central navigation handler. The session guard logic was moved to render. */
   const navigate = useCallback(
     (p: Page) => {
-      if (p === "key" && !session) { setPage("auth"); return; }
       setPage(p);
     },
-    [session],
+    [],
   );
 
   return (
@@ -86,8 +85,9 @@ function AppInner() {
 
       {page === "map" && <MapPage />}
       {page === "docs" && <DocsPage />}
-      {page === "key" && <KeyPage onNavigate={navigate} />}
-      {page === "auth" && (
+      {/* Route guard during render */}
+      {page === "key" && session && <KeyPage onNavigate={navigate} />}
+      {(page === "auth" || (page === "key" && !session)) && (
         <AuthPage
           /**
            * key forces a fresh mount (and therefore a fresh useState) whenever
