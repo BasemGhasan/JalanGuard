@@ -88,5 +88,3 @@ const fallbackSupabase: any = {
 export const supabase = IS_SUPABASE_CONFIGURED && supabaseUrl && supabaseAnonKey
   ? createClient(supabaseUrl, supabaseAnonKey)
   : fallbackSupabase;
-
-export type { User, Session } from "@supabase/supabase-js";
