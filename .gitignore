@@ -196,3 +196,6 @@ supabase/.temp/
 
 # graphify
 graphify-out/
+
+# documentation
+docs/

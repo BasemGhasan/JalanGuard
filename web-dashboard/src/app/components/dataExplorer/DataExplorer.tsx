@@ -13,10 +13,10 @@
 
 // 1. Imports — External
 import { useState, useCallback, useMemo, useEffect } from "react";
-import { Globe, MapPin, Map } from "lucide-react";
 
 // 1. Imports — Local constants
 import { COLORS, FONT_SIZES, SPACING } from "../../../constants/theme";
+import { ADM_LEVEL_OPTIONS } from "../../../constants/viewOptions";
 
 // 1. Imports — Hooks
 import { useDataExplorer, type ExplorerFilters } from "../../../hooks/useDataExplorer";
@@ -31,16 +31,10 @@ import ErrorBanner from "../ui/errorBanner";
 
 // 1. Imports — Types
 import type { HazardWithState } from "../../../types/map";
-import { ViewToggle, type ToggleOption } from "../map/ViewToggle";
+import { ViewToggle } from "../map/ViewToggle";
 
 // 2. Types — internal filter state
 type DateRange = "all" | "7" | "30";
-
-const ADM_LEVEL_OPTIONS: ToggleOption<0 | 1 | 2>[] = [
-  { value: 0, label: "Country", Icon: Globe },
-  { value: 1, label: "States", Icon: Map },
-  { value: 2, label: "Districts", Icon: MapPin },
-];
 
 export function DataExplorer() {
   // ── Administration & Pagination level ─────────────────────────────────────

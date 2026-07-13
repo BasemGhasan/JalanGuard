@@ -1,7 +1,7 @@
 // 1. Imports — External
 import { createContext, useContext, useEffect, useState, useMemo } from "react";
 import type { ReactNode }     from "react";
-import type { Session, User } from "@supabase/supabase-js";
+import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 
 // 1. Imports — Local
 import { supabase } from "../lib/supabase";
@@ -54,7 +54,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Rehydrate any persisted session — resolves immediately from localStorage
-    supabase.auth.getSession().then(({ data }) => {
+    // (explicit types because the offline fallback client is untyped)
+    supabase.auth.getSession().then(({ data }: { data: { session: Session | null } }) => {
       setSession(data.session);
       setLoading(false);
     });
@@ -62,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Keep session current for all auth events
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, sess) => {
+    } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, sess: Session | null) => {
       setSession(sess);
 
       if (event === "PASSWORD_RECOVERY") {

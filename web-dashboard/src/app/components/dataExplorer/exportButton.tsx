@@ -1,37 +1,52 @@
-import { COLORS } from "../../../constants/theme";
+// 1. Imports — External
+import { Fragment } from "react";
 
+// 1. Imports — Local constants
+import { COLORS, FONT_SIZES, SPACING } from "../../../constants/theme";
+
+// 2. Interfaces
 export interface ExportButtonsProps {
     onExport: (format: "csv" | "excel" | "xml" | "pdf") => Promise<void>;
 }
 
-export function ExportButtons({ onExport }: ExportButtonsProps) {
+/** The four supported export formats, rendered as separated link buttons. */
+const FORMATS = [
+    { key: "csv",   label: "CSV" },
+    { key: "excel", label: "Excel" },
+    { key: "xml",   label: "XML" },
+    { key: "pdf",   label: "PDF" },
+] as const;
+
+// 3. Component
+export function ExportButtons({ onExport }: Readonly<ExportButtonsProps>) {
     return (
         <div style={styles.container}>
             <span style={styles.label}>Export:</span>
-            <button style={styles.linkBtn} onClick={() => onExport("csv")}>CSV</button>
-            <span style={styles.separator}>|</span>
-            <button style={styles.linkBtn} onClick={() => onExport("excel")}>Excel</button>
-            <span style={styles.separator}>|</span>
-            <button style={styles.linkBtn} onClick={() => onExport("xml")}>XML</button>
-            <span style={styles.separator}>|</span>
-            <button style={styles.linkBtn} onClick={() => onExport("pdf")}>PDF</button>
+            {FORMATS.map(({ key, label }, i) => (
+                <Fragment key={key}>
+                    {i > 0 && <span style={styles.separator}>|</span>}
+                    <button style={styles.linkBtn} onClick={() => onExport(key)}>
+                        {label}
+                    </button>
+                </Fragment>
+            ))}
         </div>
     );
 }
 
+// 4. Styles
 const styles = {
     container: {
         display: "flex",
         alignItems: "center",
-        gap: "8px",
-        fontSize: "14px",
-        fontFamily: "sans-serif",
-        marginBottom: "16px",
+        gap: SPACING.sm,
+        fontSize: FONT_SIZES.sm + 2,
+        marginBottom: SPACING.md,
     },
     label: {
         color: COLORS.textPrimary,
-        fontWeight: "bold",
-        marginRight: "4px",
+        fontWeight: 700,
+        marginRight: SPACING.xs,
     },
     linkBtn: {
         background: "none",
@@ -39,7 +54,7 @@ const styles = {
         color: COLORS.info,
         cursor: "pointer",
         padding: 0,
-        fontSize: "14px",
+        fontSize: FONT_SIZES.sm + 2,
         textDecoration: "underline",
     },
     separator: {

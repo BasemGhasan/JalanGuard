@@ -117,8 +117,9 @@ export function ProfileField({
         toast.success(`${label} updated successfully!`);
         setIsEditing(false);
       }
-    } catch (error: any) {
-      toast.error(error.message || `Failed to update ${label.toLowerCase()}.`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "";
+      toast.error(message || `Failed to update ${label.toLowerCase()}.`);
     } finally {
       setLoading(false);
     }
@@ -196,7 +197,7 @@ const styles = {
     width: 40,
     height: 40,
     borderRadius: 8,
-    background: "rgba(255,255,255,0.03)",
+    background: COLORS.glintFaint,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",

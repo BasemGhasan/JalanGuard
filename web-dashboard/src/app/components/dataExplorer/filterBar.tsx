@@ -17,9 +17,9 @@
 import { useMemo, useCallback } from "react";
 import { RotateCcw } from "lucide-react";
 
-// 1. Imports — Local constants
+// 1. Imports — Local constants / components
 import { COLORS, FONT_SIZES, SPACING } from "../../../constants/theme";
-import { Button } from "../ui/button";
+import { AppButton } from "../ui/appButton";
 
 // 2. Interfaces
 
@@ -159,9 +159,9 @@ export function FilterBar({
         )}
         <FilterSelect
           label="Date Reported" value={dateRange} options={dateRangeOptions} onChange={onDateRange} />
-        <Button style={styles.button} onClick={resetFilters}>
+        <AppButton variant="primary" style={styles.button} onClick={resetFilters} title="Reset filters">
           <RotateCcw size={16} />
-        </Button>
+        </AppButton>
       </div>
 
       {/* ── Result count ─────────────────────────────────────────────────── */}
@@ -202,12 +202,10 @@ const styles = {
     alignSelf: "flex-end" as const,
     flexShrink: 0,
   },
+  /** Overrides merged over the shared AppButton primary variant. */
   button: {
-    background: COLORS.secondary,
-    color: COLORS.white,
-    border: "none",
     borderRadius: SPACING.xxl,
     padding: `${SPACING.sm + 3}px`,
-    cursor: "pointer",
+    boxShadow: "none",
   },
 } as const;

@@ -18,7 +18,9 @@ import { useState, useCallback } from "react";
 import { AlertCircle, FileX, Loader2 } from "lucide-react";
 
 // 1. Imports — Local
-import { COLORS, FONT_SIZES, SPACING, SEVERITY_BADGE } from "../../../constants/theme";
+import { COLORS, FONT_SIZES, SPACING } from "../../../constants/theme";
+import { SeverityPill } from "../ui/severityPill";
+import { formatDate } from "../../../utils/formatters";
 import type { HazardWithState } from "../../../types/map";
 
 // 2. Interfaces
@@ -35,45 +37,8 @@ interface TableRowProps {
   onRowClick: (h: HazardWithState) => void;
 }
 
-// 3. Helpers
-
-/** Formats an ISO timestamp to "DD MMM YYYY" in Malaysian locale. */
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-MY", {
-    day:   "2-digit",
-    month: "short",
-    year:  "numeric",
-  });
-}
-
-// 4. Sub-components — badges
-
-/**
- * Severity badge — amber/red/orange pill matching the HazardCard badge.
- * Colours sourced exclusively from SEVERITY_BADGE in theme.ts.
- */
-function SeverityBadge({ severity }: { severity: "high" | "medium" | "low" }) {
-  const badge = SEVERITY_BADGE[severity] ?? SEVERITY_BADGE.low;
-  return (
-    <span
-      style={{
-        display:       "inline-block",
-        padding:       `3px ${SPACING.sm + 2}px`,
-        borderRadius:  20,
-        fontSize:      11,
-        fontWeight:    700,
-        letterSpacing: "0.06em",
-        textTransform: "uppercase" as const,
-        background:    badge.bg,
-        color:         badge.text,
-        border:        `1px solid ${badge.border}`,
-        whiteSpace:    "nowrap" as const,
-      }}
-    >
-      {severity}
-    </span>
-  );
-}
+// 3. Sub-components — badges
+// (Severity pill + date formatting are shared: ui/severityPill, utils/formatters)
 
 /** Colour mapping for the three recognised status values. */
 const STATUS_COLOR: Record<string, string> = {
@@ -132,7 +97,7 @@ function TableRow({ hazard, onRowClick }: TableRowProps) {
     <tr
       style={{
         borderTop:  `1px solid ${COLORS.borderFaint}`,
-        background: hovered ? "rgba(255,255,255,0.035)" : "transparent",
+        background: hovered ? COLORS.glintSoft : "transparent",
         cursor:     "pointer",
         transition: "background 0.12s ease",
       }}
@@ -146,7 +111,7 @@ function TableRow({ hazard, onRowClick }: TableRowProps) {
         {hazard.defect_type.replace(/_/g, " ")}
       </td>
       <td style={tdStyle}>
-        <SeverityBadge severity={hazard.severity} />
+        <SeverityPill severity={hazard.severity} />
       </td>
       <td style={tdStyle}>
         <StatusBadge status={hazard.status} />
@@ -240,7 +205,7 @@ const thStyle = {
   textAlign:     "left" as const,
   letterSpacing: "0.07em",
   textTransform: "uppercase" as const,
-  background:    "rgba(255,255,255,0.025)",
+  background:    COLORS.glintFaint,
   borderBottom:  `1px solid ${COLORS.borderSoft}`,
   whiteSpace:    "nowrap" as const,
 } as const;

@@ -1,7 +1,7 @@
 // 1. Imports
 import { useCallback } from "react";
 import type { LucideIcon } from "lucide-react";
-import { COLORS } from "../../../constants/theme";
+import { COLORS, SHADOWS } from "../../../constants/theme";
 import type { MapView } from "../../../types/map";
 
 export type ToggleValue = MapView | 0 | 1 | 2;
@@ -69,7 +69,7 @@ const styles = {
     overflow: "hidden",
     background: COLORS.surface,
     border: `1px solid ${COLORS.borderSoft}`,
-    boxShadow: "0 8px 32px rgba(0,0,0,0.50)",
+    boxShadow: SHADOWS.float,
   },
   wrapperLeft: {
     left: 16,

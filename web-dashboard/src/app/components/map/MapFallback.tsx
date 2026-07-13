@@ -2,6 +2,7 @@
 import { useCallback } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { COLORS, MAP_CONFIG } from "../../../constants/theme";
+import { AppButton } from "../ui/appButton";
 
 // 2. Interfaces
 interface MapFallbackProps {
@@ -44,10 +45,10 @@ export function MapFallback({ error, onRetry }: MapFallbackProps) {
           <span style={styles.title}>Map data unavailable</span>
         </div>
         <p style={styles.body}>{error.message}</p>
-        <button style={styles.btn} onClick={handleRetry}>
+        <AppButton variant="primary" onClick={handleRetry}>
           <RefreshCw size={14} />
           Retry
-        </button>
+        </AppButton>
       </div>
 
       {/* Accent scan-line */}
@@ -111,19 +112,6 @@ const styles = {
   body: {
     fontSize: 13,
     color:    COLORS.textMuted,
-  },
-  btn: {
-    display:      "flex",
-    alignItems:   "center",
-    gap:          8,
-    padding:      "10px 24px",
-    borderRadius: 10,
-    border:       "none",
-    background:   COLORS.secondary,
-    color:        COLORS.white,
-    fontWeight:   500,
-    fontSize:     14,
-    cursor:       "pointer",
   },
   scanLine: {
     position:   "absolute" as const,

@@ -8,6 +8,8 @@ export const COLORS = {
   primary:    "#0F172A",
   secondary:      "#D97706",
   secondaryHover: "#B45309",
+  /** Darker amber — gradient partner for `secondary` (avatars, brand icons). */
+  secondaryDeep:  "#92400E",
   accent:     "#334155",
   background: "#0B0F19",
   surface:    "#1E293B",
@@ -39,6 +41,14 @@ export const COLORS = {
   overlayDark: "rgba(15,23,42,0.90)",
   overlayBlur: "rgba(15,23,42,0.85)",
 
+  // ── White-glint surfaces (hover states, table header, icon chips) ────────
+  glintFaint: "rgba(255,255,255,0.025)",
+  glintSoft:  "rgba(255,255,255,0.035)",
+
+  // ── Success state (mirrors errorBg/errorBorder below) ────────────────────
+  successBg:     "rgba(16,185,129,0.12)",
+  successBorder: "rgba(16,185,129,0.25)",
+
   // ── Blueprint fallback ────────────────────────────────────────────────────
   bgDeep:     "#060C18",
   accentGlow: "rgba(217,119,6,0.35)",
@@ -53,6 +63,21 @@ export const COLORS = {
   // ── Error state ───────────────────────────────────────────────────────────
   errorBg:     "rgba(239,68,68,0.12)",
   errorBorder: "rgba(239,68,68,0.30)",
+} as const;
+
+/**
+ * Elevation tokens — the only place box-shadows are defined.
+ * card  → page-level cards (KeyPage, ProfileSection, AuthPage)
+ * modal → dialog overlays (LogoutModal, DeleteAccountModal)
+ * float → floating map controls (ViewToggle, legend)
+ * glow / glowLg → amber emphasis on primary CTAs
+ */
+export const SHADOWS = {
+  card:   `0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(217,119,6,0.12)`,
+  modal:  "0 24px 60px rgba(0,0,0,0.6)",
+  float:  "0 8px 32px rgba(0,0,0,0.5)",
+  glow:   "0 0 20px rgba(217,119,6,0.35)",
+  glowLg: "0 8px 24px rgba(217,119,6,0.35)",
 } as const;
 
 /** Badge styles per severity tier — derived from severity base colors. */

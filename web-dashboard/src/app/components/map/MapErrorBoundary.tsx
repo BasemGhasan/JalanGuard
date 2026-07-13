@@ -1,6 +1,7 @@
 // 1. Imports
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { COLORS } from "../../../constants/theme";
+import { AppButton } from "../ui/appButton";
 
 // 2. Interfaces
 interface Props {
@@ -44,9 +45,9 @@ export class MapErrorBoundary extends Component<Props, State> {
     return (
       <div style={styles.wrapper}>
         <p style={styles.code}>Render error: {this.state.message}</p>
-        <button style={styles.btn} onClick={this.handleReset}>
+        <AppButton variant="primary" onClick={this.handleReset}>
           Retry
-        </button>
+        </AppButton>
       </div>
     );
   }
@@ -68,14 +69,5 @@ const styles = {
     fontSize:    13,
     color:       COLORS.error,
     fontFamily:  "monospace",
-  },
-  btn: {
-    padding:      "8px 20px",
-    borderRadius: 8,
-    border:       "none",
-    background:   COLORS.secondary,
-    color:        COLORS.white,
-    cursor:       "pointer",
-    fontWeight:   500,
   },
 } as const;

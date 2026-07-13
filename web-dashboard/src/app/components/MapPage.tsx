@@ -2,10 +2,10 @@
 import { useState, useCallback } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { Globe, Layers, MapPin, MapPinned, Map } from "lucide-react";
 
 // 1. Imports — Local constants / hooks / types
 import { MAP_CONFIG, COLORS } from "../../constants/theme";
+import { ADM_LEVEL_OPTIONS, MAP_VIEW_OPTIONS } from "../../constants/viewOptions";
 import { useMapData } from "../../hooks/useMapData";
 import type { Hazard, MapView } from "../../types/map";
 
@@ -14,20 +14,9 @@ import { MapErrorBoundary } from "./map/MapErrorBoundary";
 import { MapFallback } from "./map/MapFallback";
 import { LoadingOverlay } from "./map/LoadingOverlay";
 import { MapInner } from "./map/MapInner";
-import { ViewToggle, type ToggleOption } from "./map/ViewToggle";
+import { ViewToggle } from "./map/ViewToggle";
 import { ChoroplethLegend } from "./map/ChoroplethLegend";
 import { HazardCard } from "./map/HazardCard";
-
-const MAP_VIEW_OPTIONS: ToggleOption<MapView>[] = [
-  { value: "choropleth", label: "Choropleth", Icon: Layers },
-  { value: "pins", label: "Pins", Icon: MapPinned },
-];
-
-const ADM_LEVEL_OPTIONS: ToggleOption<0 | 1 | 2>[] = [
-  { value: 0, label: "Country", Icon: Globe },
-  { value: 1, label: "States", Icon: Map },
-  { value: 2, label: "Districts", Icon: MapPin },
-];
 
 // 2. Component
 /**

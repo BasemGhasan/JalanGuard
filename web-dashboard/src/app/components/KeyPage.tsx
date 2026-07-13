@@ -6,12 +6,17 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-// 1. Imports — Local context / components / hooks / constants
-import { useAuth }         from "../../context/AuthContext";
-import { useApiKey }       from "../../hooks/useApiKey";
-import { LogoutModal }     from "./auth/LogoutModal";
-import { ProfileSection }  from "./profile/ProfileSection";
-import type { Page }       from "./Navbar";
+// 1. Imports — Local components
+import { Card }           from "./ui/card";
+import { SectionLabel }   from "./ui/sectionLabel";
+import { AppButton }      from "./ui/appButton";
+import { LogoutModal }    from "./auth/LogoutModal";
+import { ProfileSection } from "./profile/ProfileSection";
+
+// 1. Imports — Hooks / context / constants / types
+import { useAuth }   from "../../context/AuthContext";
+import { useApiKey } from "../../hooks/useApiKey";
+import type { Page } from "./Navbar";
 import { COLORS, SPACING, FONT_SIZES } from "../../constants/theme";
 
 // 2. Interfaces
@@ -19,46 +24,10 @@ interface KeyPageProps {
   onNavigate: (p: Page) => void;
 }
 
-// 3. Sub-components (internal — not exported, not reused elsewhere)
-/**
- * Amber-icon section heading used in the cards.
- * Kept here because it is specific to this page's card layout.
- */
-function SectionLabel({
-  icon: Icon,
-  label,
-}: Readonly<{
-  icon:  React.ComponentType<{ size?: number; color?: string }>;
-  label: string;
-}>) {
-  return (
-    <div style={sectionLabelStyles.wrap}>
-      <Icon size={14} color={COLORS.secondary} />
-      <span style={sectionLabelStyles.text}>{label}</span>
-    </div>
-  );
-}
-
-const sectionLabelStyles = {
-  wrap: {
-    display:      "flex",
-    alignItems:   "center",
-    gap:          SPACING.sm,
-    marginBottom: SPACING.md,
-  },
-  text: {
-    color:         COLORS.textMuted,
-    fontSize:      FONT_SIZES.sm,
-    fontWeight:    600,
-    textTransform: "uppercase" as const,
-    letterSpacing: "0.08em",
-  },
-} as const;
-
 /** Fixed-width dotted mask so the field width does not jump between states. */
 const SECRET_MASK = "•".repeat(48);
 
-// 4. Component
+// 3. Component
 /**
  * Developer Settings page.
  *
@@ -74,8 +43,8 @@ export function KeyPage({ onNavigate }: Readonly<KeyPageProps>) {
     generate, reveal, hide, copy,
   } = useApiKey();
 
-  const [copied, setCopied]           = useState(false);
-  const [showLogout, setShowLogout]   = useState(false);
+  const [copied, setCopied]               = useState(false);
+  const [showLogout, setShowLogout]       = useState(false);
   const [confirmRotate, setConfirmRotate] = useState(false);
 
   // ── Derived display value for the key field ────────────────────────────────
@@ -135,6 +104,9 @@ export function KeyPage({ onNavigate }: Readonly<KeyPageProps>) {
     toast.success("API key regenerated. The previous key no longer works.");
   }, [generate]);
 
+  const handleOpenConfirmRotate   = useCallback(() => setConfirmRotate(true),  []);
+  const handleCancelConfirmRotate = useCallback(() => setConfirmRotate(false), []);
+
   return (
     <>
       <div style={styles.page}>
@@ -153,8 +125,7 @@ export function KeyPage({ onNavigate }: Readonly<KeyPageProps>) {
           <ProfileSection />
 
           {/* ── API key card ──────────────────────────────────────────── */}
-          <div style={styles.card}>
-
+          <Card>
             <SectionLabel icon={Key} label="Your API Key" />
 
             {status === "loading" && (
@@ -167,18 +138,20 @@ export function KeyPage({ onNavigate }: Readonly<KeyPageProps>) {
             {/* No key yet — prompt to generate */}
             {status === "none" && (
               <div style={styles.emptyState}>
-                <p style={styles.shieldText}>
+                <p style={styles.mutedText}>
                   You don't have an API key yet. Generate one to start calling the
                   JalanGuard Open Data API.
                 </p>
-                <button
-                  style={{ ...styles.primaryBtn, opacity: isBusy ? 0.6 : 1 }}
+                <AppButton
+                  variant="primary"
                   onClick={handleGenerate}
-                  disabled={isBusy || !session}
+                  loading={isBusy}
+                  disabled={!session}
+                  style={styles.generateBtn}
                 >
-                  {isBusy ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                  {!isBusy && <Plus size={14} />}
                   Generate API Key
-                </button>
+                </AppButton>
               </div>
             )}
 
@@ -225,7 +198,7 @@ export function KeyPage({ onNavigate }: Readonly<KeyPageProps>) {
                     color={COLORS.textMuted}
                     style={{ flexShrink: 0, marginTop: 2 }}
                   />
-                  <p style={styles.shieldText}>
+                  <p style={styles.mutedText}>
                     Your key is stored encrypted in Supabase Vault and revealed only
                     on request. Send it as a Bearer token:{" "}
                     <code style={styles.code}>Authorization: Bearer &lt;key&gt;</code>.
@@ -244,32 +217,26 @@ export function KeyPage({ onNavigate }: Readonly<KeyPageProps>) {
                       it must be updated with the new key.
                     </p>
                     <div style={styles.confirmActions}>
-                      <button
-                        style={styles.ghostBtn}
-                        onClick={() => setConfirmRotate(false)}
-                        disabled={isBusy}
-                      >
+                      <AppButton variant="outline" onClick={handleCancelConfirmRotate} disabled={isBusy}>
                         Cancel
-                      </button>
-                      <button
-                        style={{ ...styles.dangerBtn, opacity: isBusy ? 0.6 : 1 }}
-                        onClick={handleRotate}
-                        disabled={isBusy}
-                      >
-                        {isBusy ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                      </AppButton>
+                      <AppButton variant="danger" onClick={handleRotate} loading={isBusy}>
+                        {!isBusy && <RefreshCw size={14} />}
                         Regenerate
-                      </button>
+                      </AppButton>
                     </div>
                   </div>
                 ) : (
-                  <button
-                    style={styles.secondaryBtn}
-                    onClick={() => setConfirmRotate(true)}
+                  <AppButton
+                    variant="outline"
+                    fullWidth
+                    onClick={handleOpenConfirmRotate}
                     disabled={isBusy}
+                    style={styles.rotateBtn}
                   >
                     <RefreshCw size={14} />
                     Regenerate Key
-                  </button>
+                  </AppButton>
                 )}
               </>
             )}
@@ -277,11 +244,16 @@ export function KeyPage({ onNavigate }: Readonly<KeyPageProps>) {
             {error && <p style={styles.errorText}>{error}</p>}
 
             {/* Primary sign-out button */}
-            <button style={styles.logoutFullBtn} onClick={handleOpenLogout}>
+            <AppButton
+              variant="amberOutline"
+              fullWidth
+              onClick={handleOpenLogout}
+              style={styles.signOutBtn}
+            >
               <LogOut size={14} />
               Sign Out
-            </button>
-          </div>
+            </AppButton>
+          </Card>
         </div>
       </div>
 
@@ -296,7 +268,7 @@ export function KeyPage({ onNavigate }: Readonly<KeyPageProps>) {
   );
 }
 
-// 5. Styles — all values from COLORS / SPACING / FONT_SIZES
+// 4. Styles — all values from COLORS / SPACING / FONT_SIZES
 const styles = {
   page: {
     minHeight:      "calc(100vh - 64px)",
@@ -340,13 +312,6 @@ const styles = {
     fontSize: FONT_SIZES.md,
     margin:   0,
   },
-  card: {
-    background:   COLORS.surface,
-    borderRadius: 24,
-    padding:      SPACING.xl,
-    border:       `1px solid ${COLORS.borderFaint}`,
-    boxShadow:    `0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px ${COLORS.accentLine}`,
-  },
   loadingRow: {
     display:      "flex",
     alignItems:   "center",
@@ -358,6 +323,9 @@ const styles = {
     flexDirection: "column" as const,
     gap:           SPACING.md,
     marginBottom:  SPACING.md,
+  },
+  generateBtn: {
+    alignSelf: "flex-start" as const,
   },
   keyRow: {
     display:      "flex",
@@ -412,12 +380,6 @@ const styles = {
     gap:          SPACING.sm,
     marginBottom: SPACING.lg,
   },
-  shieldText: {
-    color:      COLORS.textMuted,
-    fontSize:   FONT_SIZES.sm + 1,
-    lineHeight: 1.5,
-    margin:     0,
-  },
   code: {
     fontFamily:   "monospace",
     fontSize:     FONT_SIZES.sm,
@@ -425,38 +387,6 @@ const styles = {
     background:   COLORS.primary,
     padding:      "2px 6px",
     borderRadius: 6,
-  },
-  primaryBtn: {
-    display:        "inline-flex",
-    alignItems:     "center",
-    justifyContent: "center",
-    gap:            SPACING.sm,
-    padding:        `${SPACING.sm + 4}px ${SPACING.lg}px`,
-    borderRadius:   12,
-    background:     COLORS.secondary,
-    border:         "none",
-    color:          COLORS.white,
-    fontWeight:     600,
-    fontSize:       FONT_SIZES.sm + 2,
-    cursor:         "pointer",
-    boxShadow:      `0 0 20px ${COLORS.accentGlow}`,
-    alignSelf:      "flex-start" as const,
-  },
-  secondaryBtn: {
-    display:        "flex",
-    alignItems:     "center",
-    justifyContent: "center",
-    gap:            SPACING.sm,
-    width:          "100%",
-    padding:        `${SPACING.sm + 4}px ${SPACING.lg}px`,
-    borderRadius:   12,
-    background:     "transparent",
-    border:         `1px solid ${COLORS.borderSoft}`,
-    color:          COLORS.textPrimary,
-    fontWeight:     600,
-    fontSize:       FONT_SIZES.sm + 2,
-    cursor:         "pointer",
-    marginBottom:   SPACING.md,
   },
   confirmBox: {
     display:       "flex",
@@ -484,48 +414,15 @@ const styles = {
     gap:            SPACING.sm,
     marginTop:      SPACING.xs,
   },
-  ghostBtn: {
-    padding:      `${SPACING.sm}px ${SPACING.md}px`,
-    borderRadius: 10,
-    background:   "transparent",
-    border:       `1px solid ${COLORS.borderSoft}`,
-    color:        COLORS.textMuted,
-    fontWeight:   600,
-    fontSize:     FONT_SIZES.sm + 1,
-    cursor:       "pointer",
-  },
-  dangerBtn: {
-    display:        "flex",
-    alignItems:     "center",
-    gap:            SPACING.xs,
-    padding:        `${SPACING.sm}px ${SPACING.md}px`,
-    borderRadius:   10,
-    background:     COLORS.error,
-    border:         "none",
-    color:          COLORS.white,
-    fontWeight:     600,
-    fontSize:       FONT_SIZES.sm + 1,
-    cursor:         "pointer",
+  rotateBtn: {
+    marginBottom: SPACING.md,
   },
   errorText: {
     color:     COLORS.error,
     fontSize:  FONT_SIZES.sm + 1,
     marginTop: SPACING.sm,
   },
-  logoutFullBtn: {
-    width:          "100%",
-    display:        "flex",
-    alignItems:     "center",
-    justifyContent: "center",
-    gap:            SPACING.sm,
-    padding:        `${SPACING.sm + 4}px ${SPACING.lg}px`,
-    borderRadius:   12,
-    background:     "transparent",
-    border:         `1px solid ${COLORS.secondary}`,
-    color:          COLORS.secondary,
-    fontWeight:     600,
-    fontSize:       FONT_SIZES.sm + 2,
-    cursor:         "pointer",
-    marginTop:      SPACING.md,
+  signOutBtn: {
+    marginTop: SPACING.md,
   },
 } as const;

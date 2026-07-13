@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 // 1. Imports — Local context / hooks / constants / components
 import { COLORS, FONT_SIZES } from "../../constants/theme";
 import { useAuth } from "../../context/AuthContext";
+import { AppButton } from "./ui/appButton";
 import { LogoutModal } from "./auth/LogoutModal";
 
 // 2. Types
@@ -107,12 +108,13 @@ export function Navbar({ active, onNavigate }: NavbarProps) {
           )}
 
           {/* Auth state: My Dashboard ↔ Get API Key */}
-          <button
+          <AppButton
+            variant="primary"
             style={styles.ctaBtn}
             onClick={isLoggedIn ? handleMyDashboard : handleNavToAuth}
           >
             {isLoggedIn ? "My Dashboard" : "Get API Key"}
-          </button>
+          </AppButton>
         </nav>
       </header>
 
@@ -175,16 +177,9 @@ const styles = {
     padding: 0,
     transition: "color 0.15s ease",
   },
+  /** Overrides merged over the shared AppButton primary variant. */
   ctaBtn: {
     padding: "10px 20px",
-    borderRadius: 12,
-    background: COLORS.secondary,
-    border: "none",
-    color: COLORS.white,
-    fontSize: FONT_SIZES.sm + 2,
-    fontWeight: 600,
-    cursor: "pointer",
-    boxShadow: `0 0 20px ${COLORS.accentGlow}`,
   },
   logo: {
     height: 55,

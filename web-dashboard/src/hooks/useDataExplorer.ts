@@ -21,8 +21,11 @@ export interface ExplorerFilters {
   dateRange?: string;
 }
 
-const normalizeHazards = (data: any[] | null | undefined): HazardWithState[] => {
-  return (data ?? []).map((hazard: any) => ({
+/** Raw hazard row with the embedded administrative-boundary join. */
+type HazardRow = HazardWithState & { boundary_data?: { name: string | null } | null };
+
+const normalizeHazards = (data: HazardRow[] | null | undefined): HazardWithState[] => {
+  return (data ?? []).map((hazard) => ({
     ...hazard,
     boundary_name: hazard.boundary_data?.name || "Unknown Area",
     malaysian_location: {

@@ -1,11 +1,13 @@
 // 1. Imports — External
 import { useMemo, useState, useCallback} from "react";
-import { User, Mail, Calendar, Pencil, Check, X, Loader2, Trash2 } from "lucide-react";
+import { User, Mail, Calendar, Trash2 } from "lucide-react";
 
 // 1. Imports — Local hooks / constants / components
 import { COLORS, FONT_SIZES, SPACING } from "../../../constants/theme";
 import { useAuth } from "../../../context/AuthContext";
 import { useProfile } from "../../../hooks/useProfile";
+import { Card } from "../ui/card";
+import { SectionLabel } from "../ui/sectionLabel";
 import { ProfileField } from "./ProfileField";
 import { DeleteAccountModal } from "./DeleteAccountModal";
 
@@ -62,13 +64,8 @@ export function ProfileSection() {
   const handleCloseDeleteModal = useCallback(() => setShowDeleteModal(false), []);
 
   return (
-    <div style={styles.card}>
-      <div style={styles.cardHeader}>
-        <div style={styles.sectionLabel}>
-          <User size={14} color={COLORS.secondary} />
-          <span style={styles.sectionLabelText}>Profile</span>
-        </div>
-      </div>
+    <Card>
+      <SectionLabel icon={User} label="Profile" />
 
       <div style={styles.avatarRow}>
         <div style={styles.avatar}>{initials}</div>
@@ -123,36 +120,11 @@ export function ProfileSection() {
       {showDeleteModal && (
         <DeleteAccountModal onClose={handleCloseDeleteModal} />
       )}
-    </div>
+    </Card>
   );
 }
 
 const styles = {
-  card: {
-    background: COLORS.surface,
-    borderRadius: 24,
-    padding: SPACING.xl,
-    border: `1px solid ${COLORS.borderFaint}`,
-    boxShadow: `0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px ${COLORS.accentLine}`,
-  },
-  cardHeader: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: SPACING.lg,
-  },
-  sectionLabel: {
-    display: "flex",
-    alignItems: "center",
-    gap: SPACING.sm,
-  },
-  sectionLabelText: {
-    color: COLORS.textMuted,
-    fontSize: FONT_SIZES.sm,
-    fontWeight: 600,
-    textTransform: "uppercase" as const,
-    letterSpacing: "0.08em",
-  },
   avatarRow: {
     display: "flex",
     alignItems: "center",
@@ -167,7 +139,7 @@ const styles = {
     width: 48,
     height: 48,
     borderRadius: "50%",
-    background: `linear-gradient(135deg, ${COLORS.secondary}, #92400E)`,
+    background: `linear-gradient(135deg, ${COLORS.secondary}, ${COLORS.secondaryDeep})`,
     color: COLORS.white,
     fontSize: FONT_SIZES.lg,
     fontWeight: 700,

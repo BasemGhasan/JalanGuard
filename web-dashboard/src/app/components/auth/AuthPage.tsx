@@ -1,17 +1,19 @@
 // 1. Imports — External
 import { useState, useCallback, useMemo } from "react";
 import {
-  Shield, Mail, Lock, User, Loader2, CheckCircle, ChevronRight,
+  Shield, Mail, Lock, User, CheckCircle, ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 
 // 1. Imports — Local constants / hooks / types
-import { COLORS, SPACING, FONT_SIZES } from "../../../constants/theme";
+import { COLORS, SPACING, FONT_SIZES, SHADOWS } from "../../../constants/theme";
 import { supabase } from "../../../lib/supabase";
 import type { Page } from "../Navbar";
 
 // 1. Imports — Local components
 import ErrorBanner from "../ui/errorBanner";
+import { Card } from "../ui/card";
+import { AppButton } from "../ui/appButton";
 
 // 2. Interfaces / Types
 
@@ -332,7 +334,7 @@ export function AuthPage({ onNavigate, initialView }: AuthPageProps) {
 
     return (
       <div style={styles.page}>
-        <div style={styles.card} onKeyDown={handleKeyDown}>
+        <Card style={styles.card} onKeyDown={handleKeyDown}>
 
           {/* ── Brand header ──────────────────────────────────────────────── */}
           <div style={styles.brand}>
@@ -415,19 +417,15 @@ export function AuthPage({ onNavigate, initialView }: AuthPageProps) {
               )}
 
               {/* Primary CTA */}
-              <button
-                style={{
-                  ...styles.ctaBtn,
-                  opacity: loading ? 0.65 : 1,
-                  cursor: loading ? "not-allowed" : "pointer",
-                }}
+              <AppButton
+                variant="primary"
+                fullWidth
                 onClick={handleCta}
-                disabled={loading}
+                loading={loading}
+                style={styles.ctaBtn}
               >
-                {loading ? (
-                  <><Loader2 size={16} className="animate-spin" />Processing…</>
-                ) : ctaLabel}
-              </button>
+                {loading ? "Processing…" : ctaLabel}
+              </AppButton>
 
               {/* Footer: view toggle links (not shown for password-reset) */}
               {view !== "password-reset" && (
@@ -457,7 +455,7 @@ export function AuthPage({ onNavigate, initialView }: AuthPageProps) {
               )}
             </div>
           )}
-        </div>
+        </Card>
       </div>
     );
   }
@@ -472,13 +470,10 @@ const styles = {
       padding: `${SPACING.xl}px ${SPACING.lg}px`,
       background: COLORS.background,
     },
+    /** Page-specific overrides merged over the shared Card base. */
     card: {
       width: 440,
-      background: COLORS.surface,
-      border: `1px solid ${COLORS.borderFaint}`,
-      borderRadius: 24,
       padding: `${SPACING.xl + SPACING.md}px ${SPACING.xl}px`,
-      boxShadow: `0 24px 60px rgba(0,0,0,0.5), 0 0 80px ${COLORS.accentLine}`,
     },
     brand: {
       textAlign: "center" as const,
@@ -488,7 +483,7 @@ const styles = {
       width: 56,
       height: 56,
       borderRadius: 16,
-      background: `linear-gradient(135deg, ${COLORS.secondary}, #92400E)`,
+      background: `linear-gradient(135deg, ${COLORS.secondary}, ${COLORS.secondaryDeep})`,
       boxShadow: `0 8px 24px ${COLORS.accentGlow}`,
       display: "flex",
       alignItems: "center",
@@ -521,20 +516,9 @@ const styles = {
       flexDirection: "column" as const,
       gap: SPACING.md,
     },
+    /** Overrides merged over the shared AppButton primary variant. */
     ctaBtn: {
-      width: "100%",
-      padding: `${SPACING.sm + 6}px`,
-      borderRadius: 12,
-      background: COLORS.secondary,
-      border: "none",
-      color: COLORS.white,
-      fontSize: FONT_SIZES.md - 1,
-      fontWeight: 600,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: SPACING.sm,
-      boxShadow: `0 8px 24px ${COLORS.accentGlow}`,
+      boxShadow: SHADOWS.glowLg,
       marginTop: SPACING.xs,
     },
     footer: {
@@ -577,8 +561,8 @@ const styles = {
       width: 64,
       height: 64,
       borderRadius: "50%",
-      background: "rgba(16,185,129,0.12)",
-      border: "1px solid rgba(16,185,129,0.25)",
+      background: COLORS.successBg,
+      border: `1px solid ${COLORS.successBorder}`,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",

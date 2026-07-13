@@ -3,9 +3,11 @@ import { useState, useMemo, useCallback } from "react";
 import { X } from "lucide-react";
 
 // 1. Imports — Local
-import { COLORS, SEVERITY_BADGE, SPACING } from "../../../constants/theme";
-import { ImageSlider }                     from "./ImageSlider";
-import type { Hazard }                     from "../../../types/map";
+import { COLORS, SPACING }   from "../../../constants/theme";
+import { ImageSlider }       from "./ImageSlider";
+import { SeverityPill }      from "../ui/severityPill";
+import { formatDate }        from "../../../utils/formatters";
+import type { Hazard }       from "../../../types/map";
 
 // 2. Interfaces
 interface HazardCardProps {
@@ -14,20 +16,9 @@ interface HazardCardProps {
   startExpanded?: boolean;
 }
 
-// 3. Helpers
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-MY", {
-    day:   "2-digit",
-    month: "short",
-    year:  "numeric",
-  });
-}
-
-// 4. Component
-export function HazardCard({ hazard, onClose, startExpanded = false }: HazardCardProps) {
+// 3. Component
+export function HazardCard({ hazard, onClose, startExpanded = false }: Readonly<HazardCardProps>) {
   const [isExpanded, setIsExpanded] = useState(startExpanded);
-
-  const badge = SEVERITY_BADGE[hazard.severity] ?? SEVERITY_BADGE.low;
 
   const images = useMemo<string[]>(() => {
     if (hazard.image_urls && hazard.image_urls.length > 0)
@@ -69,16 +60,7 @@ export function HazardCard({ hazard, onClose, startExpanded = false }: HazardCar
       >
         {/* ── Header: severity badge + close button ────────────────────── */}
         <div style={styles.header}>
-          <span
-            style={{
-              ...styles.badge,
-              background: badge.bg,
-              color:      badge.text,
-              border:     `1px solid ${badge.border}`,
-            }}
-          >
-            {hazard.severity.toUpperCase()}
-          </span>
+          <SeverityPill severity={hazard.severity} />
 
           <button
             style={styles.closeBtn}
@@ -147,13 +129,6 @@ const styles = {
     justifyContent: "space-between",
     alignItems:     "center",
     padding:        `${SPACING.sm}px`,
-  },
-  badge: {
-    padding:       `3px ${SPACING.sm}px`,
-    borderRadius:  20,
-    fontSize:      11,
-    fontWeight:    700,
-    letterSpacing: "0.06em",
   },
   closeBtn: {
     background:   "transparent",
