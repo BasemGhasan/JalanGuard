@@ -1,9 +1,14 @@
 // 1. Imports — External
-import { useState, useCallback } from "react";
-import { Key, Shield, Copy, Check, RefreshCw, LogOut } from "lucide-react";
+import { useState, useCallback, useMemo } from "react";
+import {
+  Key, Shield, Copy, Check, RefreshCw, LogOut,
+  Eye, EyeOff, Loader2, Plus, AlertTriangle,
+} from "lucide-react";
+import { toast } from "sonner";
 
-// 1. Imports — Local context / components / constants
+// 1. Imports — Local context / components / hooks / constants
 import { useAuth }         from "../../context/AuthContext";
+import { useApiKey }       from "../../hooks/useApiKey";
 import { LogoutModal }     from "./auth/LogoutModal";
 import { ProfileSection }  from "./profile/ProfileSection";
 import type { Page }       from "./Navbar";
@@ -16,16 +21,16 @@ interface KeyPageProps {
 
 // 3. Sub-components (internal — not exported, not reused elsewhere)
 /**
- * Amber-icon section heading used in the API key card.
- * Kept here because it is specific to this card's layout.
+ * Amber-icon section heading used in the cards.
+ * Kept here because it is specific to this page's card layout.
  */
 function SectionLabel({
   icon: Icon,
   label,
-}: {
+}: Readonly<{
   icon:  React.ComponentType<{ size?: number; color?: string }>;
   label: string;
-}) {
+}>) {
   return (
     <div style={sectionLabelStyles.wrap}>
       <Icon size={14} color={COLORS.secondary} />
@@ -50,21 +55,54 @@ const sectionLabelStyles = {
   },
 } as const;
 
+/** Fixed-width dotted mask so the field width does not jump between states. */
+const SECRET_MASK = "•".repeat(48);
+
 // 4. Component
 /**
  * Developer Settings page.
  *
- * Thin shell — owns only logout-modal visibility and copy state.
- * All profile data + editing logic lives in ProfileSection → useProfile.
- * All auth state lives in AuthContext → useAuth.
+ * Owns logout-modal visibility, copy feedback, and the regenerate confirm gate.
+ * All API-key logic (generate / reveal-decrypt / copy / rotate) lives in
+ * useApiKey → Supabase Vault RPCs. All profile logic lives in ProfileSection.
  */
-export function KeyPage({ onNavigate }: KeyPageProps) {
-  const { session }                 = useAuth();
-  const [copied, setCopied]         = useState(false);
-  const [showLogout, setShowLogout] = useState(false);
+export function KeyPage({ onNavigate }: Readonly<KeyPageProps>) {
+  const { session } = useAuth();
+  const {
+    status, publicId, lastRotatedAt, plaintext,
+    isRevealed, isBusy, error,
+    generate, reveal, hide, copy,
+  } = useApiKey();
 
-  const apiKey = session?.access_token ?? "pk_live_*******************";
+  const [copied, setCopied]           = useState(false);
+  const [showLogout, setShowLogout]   = useState(false);
+  const [confirmRotate, setConfirmRotate] = useState(false);
 
+  // ── Derived display value for the key field ────────────────────────────────
+  const displayValue = useMemo(() => {
+    if (status !== "ready") return "";
+    if (isRevealed && plaintext) return plaintext;
+    return `jg_${publicId ?? "••••••••"}_${SECRET_MASK}`;
+  }, [status, isRevealed, plaintext, publicId]);
+
+  const rotatedLabel = useMemo(() => {
+    if (!lastRotatedAt) return null;
+    return new Date(lastRotatedAt).toLocaleDateString("en-MY", {
+      day: "numeric", month: "long", year: "numeric",
+    });
+  }, [lastRotatedAt]);
+
+  // Icon for the show/hide toggle — extracted to avoid a nested ternary in JSX.
+  const revealIcon = useMemo(() => {
+    if (isBusy && !isRevealed) {
+      return <Loader2 size={14} color={COLORS.textMuted} className="animate-spin" />;
+    }
+    return isRevealed
+      ? <EyeOff size={14} color={COLORS.textMuted} />
+      : <Eye    size={14} color={COLORS.textMuted} />;
+  }, [isBusy, isRevealed]);
+
+  // ── Logout handlers ────────────────────────────────────────────────────────
   const handleOpenLogout  = useCallback(() => setShowLogout(true),  []);
   const handleCloseLogout = useCallback(() => setShowLogout(false), []);
   const handleLoggedOut   = useCallback(() => {
@@ -72,11 +110,30 @@ export function KeyPage({ onNavigate }: KeyPageProps) {
     onNavigate("map");
   }, [onNavigate]);
 
+  // ── Key lifecycle handlers ─────────────────────────────────────────────────
+  const handleGenerate = useCallback(async () => {
+    await generate();
+    toast.success("API key generated. Copy it now — keep it secret.");
+  }, [generate]);
+
+  const handleToggleReveal = useCallback(async () => {
+    if (isRevealed) { hide(); return; }
+    await reveal();
+  }, [isRevealed, hide, reveal]);
+
   const handleCopy = useCallback(async () => {
-    await navigator.clipboard.writeText(apiKey);
+    const ok = await copy();
+    if (!ok) { toast.error("Could not copy the API key."); return; }
     setCopied(true);
+    toast.success("API key copied to clipboard.");
     setTimeout(() => setCopied(false), 2000);
-  }, [apiKey]);
+  }, [copy]);
+
+  const handleRotate = useCallback(async () => {
+    await generate();
+    setConfirmRotate(false);
+    toast.success("API key regenerated. The previous key no longer works.");
+  }, [generate]);
 
   return (
     <>
@@ -98,45 +155,126 @@ export function KeyPage({ onNavigate }: KeyPageProps) {
           {/* ── API key card ──────────────────────────────────────────── */}
           <div style={styles.card}>
 
-            <SectionLabel icon={Key} label="Your Access Token" />
+            <SectionLabel icon={Key} label="Your API Key" />
 
-            {/* Token display row */}
-            <div style={styles.keyRow}>
-              <Key size={14} color={COLORS.textMuted} style={{ flexShrink: 0 }} />
-              <input
-                readOnly
-                value={session ? apiKey : "pk_live_*******************"}
-                style={styles.keyInput}
-              />
-              <button
-                onClick={handleCopy}
-                disabled={!session}
-                title="Copy"
-                style={{
-                  ...styles.copyBtn,
-                  opacity: session ? 1 : 0.4,
-                  cursor:  session ? "pointer" : "not-allowed",
-                }}
-              >
-                {copied
-                  ? <Check size={14} color={COLORS.success} />
-                  : <Copy  size={14} color={COLORS.textMuted} />
-                }
-              </button>
-            </div>
+            {status === "loading" && (
+              <div style={styles.loadingRow}>
+                <Loader2 size={16} color={COLORS.textMuted} className="animate-spin" />
+                <span style={styles.mutedText}>Checking for an existing key…</span>
+              </div>
+            )}
 
-            {/* Explanatory note */}
-            <div style={styles.shieldRow}>
-              <Shield
-                size={14}
-                color={COLORS.textMuted}
-                style={{ flexShrink: 0, marginTop: 2 }}
-              />
-              <p style={styles.shieldText}>
-                This is your Supabase JWT access token. Use it as a Bearer token
-                in API requests. It expires periodically and refreshes automatically.
-              </p>
-            </div>
+            {/* No key yet — prompt to generate */}
+            {status === "none" && (
+              <div style={styles.emptyState}>
+                <p style={styles.shieldText}>
+                  You don't have an API key yet. Generate one to start calling the
+                  JalanGuard Open Data API.
+                </p>
+                <button
+                  style={{ ...styles.primaryBtn, opacity: isBusy ? 0.6 : 1 }}
+                  onClick={handleGenerate}
+                  disabled={isBusy || !session}
+                >
+                  {isBusy ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                  Generate API Key
+                </button>
+              </div>
+            )}
+
+            {/* Key exists — reveal / copy / rotate */}
+            {status === "ready" && (
+              <>
+                <div style={styles.keyRow}>
+                  <Key size={14} color={COLORS.textMuted} style={{ flexShrink: 0 }} />
+                  <input
+                    readOnly
+                    value={displayValue}
+                    style={styles.keyInput}
+                    aria-label="API key"
+                  />
+                  <button
+                    onClick={handleToggleReveal}
+                    disabled={isBusy}
+                    title={isRevealed ? "Hide" : "Show"}
+                    style={styles.iconBtn}
+                  >
+                    {revealIcon}
+                  </button>
+                  <button
+                    onClick={handleCopy}
+                    disabled={isBusy}
+                    title="Copy"
+                    style={styles.iconBtn}
+                  >
+                    {copied
+                      ? <Check size={14} color={COLORS.success} />
+                      : <Copy  size={14} color={COLORS.textMuted} />
+                    }
+                  </button>
+                </div>
+
+                {rotatedLabel && (
+                  <p style={styles.metaText}>Last generated on {rotatedLabel}</p>
+                )}
+
+                {/* Explanatory note */}
+                <div style={styles.shieldRow}>
+                  <Shield
+                    size={14}
+                    color={COLORS.textMuted}
+                    style={{ flexShrink: 0, marginTop: 2 }}
+                  />
+                  <p style={styles.shieldText}>
+                    Your key is stored encrypted in Supabase Vault and revealed only
+                    on request. Send it as a Bearer token:{" "}
+                    <code style={styles.code}>Authorization: Bearer &lt;key&gt;</code>.
+                  </p>
+                </div>
+
+                {/* Regenerate — two-step confirm (rotation invalidates the old key) */}
+                {confirmRotate ? (
+                  <div style={styles.confirmBox}>
+                    <div style={styles.confirmHeader}>
+                      <AlertTriangle size={14} color={COLORS.warning} />
+                      <span style={styles.confirmTitle}>Regenerate this key?</span>
+                    </div>
+                    <p style={styles.mutedText}>
+                      The current key stops working immediately. Any integration using
+                      it must be updated with the new key.
+                    </p>
+                    <div style={styles.confirmActions}>
+                      <button
+                        style={styles.ghostBtn}
+                        onClick={() => setConfirmRotate(false)}
+                        disabled={isBusy}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        style={{ ...styles.dangerBtn, opacity: isBusy ? 0.6 : 1 }}
+                        onClick={handleRotate}
+                        disabled={isBusy}
+                      >
+                        {isBusy ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                        Regenerate
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    style={styles.secondaryBtn}
+                    onClick={() => setConfirmRotate(true)}
+                    disabled={isBusy}
+                  >
+                    <RefreshCw size={14} />
+                    Regenerate Key
+                  </button>
+                )}
+              </>
+            )}
+
+            {error && <p style={styles.errorText}>{error}</p>}
 
             {/* Primary sign-out button */}
             <button style={styles.logoutFullBtn} onClick={handleOpenLogout}>
@@ -209,23 +347,17 @@ const styles = {
     border:       `1px solid ${COLORS.borderFaint}`,
     boxShadow:    `0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px ${COLORS.accentLine}`,
   },
-  topRight: {
-    display:        "flex",
-    justifyContent: "flex-end",
-    marginBottom:   SPACING.sm,
+  loadingRow: {
+    display:      "flex",
+    alignItems:   "center",
+    gap:          SPACING.sm,
+    marginBottom: SPACING.md,
   },
-  logoutSmallBtn: {
-    display:     "flex",
-    alignItems:  "center",
-    gap:         SPACING.xs,
-    padding:     `${SPACING.xs}px ${SPACING.sm + 4}px`,
-    borderRadius: 8,
-    background:  "transparent",
-    border:      "none",
-    color:       COLORS.textMuted,
-    fontSize:    FONT_SIZES.sm + 1,
-    fontWeight:  600,
-    cursor:      "pointer",
+  emptyState: {
+    display:       "flex",
+    flexDirection: "column" as const,
+    gap:           SPACING.md,
+    marginBottom:  SPACING.md,
   },
   keyRow: {
     display:      "flex",
@@ -235,7 +367,7 @@ const styles = {
     borderRadius: 12,
     border:       `1px solid ${COLORS.borderFaint}`,
     padding:      `${SPACING.sm}px ${SPACING.sm}px ${SPACING.sm}px ${SPACING.md + 4}px`,
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
   },
   keyInput: {
     flex:          1,
@@ -247,8 +379,9 @@ const styles = {
     fontSize:      FONT_SIZES.sm + 1,
     letterSpacing: "0.03em",
     minWidth:      0,
+    textOverflow:  "ellipsis",
   },
-  copyBtn: {
+  iconBtn: {
     width:          40,
     height:         40,
     borderRadius:   8,
@@ -258,6 +391,20 @@ const styles = {
     alignItems:     "center",
     justifyContent: "center",
     flexShrink:     0,
+    cursor:         "pointer",
+  },
+  metaText: {
+    color:        COLORS.textMuted,
+    fontSize:     FONT_SIZES.sm,
+    opacity:      0.75,
+    margin:       0,
+    marginBottom: SPACING.md,
+  },
+  mutedText: {
+    color:      COLORS.textMuted,
+    fontSize:   FONT_SIZES.sm + 1,
+    lineHeight: 1.5,
+    margin:     0,
   },
   shieldRow: {
     display:      "flex",
@@ -270,6 +417,100 @@ const styles = {
     fontSize:   FONT_SIZES.sm + 1,
     lineHeight: 1.5,
     margin:     0,
+  },
+  code: {
+    fontFamily:   "monospace",
+    fontSize:     FONT_SIZES.sm,
+    color:        COLORS.textPrimary,
+    background:   COLORS.primary,
+    padding:      "2px 6px",
+    borderRadius: 6,
+  },
+  primaryBtn: {
+    display:        "inline-flex",
+    alignItems:     "center",
+    justifyContent: "center",
+    gap:            SPACING.sm,
+    padding:        `${SPACING.sm + 4}px ${SPACING.lg}px`,
+    borderRadius:   12,
+    background:     COLORS.secondary,
+    border:         "none",
+    color:          COLORS.white,
+    fontWeight:     600,
+    fontSize:       FONT_SIZES.sm + 2,
+    cursor:         "pointer",
+    boxShadow:      `0 0 20px ${COLORS.accentGlow}`,
+    alignSelf:      "flex-start" as const,
+  },
+  secondaryBtn: {
+    display:        "flex",
+    alignItems:     "center",
+    justifyContent: "center",
+    gap:            SPACING.sm,
+    width:          "100%",
+    padding:        `${SPACING.sm + 4}px ${SPACING.lg}px`,
+    borderRadius:   12,
+    background:     "transparent",
+    border:         `1px solid ${COLORS.borderSoft}`,
+    color:          COLORS.textPrimary,
+    fontWeight:     600,
+    fontSize:       FONT_SIZES.sm + 2,
+    cursor:         "pointer",
+    marginBottom:   SPACING.md,
+  },
+  confirmBox: {
+    display:       "flex",
+    flexDirection: "column" as const,
+    gap:           SPACING.sm,
+    padding:       SPACING.md,
+    borderRadius:  12,
+    background:    `${COLORS.warning}12`,
+    border:        `1px solid ${COLORS.warning}40`,
+    marginBottom:  SPACING.md,
+  },
+  confirmHeader: {
+    display:    "flex",
+    alignItems: "center",
+    gap:        SPACING.sm,
+  },
+  confirmTitle: {
+    color:      COLORS.textPrimary,
+    fontSize:   FONT_SIZES.sm + 2,
+    fontWeight: 600,
+  },
+  confirmActions: {
+    display:        "flex",
+    justifyContent: "flex-end",
+    gap:            SPACING.sm,
+    marginTop:      SPACING.xs,
+  },
+  ghostBtn: {
+    padding:      `${SPACING.sm}px ${SPACING.md}px`,
+    borderRadius: 10,
+    background:   "transparent",
+    border:       `1px solid ${COLORS.borderSoft}`,
+    color:        COLORS.textMuted,
+    fontWeight:   600,
+    fontSize:     FONT_SIZES.sm + 1,
+    cursor:       "pointer",
+  },
+  dangerBtn: {
+    display:        "flex",
+    alignItems:     "center",
+    gap:            SPACING.xs,
+    padding:        `${SPACING.sm}px ${SPACING.md}px`,
+    borderRadius:   10,
+    background:     COLORS.error,
+    border:         "none",
+    color:          COLORS.white,
+    fontWeight:     600,
+    fontSize:       FONT_SIZES.sm + 1,
+    cursor:         "pointer",
+  },
+  errorText: {
+    color:     COLORS.error,
+    fontSize:  FONT_SIZES.sm + 1,
+    marginTop: SPACING.sm,
   },
   logoutFullBtn: {
     width:          "100%",
@@ -285,11 +526,6 @@ const styles = {
     fontWeight:     600,
     fontSize:       FONT_SIZES.sm + 2,
     cursor:         "pointer",
-  },
-  footer: {
-    textAlign: "center" as const,
-    color:     COLORS.textMuted,
-    fontSize:  FONT_SIZES.sm + 1,
-    margin:    0,
+    marginTop:      SPACING.md,
   },
 } as const;

@@ -190,3 +190,9 @@ dmypy.json
 
 # Supabase
 supabase/.temp/
+
+# claude
+.claude/
+
+# graphify
+graphify-out/
