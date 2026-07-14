@@ -59,7 +59,13 @@
       "invalidNameTitle": "Invalid name",
       "invalidNameMessage": "Please enter your full name.",
       "resetEmailSentTitle": "Reset email sent",
-      "resetEmailSentMessage": "Please check your inbox for reset instructions."
+      "resetEmailSentMessage": "Please check your inbox for reset instructions.",
+      "loginFailedTitle": "Login Failed",
+      "registerFailedTitle": "Registration Failed",
+      "resetFailedTitle": "Reset Failed",
+      "genericMessage": "Something went wrong. Please try again.",
+      "checkEmailTitle": "Confirm Your Email",
+      "checkEmailMessage": "We've sent a confirmation link to your email. Tap it to activate your account."
     }
   },
   "onboarding": {

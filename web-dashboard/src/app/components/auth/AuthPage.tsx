@@ -37,7 +37,7 @@ interface AuthPageProps {
 }
 
 interface AuthFieldProps {
-  icon: React.ComponentType<{ size?: number; color?: string }>;
+  icon: React.ComponentType<{ size?: number | string; color?: string }>;
   label: string;
   type: string;
   placeholder: string;

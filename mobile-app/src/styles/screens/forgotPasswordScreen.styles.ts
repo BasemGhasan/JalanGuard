@@ -19,14 +19,6 @@ export const forgotPasswordScreenStyles = StyleSheet.create({
     color: COLORS.disabled,
     fontSize: FONT_SIZES.sm,
   },
-  input: {
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: FONT_SIZES.md,
-    backgroundColor: COLORS.accent,
-    color: COLORS.white,
-  },
   linkText: {
     marginTop: SPACING.lg,
     textAlign: 'center',

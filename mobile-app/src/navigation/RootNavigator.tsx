@@ -24,7 +24,8 @@ import {
 
 type RootNavigatorProps = {
   isAuthenticated: boolean;
-  onLogin: (email: string) => Promise<void>;
+  onLogin: (email: string, password: string) => Promise<void>;
+  onRegister: (fullName: string, email: string, password: string) => Promise<{ needsConfirmation: boolean }>;
   onLogout: () => Promise<void>;
 };
 
@@ -134,7 +135,13 @@ function AppStackNavigator({ onLogout }: { onLogout: () => Promise<void> }) {
   );
 }
 
-function AuthStackNavigator({ onLogin }: { onLogin: (email: string) => Promise<void> }) {
+function AuthStackNavigator({
+  onLogin,
+  onRegister,
+}: {
+  onLogin: (email: string, password: string) => Promise<void>;
+  onRegister: (fullName: string, email: string, password: string) => Promise<{ needsConfirmation: boolean }>;
+}) {
   const { t } = useTranslation();
 
   return (
@@ -154,7 +161,7 @@ function AuthStackNavigator({ onLogin }: { onLogin: (email: string) => Promise<v
         {(props) => <LoginScreen {...props} onLogin={onLogin} />}
       </AuthStack.Screen>
       <AuthStack.Screen name="Register" options={{ title: t('navigation.auth.register') }}>
-        {(props) => <RegisterScreen {...props} onRegister={onLogin} />}
+        {(props) => <RegisterScreen {...props} onRegister={onRegister} />}
       </AuthStack.Screen>
       <AuthStack.Screen
         name="ForgotPassword"
@@ -165,10 +172,10 @@ function AuthStackNavigator({ onLogin }: { onLogin: (email: string) => Promise<v
   );
 }
 
-export function RootNavigator({ isAuthenticated, onLogin, onLogout }: RootNavigatorProps) {
+export function RootNavigator({ isAuthenticated, onLogin, onRegister, onLogout }: RootNavigatorProps) {
   if (isAuthenticated) {
     return <AppStackNavigator onLogout={onLogout} />;
   }
 
-  return <AuthStackNavigator onLogin={onLogin} />;
+  return <AuthStackNavigator onLogin={onLogin} onRegister={onRegister} />;
 }

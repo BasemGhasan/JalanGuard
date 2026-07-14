@@ -59,7 +59,13 @@
       "invalidNameTitle": "Nama tidak sah",
       "invalidNameMessage": "Sila masukkan nama penuh anda.",
       "resetEmailSentTitle": "Emel tetapan semula dihantar",
-      "resetEmailSentMessage": "Sila semak peti masuk anda untuk arahan tetapan semula."
+      "resetEmailSentMessage": "Sila semak peti masuk anda untuk arahan tetapan semula.",
+      "loginFailedTitle": "Log Masuk Gagal",
+      "registerFailedTitle": "Pendaftaran Gagal",
+      "resetFailedTitle": "Set Semula Gagal",
+      "genericMessage": "Sesuatu tidak kena. Sila cuba lagi.",
+      "checkEmailTitle": "Sahkan E-mel Anda",
+      "checkEmailMessage": "Kami telah menghantar pautan pengesahan ke e-mel anda. Ketik untuk mengaktifkan akaun anda."
     }
   },
   "onboarding": {

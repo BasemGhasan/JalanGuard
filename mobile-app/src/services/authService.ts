@@ -1,41 +1,90 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+/**
+ * Authentication service — direct Supabase BaaS.
+ *
+ * Ported from the web dashboard (AuthPage + AuthContext auth calls) and adapted
+ * for React Native. All auth goes straight to Supabase Auth; there is no custom
+ * backend in between. Session persistence is handled by the RN client
+ * (AsyncStorage) configured in `./supabase`.
+ */
+import type { Session } from '@supabase/supabase-js';
+
+import { supabase } from './supabase';
 import { AuthState, UserProfile } from '../types';
 
-const AUTH_KEY = 'jalanguard.auth';
-
-const defaultState: AuthState = {
-  isAuthenticated: false,
-  user: null,
-};
-
-export async function getAuthState(): Promise<AuthState> {
-  const raw = await AsyncStorage.getItem(AUTH_KEY);
-  if (!raw) return defaultState;
-
-  try {
-    return JSON.parse(raw) as AuthState;
-  } catch {
-    return defaultState;
+/** Maps a Supabase session to the app's AuthState shape. */
+function toAuthState(session: Session | null): AuthState {
+  if (!session?.user) {
+    return { isAuthenticated: false, user: null };
   }
-}
 
-export async function signIn(email: string): Promise<AuthState> {
+  const { id, email, user_metadata } = session.user;
   const user: UserProfile = {
-    id: `user-${Date.now()}`,
-    name: email.split('@')[0] || 'User',
-    email,
+    id,
+    email: email ?? '',
+    name: (user_metadata?.full_name as string | undefined) ?? email?.split('@')[0] ?? 'User',
   };
 
-  const state: AuthState = {
-    isAuthenticated: true,
-    user,
-  };
-
-  await AsyncStorage.setItem(AUTH_KEY, JSON.stringify(state));
-  return state;
+  return { isAuthenticated: true, user };
 }
 
-export async function signOut(): Promise<AuthState> {
-  await AsyncStorage.removeItem(AUTH_KEY);
-  return defaultState;
+/** Current auth state, rehydrated from the persisted session on cold start. */
+export async function getAuthState(): Promise<AuthState> {
+  const { data } = await supabase.auth.getSession();
+  return toAuthState(data.session);
+}
+
+/** Email + password sign-in. Throws on failure so the screen can surface it. */
+export async function signIn(email: string, password: string): Promise<void> {
+  const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+  if (error) throw error;
+}
+
+/**
+ * Registers a citizen account. Unlike the web dashboard (which sets
+ * role: 'developer'), mobile users are citizens, so we omit the role and let
+ * the `handle_new_user` trigger assign the default citizen profile.
+ *
+ * @returns needsConfirmation — true when email confirmation is required (no
+ *          session was returned), so the UI can tell the user to check email.
+ */
+export async function signUp(
+  fullName: string,
+  email: string,
+  password: string,
+): Promise<{ needsConfirmation: boolean }> {
+  const { data, error } = await supabase.auth.signUp({
+    email: email.trim(),
+    password,
+    options: { data: { full_name: fullName.trim() } },
+  });
+
+  if (error) throw error;
+
+  // Supabase returns a user with an empty identities array when the email is
+  // already registered (it does not error, for privacy reasons).
+  if (data.user && data.user.identities && data.user.identities.length === 0) {
+    throw new Error('This email is already registered. Please log in.');
+  }
+
+  return { needsConfirmation: !data.session };
+}
+
+/** Sends a password-reset email. */
+export async function resetPassword(email: string): Promise<void> {
+  const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
+  if (error) throw error;
+}
+
+/** Ends the session and clears the persisted tokens. */
+export async function signOut(): Promise<void> {
+  const { error } = await supabase.auth.signOut();
+  if (error) throw error;
+}
+
+/**
+ * Subscribes to auth changes (login / logout / token refresh) so the app tree
+ * updates reactively. Mirrors the web AuthContext's onAuthStateChange listener.
+ */
+export function onAuthStateChange(callback: (state: AuthState) => void) {
+  return supabase.auth.onAuthStateChange((_event, session) => callback(toAuthState(session)));
 }

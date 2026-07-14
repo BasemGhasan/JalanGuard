@@ -1,23 +1,20 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, Pressable, Text, TextInput, View } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Alert, Pressable, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { AuthStackParamList } from '../../types';
-import { COLORS } from '../../constants';
-import { PrimaryButton } from '../../components';
+import { PrimaryButton, FormField } from '../../components';
 import { isValidEmail } from '../../utils';
 import { loginScreenStyles } from '../../styles/screens';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'> & {
-  onLogin: (email: string) => Promise<void>;
+  onLogin: (email: string, password: string) => Promise<void>;
 };
 
 export function LoginScreen({ navigation, onLogin }: Props) {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const buttonLabel = useMemo(
@@ -38,7 +35,11 @@ export function LoginScreen({ navigation, onLogin }: Props) {
 
     setSubmitting(true);
     try {
-      await onLogin(email);
+      await onLogin(email, password);
+      // On success the auth listener flips the navigator to the main app.
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t('auth.alerts.genericMessage');
+      Alert.alert(t('auth.alerts.loginFailedTitle'), message);
     } finally {
       setSubmitting(false);
     }
@@ -53,34 +54,22 @@ export function LoginScreen({ navigation, onLogin }: Props) {
       <Text style={loginScreenStyles.title}>{t('auth.titles.welcomeBack')}</Text>
       <Text style={loginScreenStyles.subtitle}>{t('auth.subtitles.login')}</Text>
 
-      <View style={loginScreenStyles.inputWrap}>
-        <MaterialIcons name="mail-outline" size={20} color={COLORS.disabled} />
-        <TextInput
-          value={email}
-          onChangeText={setEmail}
-          placeholder={t('auth.placeholders.email')}
-          placeholderTextColor={COLORS.disabled}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          style={loginScreenStyles.input}
-        />
-      </View>
+      <FormField
+        icon="mail-outline"
+        value={email}
+        onChangeText={setEmail}
+        placeholder={t('auth.placeholders.email')}
+        keyboardType="email-address"
+      />
 
-      <View style={[loginScreenStyles.inputWrap, loginScreenStyles.passwordWrap]}>
-        <MaterialIcons name="lock-outline" size={20} color={COLORS.disabled} />
-        <TextInput
-          value={password}
-          onChangeText={setPassword}
-          placeholder={t('auth.placeholders.password')}
-          placeholderTextColor={COLORS.disabled}
-          secureTextEntry={!showPassword}
-          autoCapitalize="none"
-          style={loginScreenStyles.input}
-        />
-        <Pressable onPress={() => setShowPassword((prev) => !prev)}>
-          <MaterialIcons name={showPassword ? 'visibility-off' : 'visibility'} size={20} color={COLORS.disabled} />
-        </Pressable>
-      </View>
+      <FormField
+        icon="lock-outline"
+        value={password}
+        onChangeText={setPassword}
+        placeholder={t('auth.placeholders.password')}
+        secureTextEntry
+        style={loginScreenStyles.passwordWrap}
+      />
 
       <Pressable style={loginScreenStyles.forgotWrap} onPress={handleForgotPassword}>
         <Text style={loginScreenStyles.forgotText}>{t('auth.links.forgotPassword')}</Text>

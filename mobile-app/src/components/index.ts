@@ -1,6 +1,7 @@
 export * from './LoadingSpinner';
 export * from './AppHeader';
 export * from './PrimaryButton';
+export * from './FormField';
 export * from './InfoCard';
 export * from './BadgeChip';
 export * from './ListRow';

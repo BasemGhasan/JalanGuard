@@ -1,16 +1,14 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, Pressable, Text, TextInput, View } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Alert, Pressable, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { AuthStackParamList } from '../../types';
-import { COLORS } from '../../constants';
-import { PrimaryButton } from '../../components';
+import { PrimaryButton, FormField } from '../../components';
 import { isValidEmail } from '../../utils';
 import { registerScreenStyles } from '../../styles/screens';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Register'> & {
-  onRegister: (email: string) => Promise<void>;
+  onRegister: (fullName: string, email: string, password: string) => Promise<{ needsConfirmation: boolean }>;
 };
 
 export function RegisterScreen({ navigation, onRegister }: Props) {
@@ -18,7 +16,6 @@ export function RegisterScreen({ navigation, onRegister }: Props) {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const buttonLabel = useMemo(
@@ -44,57 +41,51 @@ export function RegisterScreen({ navigation, onRegister }: Props) {
 
     setSubmitting(true);
     try {
-      await onRegister(email);
+      const { needsConfirmation } = await onRegister(fullName, email, password);
+      if (needsConfirmation) {
+        // Email confirmation required — no session yet, so guide the user back.
+        Alert.alert(t('auth.alerts.checkEmailTitle'), t('auth.alerts.checkEmailMessage'));
+        navigation.navigate('Login');
+      }
+      // Otherwise the auth listener signs the user straight into the app.
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t('auth.alerts.genericMessage');
+      Alert.alert(t('auth.alerts.registerFailedTitle'), message);
     } finally {
       setSubmitting(false);
     }
-  }, [email, fullName, onRegister, password, t]);
+  }, [email, fullName, navigation, onRegister, password, t]);
 
   return (
     <View style={registerScreenStyles.container}>
       <Text style={registerScreenStyles.title}>{t('auth.titles.createAccount')}</Text>
       <Text style={registerScreenStyles.subtitle}>{t('auth.subtitles.register')}</Text>
 
-      <View style={registerScreenStyles.inputWrap}>
-        <MaterialIcons name="person-outline" size={20} color={COLORS.disabled} />
-        <TextInput
-          value={fullName}
-          onChangeText={setFullName}
-          placeholder={t('auth.placeholders.fullName')}
-          placeholderTextColor={COLORS.disabled}
-          autoCapitalize="words"
-          style={registerScreenStyles.input}
-        />
-      </View>
+      <FormField
+        icon="person-outline"
+        value={fullName}
+        onChangeText={setFullName}
+        placeholder={t('auth.placeholders.fullName')}
+        autoCapitalize="words"
+      />
 
-      <View style={[registerScreenStyles.inputWrap, registerScreenStyles.inputSpacing]}>
-        <MaterialIcons name="mail-outline" size={20} color={COLORS.disabled} />
-        <TextInput
-          value={email}
-          onChangeText={setEmail}
-          placeholder={t('auth.placeholders.email')}
-          placeholderTextColor={COLORS.disabled}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          style={registerScreenStyles.input}
-        />
-      </View>
+      <FormField
+        icon="mail-outline"
+        value={email}
+        onChangeText={setEmail}
+        placeholder={t('auth.placeholders.email')}
+        keyboardType="email-address"
+        style={registerScreenStyles.inputSpacing}
+      />
 
-      <View style={[registerScreenStyles.inputWrap, registerScreenStyles.inputSpacing]}>
-        <MaterialIcons name="lock-outline" size={20} color={COLORS.disabled} />
-        <TextInput
-          value={password}
-          onChangeText={setPassword}
-          placeholder={t('auth.placeholders.password')}
-          placeholderTextColor={COLORS.disabled}
-          secureTextEntry={!showPassword}
-          autoCapitalize="none"
-          style={registerScreenStyles.input}
-        />
-        <Pressable onPress={() => setShowPassword((prev) => !prev)}>
-          <MaterialIcons name={showPassword ? 'visibility-off' : 'visibility'} size={20} color={COLORS.disabled} />
-        </Pressable>
-      </View>
+      <FormField
+        icon="lock-outline"
+        value={password}
+        onChangeText={setPassword}
+        placeholder={t('auth.placeholders.password')}
+        secureTextEntry
+        style={registerScreenStyles.inputSpacing}
+      />
 
       <PrimaryButton label={buttonLabel} onPress={handleRegister} disabled={submitting} icon="chevron-right" />
 

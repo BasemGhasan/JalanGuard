@@ -19,23 +19,8 @@ export const registerScreenStyles = StyleSheet.create({
     color: COLORS.disabled,
     fontSize: FONT_SIZES.sm,
   },
-  inputWrap: {
-    borderRadius: 12,
-    backgroundColor: COLORS.accent,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
   inputSpacing: {
     marginTop: SPACING.md,
-  },
-  input: {
-    flex: 1,
-    paddingHorizontal: 14,
-    fontSize: FONT_SIZES.md,
-    color: COLORS.white,
   },
   linkText: {
     marginTop: SPACING.lg,

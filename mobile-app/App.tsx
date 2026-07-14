@@ -16,7 +16,7 @@ import './src/i18n';
 
 export default function App() {
   const { t } = useTranslation();
-  const { isAuthenticated, checkAuthStatus, login, logout } = useAuth();
+  const { isAuthenticated, checkAuthStatus, login, register, logout } = useAuth();
   const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
@@ -39,7 +39,12 @@ export default function App() {
     <SafeAreaProvider>
       <NavigationContainer>
         <StatusBar style="dark" backgroundColor={COLORS.background} />
-        <RootNavigator isAuthenticated={isAuthenticated} onLogin={login} onLogout={logout} />
+        <RootNavigator
+          isAuthenticated={isAuthenticated}
+          onLogin={login}
+          onRegister={register}
+          onLogout={logout}
+        />
       </NavigationContainer>
     </SafeAreaProvider>
   );
