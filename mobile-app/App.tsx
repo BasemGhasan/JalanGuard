@@ -16,7 +16,7 @@ import './src/i18n';
 
 export default function App() {
   const { t } = useTranslation();
-  const { isAuthenticated, checkAuthStatus, login, register, logout } = useAuth();
+  const { isAuthenticated, user, checkAuthStatus, login, register, logout } = useAuth();
   const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
@@ -41,6 +41,7 @@ export default function App() {
         <StatusBar style="dark" backgroundColor={COLORS.background} />
         <RootNavigator
           isAuthenticated={isAuthenticated}
+          user={user}
           onLogin={login}
           onRegister={register}
           onLogout={logout}

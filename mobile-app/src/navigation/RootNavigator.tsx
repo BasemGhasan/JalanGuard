@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { COLORS } from '../constants';
-import { AppStackParamList, AuthStackParamList, MainTabParamList } from '../types';
+import { AppStackParamList, AuthStackParamList, Hazard, MainTabParamList, UserProfile } from '../types';
 import {
   CameraScreen,
   HazardDetailScreen,
@@ -24,6 +24,7 @@ import {
 
 type RootNavigatorProps = {
   isAuthenticated: boolean;
+  user: UserProfile | null;
   onLogin: (email: string, password: string) => Promise<void>;
   onRegister: (fullName: string, email: string, password: string) => Promise<{ needsConfirmation: boolean }>;
   onLogout: () => Promise<void>;
@@ -34,14 +35,16 @@ const MainTabs = createBottomTabNavigator<MainTabParamList>();
 const AppStack = createNativeStackNavigator<AppStackParamList>();
 
 function MainTabsNavigator({
+  user,
   onLogout,
   onOpenNotifications,
   onOpenHazardDetail,
   onOpenSettings,
 }: {
+  user: UserProfile | null;
   onLogout: () => Promise<void>;
   onOpenNotifications: () => void;
-  onOpenHazardDetail: () => void;
+  onOpenHazardDetail: (hazard: Hazard) => void;
   onOpenSettings: () => void;
 }) {
   const { t } = useTranslation();
@@ -86,13 +89,19 @@ function MainTabsNavigator({
       </MainTabs.Screen>
       <MainTabs.Screen name="History" component={HistoryScreen} />
       <MainTabs.Screen name="Profile">
-        {() => <ProfileScreen onLogout={onLogout} onOpenSettings={onOpenSettings} />}
+        {() => <ProfileScreen user={user} onLogout={onLogout} onOpenSettings={onOpenSettings} />}
       </MainTabs.Screen>
     </MainTabs.Navigator>
   );
 }
 
-function AppStackNavigator({ onLogout }: { onLogout: () => Promise<void> }) {
+function AppStackNavigator({
+  user,
+  onLogout,
+}: {
+  user: UserProfile | null;
+  onLogout: () => Promise<void>;
+}) {
   return (
     <AppStack.Navigator
       initialRouteName="MainTabs"
@@ -103,9 +112,10 @@ function AppStackNavigator({ onLogout }: { onLogout: () => Promise<void> }) {
       <AppStack.Screen name="MainTabs">
         {({ navigation }) => (
           <MainTabsNavigator
+            user={user}
             onLogout={onLogout}
             onOpenNotifications={() => navigation.navigate('Notifications')}
-            onOpenHazardDetail={() => navigation.navigate('HazardDetail')}
+            onOpenHazardDetail={(hazard) => navigation.navigate('HazardDetail', { hazard })}
             onOpenSettings={() => navigation.navigate('Settings')}
           />
         )}
@@ -121,7 +131,9 @@ function AppStackNavigator({ onLogout }: { onLogout: () => Promise<void> }) {
         )}
       </AppStack.Screen>
       <AppStack.Screen name="HazardDetail">
-        {({ navigation }) => <HazardDetailScreen onBack={() => navigation.goBack()} />}
+        {({ navigation, route }) => (
+          <HazardDetailScreen hazard={route.params?.hazard} onBack={() => navigation.goBack()} />
+        )}
       </AppStack.Screen>
       <AppStack.Screen name="Notifications">
         {({ navigation }) => <NotificationsScreen onBack={() => navigation.goBack()} />}
@@ -172,9 +184,9 @@ function AuthStackNavigator({
   );
 }
 
-export function RootNavigator({ isAuthenticated, onLogin, onRegister, onLogout }: RootNavigatorProps) {
+export function RootNavigator({ isAuthenticated, user, onLogin, onRegister, onLogout }: RootNavigatorProps) {
   if (isAuthenticated) {
-    return <AppStackNavigator onLogout={onLogout} />;
+    return <AppStackNavigator user={user} onLogout={onLogout} />;
   }
 
   return <AuthStackNavigator onLogin={onLogin} onRegister={onRegister} />;

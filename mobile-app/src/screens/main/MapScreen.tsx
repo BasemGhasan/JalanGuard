@@ -1,54 +1,132 @@
-import React, { useMemo } from 'react';
-import { DimensionValue, ImageBackground, Pressable, Text, View } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { useTranslation } from 'react-i18next';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import { COLORS } from '../../constants';
-import { PrimaryButton } from '../../components';
+import { useMapData } from '../../hooks';
+import type { Hazard, MapView as MapViewMode } from '../../types';
+import { LEAFLET_MAP_HTML } from './leafletMapHtml';
 import { mapScreenStyles } from '../../styles/screens';
 
 type MapScreenProps = {
-  onOpenHazardDetail: () => void;
+  onOpenHazardDetail: (hazard: Hazard) => void;
 };
 
-const MAP_IMG =
-  'https://images.unsplash.com/photo-1620662892011-f5c2d523fae2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080';
+const ADM_OPTIONS: Array<{ level: 0 | 1 | 2; label: string }> = [
+  { level: 0, label: 'Country' },
+  { level: 1, label: 'States' },
+  { level: 2, label: 'Districts' },
+];
 
+/**
+ * Live map — the mobile counterpart of the web dashboard's MapPage.
+ *
+ * Renders the shared Leaflet document (see `leafletMapHtml`) inside a WebView
+ * and feeds it live Supabase data via `useMapData`. The choropleth/pins toggle
+ * and ADM-level toggle are native overlays; tapping a pin's "View details"
+ * posts the hazard back over the bridge and opens the native detail screen.
+ */
 export function MapScreen({ onOpenHazardDetail }: MapScreenProps) {
-  const { t } = useTranslation();
+  const webRef = useRef<WebView>(null);
+  const [ready, setReady] = useState(false);
+  const [mapView, setMapView] = useState<MapViewMode>('choropleth');
+  const [admLevel, setAdmLevel] = useState<0 | 1 | 2>(1);
 
-  const pins = useMemo(
-    () => [
-      { id: '1', top: '35%', left: '28%' },
-      { id: '2', top: '46%', left: '58%' },
-      { id: '3', top: '59%', left: '40%' },
-    ] as Array<{ id: string; top: DimensionValue; left: DimensionValue }>,
-    [],
+  const { stats, hazards, loading, error, retry } = useMapData(admLevel);
+
+  const payload = useMemo(
+    () => ({ view: mapView, stats, hazards }),
+    [mapView, stats, hazards],
+  );
+
+  // Push data into the WebView whenever it (re)renders or the data/view changes.
+  useEffect(() => {
+    if (!ready) return;
+    const js = `window.__render && window.__render(${JSON.stringify(payload)}); true;`;
+    webRef.current?.injectJavaScript(js);
+  }, [ready, payload]);
+
+  const handleMessage = useCallback(
+    (event: WebViewMessageEvent) => {
+      try {
+        const data = JSON.parse(event.nativeEvent.data) as
+          | { type: 'ready' }
+          | { type: 'select'; hazard: Hazard };
+        if (data.type === 'ready') {
+          setReady(true);
+        } else if (data.type === 'select' && data.hazard) {
+          onOpenHazardDetail(data.hazard);
+        }
+      } catch {
+        // Ignore malformed bridge messages.
+      }
+    },
+    [onOpenHazardDetail],
   );
 
   return (
     <View style={mapScreenStyles.container}>
-      <ImageBackground source={{ uri: MAP_IMG }} style={mapScreenStyles.mapArea}>
-        <View style={mapScreenStyles.topSearch}>
-          <MaterialIcons name="search" size={18} color={COLORS.disabled} />
-          <Text style={mapScreenStyles.searchText}>{t('map.searchPlaceholder')}</Text>
-        </View>
+      <WebView
+        ref={webRef}
+        originWhitelist={['*']}
+        source={{ html: LEAFLET_MAP_HTML }}
+        javaScriptEnabled
+        domStorageEnabled
+        onMessage={handleMessage}
+        style={mapScreenStyles.webview}
+      />
 
-        {pins.map((pin) => (
-          <Pressable
-            key={pin.id}
-            onPress={onOpenHazardDetail}
-            style={[mapScreenStyles.pin, { top: pin.top, left: pin.left }]}
-          >
-            <MaterialIcons name="warning" size={14} color={COLORS.white} />
+      {/* View toggle (top-right) */}
+      <View style={[mapScreenStyles.toggleGroup, mapScreenStyles.toggleRight]}>
+        {(['choropleth', 'pins'] as MapViewMode[]).map((view) => {
+          const active = mapView === view;
+          return (
+            <Pressable
+              key={view}
+              onPress={() => setMapView(view)}
+              style={[mapScreenStyles.toggleItem, active && mapScreenStyles.toggleItemActive]}
+            >
+              <Text style={[mapScreenStyles.toggleText, active && mapScreenStyles.toggleTextActive]}>
+                {view === 'choropleth' ? 'Areas' : 'Pins'}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      {/* ADM-level toggle (top-left, choropleth only) */}
+      {mapView === 'choropleth' && (
+        <View style={[mapScreenStyles.toggleGroup, mapScreenStyles.toggleLeft]}>
+          {ADM_OPTIONS.map((opt) => {
+            const active = admLevel === opt.level;
+            return (
+              <Pressable
+                key={opt.level}
+                onPress={() => setAdmLevel(opt.level)}
+                style={[mapScreenStyles.toggleItem, active && mapScreenStyles.toggleItemActive]}
+              >
+                <Text style={[mapScreenStyles.toggleText, active && mapScreenStyles.toggleTextActive]}>
+                  {opt.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      )}
+
+      {loading && (
+        <View style={mapScreenStyles.overlay} pointerEvents="none">
+          <ActivityIndicator size="large" color={COLORS.secondary} />
+        </View>
+      )}
+
+      {!loading && error && (
+        <View style={mapScreenStyles.overlay}>
+          <Text style={mapScreenStyles.errorText}>Couldn’t load map data.</Text>
+          <Pressable style={mapScreenStyles.retryButton} onPress={retry}>
+            <Text style={mapScreenStyles.retryText}>Retry</Text>
           </Pressable>
-        ))}
-
-        <View style={mapScreenStyles.bottomSheet}>
-          <Text style={mapScreenStyles.bottomTitle}>{t('map.bottomTitle')}</Text>
-          <Text style={mapScreenStyles.bottomSubtitle}>{t('map.bottomSubtitle')}</Text>
-          <PrimaryButton label={t('common.actions.viewDetails')} onPress={onOpenHazardDetail} icon="chevron-right" />
         </View>
-      </ImageBackground>
+      )}
     </View>
   );
 }

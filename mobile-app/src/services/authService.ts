@@ -11,6 +11,30 @@ import type { Session } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 import { AuthState, UserProfile } from '../types';
 
+/**
+ * Normalises the low-level errors supabase-js surfaces on a stalled/aborted
+ * request (the timeout wrapper in `./supabase` aborts after 15s) into a single
+ * human-readable message, so screens show "check your connection" instead of a
+ * cryptic "Aborted" / "Network request failed".
+ */
+function toFriendlyError(error: unknown): Error {
+  if (error instanceof Error) {
+    const msg = error.message.toLowerCase();
+    if (
+      error.name === 'AbortError' ||
+      msg.includes('abort') ||
+      msg.includes('network request failed') ||
+      msg.includes('failed to fetch')
+    ) {
+      return new Error(
+        'Could not reach the server. Check your internet connection and try again.',
+      );
+    }
+    return error;
+  }
+  return new Error('Something went wrong. Please try again.');
+}
+
 /** Maps a Supabase session to the app's AuthState shape. */
 function toAuthState(session: Session | null): AuthState {
   if (!session?.user) {
@@ -35,8 +59,12 @@ export async function getAuthState(): Promise<AuthState> {
 
 /** Email + password sign-in. Throws on failure so the screen can surface it. */
 export async function signIn(email: string, password: string): Promise<void> {
-  const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-  if (error) throw error;
+  try {
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    if (error) throw error;
+  } catch (error) {
+    throw toFriendlyError(error);
+  }
 }
 
 /**
@@ -52,13 +80,18 @@ export async function signUp(
   email: string,
   password: string,
 ): Promise<{ needsConfirmation: boolean }> {
-  const { data, error } = await supabase.auth.signUp({
-    email: email.trim(),
-    password,
-    options: { data: { full_name: fullName.trim() } },
-  });
-
-  if (error) throw error;
+  let data;
+  try {
+    const result = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: { data: { full_name: fullName.trim() } },
+    });
+    if (result.error) throw result.error;
+    data = result.data;
+  } catch (error) {
+    throw toFriendlyError(error);
+  }
 
   // Supabase returns a user with an empty identities array when the email is
   // already registered (it does not error, for privacy reasons).
@@ -79,6 +112,32 @@ export async function resetPassword(email: string): Promise<void> {
 export async function signOut(): Promise<void> {
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
+}
+
+/**
+ * Permanently deletes the current account. Ported from the web dashboard's
+ * `useDeleteAccount`:
+ *   1. Re-authenticates with the supplied password to confirm identity.
+ *   2. Calls the `delete_user` RPC (removes the auth user; cascades to profiles).
+ *   3. Signs out locally.
+ *
+ * Throws with a user-facing message on any failure so the modal can show it.
+ */
+export async function deleteAccount(email: string, password: string): Promise<void> {
+  try {
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+    if (signInError) throw new Error('Incorrect password. Please try again.');
+
+    const { error: rpcError } = await supabase.rpc('delete_user');
+    if (rpcError) throw new Error(`Failed to delete account: ${rpcError.message}`);
+
+    await supabase.auth.signOut();
+  } catch (error) {
+    throw toFriendlyError(error);
+  }
 }
 
 /**
