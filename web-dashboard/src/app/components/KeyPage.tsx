@@ -126,7 +126,9 @@ export function KeyPage({ onNavigate }: Readonly<KeyPageProps>) {
 
           {/* ── API key card ──────────────────────────────────────────── */}
           <Card>
-            <SectionLabel icon={Key} label="Your API Key" />
+            <SectionLabel icon={(props: { size?: number; color?: string }) => (
+              <Key size={props.size ?? 14} color={props.color} />
+            )} label="Your API Key" />
 
             {status === "loading" && (
               <div style={styles.loadingRow}>

@@ -7,13 +7,40 @@ export const cameraScreenStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.primary,
   },
+  camera: {
+    ...StyleSheet.absoluteFillObject,
+  },
   overlay: {
     flex: 1,
-    backgroundColor: withAlpha(COLORS.primary, 0.45),
+    backgroundColor: withAlpha(COLORS.primary, 0.15),
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.xl * 2,
     paddingBottom: SPACING.xl,
     justifyContent: 'space-between',
+  },
+  permissionContainer: {
+    flex: 1,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: SPACING.xl,
+    gap: SPACING.sm,
+  },
+  permissionTitle: {
+    color: COLORS.white,
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '700',
+    marginTop: SPACING.sm,
+    textAlign: 'center',
+  },
+  permissionMessage: {
+    color: COLORS.disabled,
+    fontSize: FONT_SIZES.md,
+    textAlign: 'center',
+  },
+  permissionActions: {
+    width: '100%',
+    marginTop: SPACING.lg,
   },
   topRow: {
     flexDirection: 'row',
@@ -85,11 +112,6 @@ export const cameraScreenStyles = StyleSheet.create({
     borderRightWidth: 3,
     borderColor: COLORS.secondary,
   },
-  severityTag: {
-    position: 'absolute',
-    bottom: -28,
-    right: 0,
-  },
   bottomPanel: {
     alignItems: 'center',
     gap: SPACING.md,
@@ -122,6 +144,9 @@ export const cameraScreenStyles = StyleSheet.create({
     height: 68,
     borderRadius: 34,
     backgroundColor: COLORS.secondary,
+  },
+  captureDisabled: {
+    opacity: 0.5,
   },
   hintText: {
     color: COLORS.white,

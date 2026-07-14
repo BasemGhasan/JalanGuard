@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { COLORS } from '../constants';
+import { ReportTabButton } from '../components';
 import { AppStackParamList, AuthStackParamList, Hazard, MainTabParamList, UserProfile } from '../types';
 import {
   CameraScreen,
@@ -21,6 +22,10 @@ import {
   SplashScreen,
   SubmissionScreen,
 } from '../screens';
+
+function EmptyReportPlaceholder() {
+  return null;
+}
 
 type RootNavigatorProps = {
   isAuthenticated: boolean;
@@ -40,12 +45,14 @@ function MainTabsNavigator({
   onOpenNotifications,
   onOpenHazardDetail,
   onOpenSettings,
+  onOpenCamera,
 }: {
   user: UserProfile | null;
   onLogout: () => Promise<void>;
   onOpenNotifications: () => void;
   onOpenHazardDetail: (hazard: Hazard) => void;
   onOpenSettings: () => void;
+  onOpenCamera: () => void;
 }) {
   const { t } = useTranslation();
 
@@ -66,7 +73,9 @@ function MainTabsNavigator({
               ? t('common.tabs.map')
               : route.name === 'History'
                 ? t('common.tabs.history')
-                : t('common.tabs.profile'),
+                : route.name === 'Profile'
+                  ? t('common.tabs.profile')
+                  : undefined,
         tabBarIcon: ({ color, size }) => {
           const iconByRoute: Record<string, keyof typeof MaterialIcons.glyphMap> = {
             Home: 'home',
@@ -87,6 +96,13 @@ function MainTabsNavigator({
       <MainTabs.Screen name="Map">
         {() => <MapScreen onOpenHazardDetail={onOpenHazardDetail} />}
       </MainTabs.Screen>
+      <MainTabs.Screen
+        name="Report"
+        component={EmptyReportPlaceholder}
+        options={{
+          tabBarButton: () => <ReportTabButton onPress={onOpenCamera} />,
+        }}
+      />
       <MainTabs.Screen name="History" component={HistoryScreen} />
       <MainTabs.Screen name="Profile">
         {() => <ProfileScreen user={user} onLogout={onLogout} onOpenSettings={onOpenSettings} />}
@@ -117,17 +133,27 @@ function AppStackNavigator({
             onOpenNotifications={() => navigation.navigate('Notifications')}
             onOpenHazardDetail={(hazard) => navigation.navigate('HazardDetail', { hazard })}
             onOpenSettings={() => navigation.navigate('Settings')}
+            onOpenCamera={() => navigation.navigate('Camera')}
           />
         )}
       </AppStack.Screen>
       <AppStack.Screen name="Camera">
         {({ navigation }) => (
-          <CameraScreen onBack={() => navigation.goBack()} onCapture={() => navigation.navigate('Submission')} />
+          <CameraScreen
+            onBack={() => navigation.goBack()}
+            onCapture={(report) => navigation.navigate('Submission', report)}
+          />
         )}
       </AppStack.Screen>
       <AppStack.Screen name="Submission">
-        {({ navigation }) => (
-          <SubmissionScreen onBack={() => navigation.goBack()} onSubmit={() => navigation.navigate('MainTabs')} />
+        {({ navigation, route }) => (
+          <SubmissionScreen
+            photoUri={route.params.photoUri}
+            latitude={route.params.latitude}
+            longitude={route.params.longitude}
+            onBack={() => navigation.goBack()}
+            onSubmit={() => navigation.navigate('MainTabs')}
+          />
         )}
       </AppStack.Screen>
       <AppStack.Screen name="HazardDetail">

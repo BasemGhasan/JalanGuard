@@ -9,16 +9,24 @@ export type AuthStackParamList = {
 export type MainTabParamList = {
   Home: undefined;
   Map: undefined;
+  Report: undefined;
   History: undefined;
   Profile: undefined;
 };
 
 import type { Hazard } from './map';
 
+/** Captured photo plus GPS fix (null if location permission was denied/unavailable) handed off from Camera to Submission. */
+export type CapturedReport = {
+  photoUri: string;
+  latitude: number | null;
+  longitude: number | null;
+};
+
 export type AppStackParamList = {
   MainTabs: undefined;
   Camera: undefined;
-  Submission: undefined;
+  Submission: CapturedReport;
   /** Opened from a map pin — carries the tapped hazard, or undefined for a direct/deep entry. */
   HazardDetail: { hazard: Hazard } | undefined;
   Notifications: undefined;

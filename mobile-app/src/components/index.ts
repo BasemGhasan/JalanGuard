@@ -5,3 +5,4 @@ export * from './FormField';
 export * from './InfoCard';
 export * from './BadgeChip';
 export * from './ListRow';
+export * from './ReportTabButton';

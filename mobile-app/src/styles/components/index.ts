@@ -5,3 +5,4 @@ export * from './infoCard.styles';
 export * from './listRow.styles';
 export * from './loadingSpinner.styles';
 export * from './primaryButton.styles';
+export * from './reportTabButton.styles';

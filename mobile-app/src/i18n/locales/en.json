@@ -156,9 +156,12 @@
   },
   "camera": {
     "live": "LIVE",
-    "highSeverity": "High Severity",
     "hint": "Tap capture to continue",
-    "coordinates": "-6.2088, 106.8456"
+    "locating": "Locating...",
+    "locationUnavailable": "Location unavailable",
+    "permissionTitle": "Camera access needed",
+    "permissionMessage": "JalanGuard needs your camera to photograph road hazards for reporting.",
+    "grantAccess": "Grant Camera Access"
   },
   "hazardDetail": {
     "title": "Hazard Detail",
@@ -213,7 +216,7 @@
   "submission": {
     "title": "Submit Report",
     "gpsCoordinates": "GPS Coordinates",
-    "gpsValue": "-6.2088, 106.8456",
+    "gpsUnavailable": "Location unavailable",
     "aiSeverityAssessment": "AI Severity Assessment",
     "aiSeverityValue": "High Severity (92% confidence)",
     "hazardType": "Hazard Type",

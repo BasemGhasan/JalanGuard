@@ -13,7 +13,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "JalanGuard needs camera access so you can photograph road hazards to report.",
+        "NSLocationWhenInUseUsageDescription": "JalanGuard needs your location to tag hazard reports with GPS coordinates."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -28,7 +32,19 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "JalanGuard needs camera access so you can photograph road hazards to report."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "JalanGuard needs your location to tag hazard reports with GPS coordinates."
+        }
+      ]
     ]
   }
 }

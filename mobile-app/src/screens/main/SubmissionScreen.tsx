@@ -6,14 +6,14 @@ import { AppHeader, InfoCard, PrimaryButton } from '../../components';
 import { submissionScreenStyles } from '../../styles/screens';
 
 type SubmissionScreenProps = {
+  photoUri: string;
+  latitude: number | null;
+  longitude: number | null;
   onBack: () => void;
   onSubmit: () => void;
 };
 
-const PREVIEW_IMAGE =
-  'https://images.unsplash.com/photo-1709934730506-fba12664d4e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080';
-
-export function SubmissionScreen({ onBack, onSubmit }: SubmissionScreenProps) {
+export function SubmissionScreen({ photoUri, latitude, longitude, onBack, onSubmit }: SubmissionScreenProps) {
   const { t } = useTranslation();
 
   const handleBack = useCallback(() => {
@@ -24,14 +24,19 @@ export function SubmissionScreen({ onBack, onSubmit }: SubmissionScreenProps) {
     onSubmit();
   }, [onSubmit]);
 
+  const gpsValue =
+    latitude !== null && longitude !== null
+      ? `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`
+      : t('submission.gpsUnavailable');
+
   return (
     <View style={submissionScreenStyles.container}>
       <AppHeader title={t('submission.title')} onBack={handleBack} />
 
       <ScrollView contentContainerStyle={submissionScreenStyles.content}>
-        <Image source={{ uri: PREVIEW_IMAGE }} style={submissionScreenStyles.previewImage} />
+        <Image source={{ uri: photoUri }} style={submissionScreenStyles.previewImage} />
 
-        <InfoCard icon="location-on" title={t('submission.gpsCoordinates')} value={t('submission.gpsValue')} />
+        <InfoCard icon="location-on" title={t('submission.gpsCoordinates')} value={gpsValue} />
 
         <InfoCard icon="analytics" title={t('submission.aiSeverityAssessment')} value={t('submission.aiSeverityValue')} />
 

@@ -156,9 +156,12 @@
   },
   "camera": {
     "live": "LANGSUNG",
-    "highSeverity": "Tahap Tinggi",
     "hint": "Tekan rakam untuk teruskan",
-    "coordinates": "-6.2088, 106.8456"
+    "locating": "Mencari lokasi...",
+    "locationUnavailable": "Lokasi tidak tersedia",
+    "permissionTitle": "Akses kamera diperlukan",
+    "permissionMessage": "JalanGuard memerlukan kamera anda untuk mengambil gambar bahaya jalan bagi tujuan laporan.",
+    "grantAccess": "Benarkan Akses Kamera"
   },
   "hazardDetail": {
     "title": "Butiran Bahaya",
@@ -213,7 +216,7 @@
   "submission": {
     "title": "Hantar Laporan",
     "gpsCoordinates": "Koordinat GPS",
-    "gpsValue": "-6.2088, 106.8456",
+    "gpsUnavailable": "Lokasi tidak tersedia",
     "aiSeverityAssessment": "Penilaian Tahap AI",
     "aiSeverityValue": "Tahap Tinggi (92% keyakinan)",
     "hazardType": "Jenis Bahaya",
