@@ -3,7 +3,8 @@ import { COLORS, FONT_SIZES, SPACING } from '../../constants';
 
 export const appHeaderStyles = StyleSheet.create({
   row: {
-    paddingTop: SPACING.xl * 2,
+    // Top padding is applied dynamically from the device's safe-area inset in
+    // the AppHeader component; only the base spacing lives here.
     paddingBottom: SPACING.md,
     paddingHorizontal: SPACING.lg,
     flexDirection: 'row',

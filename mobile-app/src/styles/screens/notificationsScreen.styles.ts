@@ -7,6 +7,7 @@ export const notificationsScreenStyles = StyleSheet.create({
     backgroundColor: COLORS.primary,
   },
   listContainer: {
+    flexGrow: 1,
     padding: SPACING.lg,
     gap: SPACING.md,
   },

@@ -38,7 +38,11 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <NavigationContainer>
-        <StatusBar style="dark" backgroundColor={COLORS.background} />
+        {/* Auth/onboarding screens are light-themed; the main app is dark. */}
+        <StatusBar
+          style={isAuthenticated ? 'light' : 'dark'}
+          backgroundColor={isAuthenticated ? COLORS.primary : COLORS.background}
+        />
         <RootNavigator
           isAuthenticated={isAuthenticated}
           user={user}

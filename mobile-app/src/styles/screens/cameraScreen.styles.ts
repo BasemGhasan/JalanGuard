@@ -11,11 +11,10 @@ export const cameraScreenStyles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   overlay: {
+    // Vertical padding is applied from safe-area insets in the component.
     flex: 1,
     backgroundColor: withAlpha(COLORS.primary, 0.15),
     paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.xl * 2,
-    paddingBottom: SPACING.xl,
     justifyContent: 'space-between',
   },
   permissionContainer: {

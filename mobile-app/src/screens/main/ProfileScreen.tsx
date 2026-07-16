@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { COLORS } from '../../constants';
 import { AppHeader, FormField, InfoCard, PrimaryButton } from '../../components';
 import * as authService from '../../services';
+import { useContributionStats, useRefetchOnFocus } from '../../hooks';
 import type { UserProfile } from '../../types';
 import { profileScreenStyles } from '../../styles/screens';
 
@@ -30,6 +31,11 @@ export function ProfileScreen({ user, onLogout, onOpenSettings }: ProfileScreenP
   const [deleting, setDeleting] = useState(false);
 
   const initials = useMemo(() => initialsOf(user?.name), [user?.name]);
+
+  const { data: stats, loading: statsLoading, retry: retryStats } = useContributionStats(user?.id);
+  useRefetchOnFocus(retryStats);
+  const statValue = (value: number | null | undefined): string =>
+    statsLoading ? '…' : value == null ? '0' : String(value);
 
   const handleDelete = useCallback(async () => {
     if (!user?.email) return;
@@ -63,9 +69,9 @@ export function ProfileScreen({ user, onLogout, onOpenSettings }: ProfileScreenP
       <Text style={profileScreenStyles.level}>{user?.email ?? t('profile.level')}</Text>
 
       <View style={profileScreenStyles.statsWrap}>
-        <InfoCard icon="warning" title={t('profile.stats.reports')} value="24" />
-        <InfoCard icon="thumb-up" title={t('profile.stats.verifies')} value="58" />
-        <InfoCard icon="emoji-events" title={t('profile.stats.rank')} value="#12" />
+        <InfoCard icon="warning" title={t('profile.stats.reports')} value={statValue(stats?.reports)} />
+        <InfoCard icon="thumb-up" title={t('profile.stats.votes')} value={statValue(stats?.votes)} />
+        <InfoCard icon="emoji-events" title={t('profile.stats.trust')} value={statValue(stats?.trustScore)} />
       </View>
 
       <Pressable style={profileScreenStyles.logoutButton} onPress={onLogout}>

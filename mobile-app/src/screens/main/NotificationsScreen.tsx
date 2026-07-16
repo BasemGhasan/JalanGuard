@@ -1,58 +1,76 @@
-import React, { useCallback } from 'react';
-import { ScrollView, View } from 'react-native';
+import React from 'react';
+import { FlatList, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { AppHeader, BadgeChip, ListRow } from '../../components';
+import { AppHeader, BadgeChip, ListRow, StateView } from '../../components';
+import { useRecentActivity } from '../../hooks';
+import { formatDate } from '../../utils';
+import type { ActivityItem, Hazard, UserProfile } from '../../types';
 import { notificationsScreenStyles } from '../../styles/screens';
 
 type NotificationsScreenProps = {
+  user: UserProfile | null;
   onBack: () => void;
+  onOpenHazardDetail: (hazard: Hazard) => void;
 };
 
-export function NotificationsScreen({ onBack }: NotificationsScreenProps) {
+const KIND_ICON = {
+  reported: 'add-alert',
+  resolved: 'check-circle',
+  in_review: 'hourglass-empty',
+} as const;
+
+const KIND_TONE = {
+  reported: 'warning',
+  resolved: 'success',
+  in_review: 'neutral',
+} as const;
+
+/**
+ * Notifications derived from the user's real report activity and its lifecycle
+ * status — there is no separate notifications table, so this stays honest to the
+ * data rather than showing invented alerts. Loading/error/empty via StateView.
+ */
+export function NotificationsScreen({ user, onBack, onOpenHazardDetail }: NotificationsScreenProps) {
   const { t } = useTranslation();
+  const { data: activity, loading, error, retry } = useRecentActivity(user?.id, 20);
 
-  const notifications = [
-    {
-      title: t('notifications.items.trustPoints.title'),
-      subtitle: t('notifications.items.trustPoints.subtitle'),
-      type: 'reward',
-      icon: 'emoji-events' as const,
-      tone: 'accent' as const,
-      typeLabel: t('notifications.items.trustPoints.type'),
-    },
-    {
-      title: t('notifications.items.reportFixed.title'),
-      subtitle: t('notifications.items.reportFixed.subtitle'),
-      type: 'update',
-      icon: 'check-circle' as const,
-      tone: 'success' as const,
-      typeLabel: t('notifications.items.reportFixed.type'),
-    },
-    {
-      title: t('notifications.items.photoUpdate.title'),
-      subtitle: t('notifications.items.photoUpdate.subtitle'),
-      type: 'action',
-      icon: 'camera-alt' as const,
-      tone: 'warning' as const,
-      typeLabel: t('notifications.items.photoUpdate.type'),
-    },
-  ];
-
-  const handleBack = useCallback(() => {
-    onBack();
-  }, [onBack]);
+  const renderItem = ({ item }: { item: ActivityItem }) => (
+    <ListRow
+      title={t(`notifications.kinds.${item.kind}`)}
+      subtitle={`${item.title} · ${formatDate(item.createdAt)}`}
+      icon={KIND_ICON[item.kind]}
+      rightIcon="chevron-right"
+      onPress={() => onOpenHazardDetail(item.hazard)}
+    >
+      <BadgeChip
+        label={t(`common.status.${item.hazard.status}`, { defaultValue: item.hazard.status })}
+        tone={KIND_TONE[item.kind]}
+      />
+    </ListRow>
+  );
 
   return (
     <View style={notificationsScreenStyles.container}>
-      <AppHeader title={t('notifications.title')} onBack={handleBack} />
+      <AppHeader title={t('notifications.title')} onBack={onBack} />
 
-      <ScrollView contentContainerStyle={notificationsScreenStyles.listContainer}>
-        {notifications.map((item) => (
-          <ListRow key={item.title} title={item.title} subtitle={item.subtitle} icon={item.icon}>
-            <BadgeChip label={item.typeLabel} tone={item.tone} />
-          </ListRow>
-        ))}
-      </ScrollView>
+      {loading || error ? (
+        <StateView loading={loading} error={error} onRetry={retry} />
+      ) : (
+        <FlatList
+          data={activity ?? []}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={notificationsScreenStyles.listContainer}
+          ListEmptyComponent={
+            <StateView
+              empty
+              emptyIcon="notifications-none"
+              emptyTitle={t('notifications.emptyTitle')}
+              emptyMessage={t('notifications.emptyMessage')}
+            />
+          }
+        />
+      )}
     </View>
   );
 }

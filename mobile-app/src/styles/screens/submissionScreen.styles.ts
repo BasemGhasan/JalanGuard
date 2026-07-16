@@ -9,20 +9,43 @@ export const submissionScreenStyles = StyleSheet.create({
   content: {
     padding: SPACING.lg,
     gap: SPACING.md,
+    paddingBottom: SPACING.xl,
   },
   previewImage: {
     width: '100%',
     height: 220,
     borderRadius: 18,
+    backgroundColor: COLORS.accent,
+  },
+  noteText: {
+    color: COLORS.disabled,
+    fontSize: FONT_SIZES.sm,
+    marginTop: -SPACING.sm + 2,
+  },
+  warningText: {
+    color: COLORS.warning,
+    fontSize: FONT_SIZES.sm,
+    marginTop: -SPACING.sm + 2,
+  },
+  errorText: {
+    color: COLORS.error,
+    fontSize: FONT_SIZES.sm,
+    textAlign: 'center',
   },
   sectionTitle: {
     color: COLORS.white,
     fontSize: FONT_SIZES.md,
     fontWeight: '600',
-    marginTop: SPACING.md,
+    marginTop: SPACING.sm,
+  },
+  sectionHint: {
+    color: COLORS.disabled,
+    fontSize: FONT_SIZES.sm,
+    marginTop: 2,
   },
   tagRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: SPACING.sm,
     marginTop: SPACING.sm,
   },
@@ -33,12 +56,27 @@ export const submissionScreenStyles = StyleSheet.create({
     backgroundColor: COLORS.accent,
     color: COLORS.disabled,
     fontWeight: '600',
+    overflow: 'hidden',
   },
   tagActive: {
     backgroundColor: COLORS.secondary,
     color: COLORS.white,
   },
+  descriptionInput: {
+    backgroundColor: COLORS.accent,
+    borderRadius: 14,
+    padding: SPACING.md,
+    color: COLORS.white,
+    fontSize: FONT_SIZES.md,
+    minHeight: 96,
+    textAlignVertical: 'top',
+    marginTop: SPACING.sm,
+  },
   submitWrap: {
-    margin: SPACING.lg,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.sm,
+    gap: SPACING.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: COLORS.accent,
   },
 });

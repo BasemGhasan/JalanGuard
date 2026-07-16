@@ -1,61 +1,75 @@
 import React from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { FlatList, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { AppHeader, BadgeChip, ListRow } from '../../components';
+import { AppHeader, BadgeChip, ListRow, StateView } from '../../components';
+import { useMyReports, useRefetchOnFocus } from '../../hooks';
+import { formatDate, prettyDefectType, severityTone, statusTone } from '../../utils';
+import type { Hazard, UserProfile } from '../../types';
 import { historyScreenStyles } from '../../styles/screens';
 
-const REPORT_IMG =
-  'https://images.unsplash.com/photo-1709934730506-fba12664d4e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080';
+type HistoryScreenProps = {
+  user: UserProfile | null;
+  onOpenHazardDetail: (hazard: Hazard) => void;
+};
 
-export function HistoryScreen() {
+/**
+ * The signed-in user's own reports, straight from Supabase (no mock rows).
+ * Loading, error+retry and empty states are all handled by StateView.
+ */
+export function HistoryScreen({ user, onOpenHazardDetail }: HistoryScreenProps) {
   const { t } = useTranslation();
+  const { data: reports, loading, error, retry } = useMyReports(user?.id);
+  useRefetchOnFocus(retry);
 
-  const reports = [
-    {
-      title: t('history.reports.severePothole.title'),
-      location: t('history.reports.severePothole.location'),
-      severity: t('history.reports.severePothole.severity'),
-      severityTone: 'danger' as const,
-      status: t('history.reports.severePothole.status'),
-      statusTone: 'warning' as const,
-    },
-    {
-      title: t('history.reports.roadCrack.title'),
-      location: t('history.reports.roadCrack.location'),
-      severity: t('history.reports.roadCrack.severity'),
-      severityTone: 'warning' as const,
-      status: t('history.reports.roadCrack.status'),
-      statusTone: 'success' as const,
-    },
-    {
-      title: t('history.reports.brokenPavement.title'),
-      location: t('history.reports.brokenPavement.location'),
-      severity: t('history.reports.brokenPavement.severity'),
-      severityTone: 'danger' as const,
-      status: t('history.reports.brokenPavement.status'),
-      statusTone: 'warning' as const,
-    },
-  ];
+  const renderItem = ({ item }: { item: Hazard }) => {
+    const thumb = item.image_urls?.[0] ?? item.image_url ?? undefined;
+    return (
+      <ListRow
+        title={prettyDefectType(item.defect_type)}
+        subtitle={formatDate(item.created_at)}
+        thumbnailUri={thumb}
+        icon={thumb ? undefined : 'warning'}
+        rightIcon="chevron-right"
+        onPress={() => onOpenHazardDetail(item)}
+      >
+        <BadgeChip label={t(`common.severity.${item.severity}`)} tone={severityTone(item.severity)} />
+        <BadgeChip
+          label={t(`common.status.${item.status}`, { defaultValue: item.status })}
+          tone={statusTone(item.status)}
+        />
+      </ListRow>
+    );
+  };
 
   return (
     <View style={historyScreenStyles.container}>
       <AppHeader title={t('history.title')} />
-      <ScrollView contentContainerStyle={historyScreenStyles.content}>
-        <Text style={historyScreenStyles.summaryText}>{t('history.summary', { count: reports.length })}</Text>
 
-        {reports.map((report) => (
-          <ListRow
-            key={report.title}
-            title={report.title}
-            subtitle={report.location}
-            thumbnailUri={REPORT_IMG}
-            rightIcon="chevron-right"
-          >
-            <BadgeChip label={report.severity} tone={report.severityTone} />
-            <BadgeChip label={report.status} tone={report.statusTone} />
-          </ListRow>
-        ))}
-      </ScrollView>
+      {loading || error ? (
+        <StateView loading={loading} error={error} onRetry={retry} />
+      ) : (
+        <FlatList
+          data={reports ?? []}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={historyScreenStyles.content}
+          ListHeaderComponent={
+            (reports?.length ?? 0) > 0 ? (
+              <Text style={historyScreenStyles.summaryText}>
+                {t('history.summary', { count: reports?.length ?? 0 })}
+              </Text>
+            ) : null
+          }
+          ListEmptyComponent={
+            <StateView
+              empty
+              emptyIcon="assignment"
+              emptyTitle={t('history.emptyTitle')}
+              emptyMessage={t('history.emptyMessage')}
+            />
+          }
+        />
+      )}
     </View>
   );
 }

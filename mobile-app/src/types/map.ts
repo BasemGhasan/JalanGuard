@@ -21,10 +21,12 @@ export interface StateChoroplethStat {
   high_severity_ratio: number;
 }
 
+export type Severity = 'high' | 'medium' | 'low';
+
 export interface Hazard {
   id: string;
   defect_type: string;
-  severity: 'high' | 'medium' | 'low';
+  severity: Severity;
   status: string;
   latitude: number;
   longitude: number;

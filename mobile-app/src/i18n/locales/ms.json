@@ -20,6 +20,26 @@
       "map": "Peta",
       "history": "Sejarah",
       "profile": "Profil"
+    },
+    "severity": {
+      "high": "Tinggi",
+      "medium": "Sederhana",
+      "low": "Rendah"
+    },
+    "status": {
+      "active": "Aktif",
+      "in_review": "Dalam semakan",
+      "pending": "Menunggu",
+      "resolved": "Selesai",
+      "fixed": "Dibaiki"
+    },
+    "states": {
+      "retry": "Cuba Semula",
+      "tryAgain": "Cuba lagi",
+      "loading": "Memuatkan…",
+      "offlineTitle": "Anda di luar talian",
+      "errorTitle": "Sesuatu tidak kena",
+      "emptyTitle": "Belum ada apa-apa di sini"
     }
   },
   "auth": {
@@ -90,8 +110,7 @@
     "alreadyHaveAccount": "Sudah ada akaun? Log masuk"
   },
   "home": {
-    "greeting": "Selamat pagi",
-    "helloUser": "Hai, Pengguna!",
+    "greeting": "Selamat kembali",
     "contributions": "Sumbangan Anda",
     "stats": {
       "reports": "Laporan",
@@ -99,21 +118,11 @@
       "trust": "Kepercayaan"
     },
     "communityMap": "Peta Komuniti",
-    "hazardsNearby": "5 bahaya berhampiran",
+    "mapSubtitle": "Ketik untuk meneroka bahaya berhampiran anda",
     "recentActivity": "Aktiviti Terkini",
-    "activity": {
-      "potholeReported": "Lubang jalan dilaporkan",
-      "potholeSubtitle": "Jl. Sudirman · 2j lalu",
-      "voteConfirmed": "Undian disahkan",
-      "voteSubtitle": "Jl. Thamrin · 5j lalu",
-      "badgeEarned": "Lencana diperoleh",
-      "badgeSubtitle": "Road Hero · 1h lalu"
-    },
-    "badges": {
-      "pending": "Menunggu",
-      "verified": "Disahkan",
-      "reward": "Ganjaran"
-    }
+    "activityEmptyTitle": "Belum ada aktiviti",
+    "activityEmptyMessage": "Laporkan bahaya pertama anda untuk mula membina sejarah sumbangan.",
+    "activityStatus": "{{type}} · {{status}}"
   },
   "map": {
     "searchPlaceholder": "Cari bahaya...",
@@ -123,26 +132,8 @@
   "history": {
     "title": "Laporan Saya",
     "summary": "{{count}} jumlah laporan",
-    "reports": {
-      "severePothole": {
-        "title": "Lubang Jalan Teruk",
-        "location": "Jl. Sudirman, Jakarta",
-        "severity": "Tinggi",
-        "status": "Menunggu"
-      },
-      "roadCrack": {
-        "title": "Retakan Jalan",
-        "location": "Jl. Thamrin, Jakarta",
-        "severity": "Sederhana",
-        "status": "Disahkan"
-      },
-      "brokenPavement": {
-        "title": "Turapan Rosak",
-        "location": "Jl. Tun Razak, Kuala Lumpur",
-        "severity": "Tinggi",
-        "status": "Menunggu"
-      }
-    }
+    "emptyTitle": "Belum ada laporan",
+    "emptyMessage": "Laporan yang anda hantar akan muncul di sini. Ketik butang kamera untuk menambah laporan pertama anda."
   },
   "profile": {
     "title": "Profil",
@@ -150,8 +141,8 @@
     "level": "Penyumbang Dipercayai",
     "stats": {
       "reports": "Laporan",
-      "verifies": "Pengesahan",
-      "rank": "Kedudukan"
+      "votes": "Undian",
+      "trust": "Kepercayaan"
     }
   },
   "camera": {
@@ -165,31 +156,24 @@
   },
   "hazardDetail": {
     "title": "Butiran Bahaya",
-    "hazardName": "Lubang Jalan Teruk",
-    "hazardLocation": "Jl. Sudirman, Jakarta",
     "communityVerification": "Pengesahan Komuniti",
     "verificationQuestion": "Adakah bahaya ini telah dibaiki?",
     "reporterTitle": "Pelapor",
-    "reporterValue": "Penyumbang dipercayai Ahmad R."
+    "reporterUnknown": "Pelapor tanpa nama",
+    "reportedOn": "Dilaporkan {{date}}",
+    "severityLabel": "Tahap {{severity}}",
+    "missingTitle": "Bahaya tidak tersedia",
+    "missingMessage": "Kami tidak dapat memuatkan bahaya ini. Sila kembali dan cuba lagi.",
+    "photoCount": "{{index}} / {{total}}"
   },
   "notifications": {
     "title": "Notifikasi",
-    "items": {
-      "trustPoints": {
-        "title": "Anda mendapat 50 mata kepercayaan!",
-        "subtitle": "Sumbangan hebat minggu ini.",
-        "type": "Ganjaran"
-      },
-      "reportFixed": {
-        "title": "Laporan ditanda selesai",
-        "subtitle": "Lubang jalan Jalan Gasing telah dibaiki.",
-        "type": "Kemas Kini"
-      },
-      "photoUpdate": {
-        "title": "Kemaskini gambar diminta",
-        "subtitle": "Sila sahkan bahaya berhampiran Jalan Ampang.",
-        "type": "Tindakan"
-      }
+    "emptyTitle": "Tiada notifikasi",
+    "emptyMessage": "Kemas kini tentang laporan yang anda hantar akan muncul di sini.",
+    "kinds": {
+      "reported": "Laporan dihantar",
+      "in_review": "Laporan dalam semakan",
+      "resolved": "Laporan selesai"
     }
   },
   "settings": {
@@ -217,9 +201,18 @@
     "title": "Hantar Laporan",
     "gpsCoordinates": "Koordinat GPS",
     "gpsUnavailable": "Lokasi tidak tersedia",
-    "aiSeverityAssessment": "Penilaian Tahap AI",
-    "aiSeverityValue": "Tahap Tinggi (92% keyakinan)",
+    "locationRequired": "Lokasi GPS diperlukan untuk menghantar. Aktifkan lokasi dan ambil semula gambar.",
+    "aiSeverityAssessment": "Penilaian Tahap",
+    "severityValue": "{{severity}} · {{confidence}}% keyakinan",
+    "preliminaryNote": "Anggaran awal automatik — menunggu pengesahan AI.",
     "hazardType": "Jenis Bahaya",
+    "hazardTypeHint": "Pilih jenis kerosakan yang paling sepadan dengan gambar.",
+    "descriptionLabel": "Penerangan (pilihan)",
+    "descriptionPlaceholder": "Tambah butiran yang membantu pasukan mencari dan menilai bahaya…",
+    "submitting": "Menghantar…",
+    "successTitle": "Laporan dihantar",
+    "successMessage": "Terima kasih kerana membantu memastikan jalan raya selamat. Laporan anda kini di peta.",
+    "errorTitle": "Penghantaran gagal",
     "hazardTags": {
       "pothole": "Lubang Jalan",
       "crack": "Retakan",

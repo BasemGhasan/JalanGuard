@@ -7,6 +7,7 @@ export const historyScreenStyles = StyleSheet.create({
     backgroundColor: COLORS.primary,
   },
   content: {
+    flexGrow: 1,
     padding: SPACING.lg,
     gap: SPACING.md,
   },

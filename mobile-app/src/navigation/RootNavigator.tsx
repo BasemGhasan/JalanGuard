@@ -90,7 +90,11 @@ function MainTabsNavigator({
     >
       <MainTabs.Screen name="Home">
         {({ navigation }) => (
-          <HomeScreen onOpenMap={() => navigation.navigate('Map')} onOpenNotifications={onOpenNotifications} />
+          <HomeScreen
+            user={user}
+            onOpenMap={() => navigation.navigate('Map')}
+            onOpenNotifications={onOpenNotifications}
+          />
         )}
       </MainTabs.Screen>
       <MainTabs.Screen name="Map">
@@ -103,7 +107,9 @@ function MainTabsNavigator({
           tabBarButton: () => <ReportTabButton onPress={onOpenCamera} />,
         }}
       />
-      <MainTabs.Screen name="History" component={HistoryScreen} />
+      <MainTabs.Screen name="History">
+        {() => <HistoryScreen user={user} onOpenHazardDetail={onOpenHazardDetail} />}
+      </MainTabs.Screen>
       <MainTabs.Screen name="Profile">
         {() => <ProfileScreen user={user} onLogout={onLogout} onOpenSettings={onOpenSettings} />}
       </MainTabs.Screen>
@@ -151,18 +157,29 @@ function AppStackNavigator({
             photoUri={route.params.photoUri}
             latitude={route.params.latitude}
             longitude={route.params.longitude}
+            user={user}
             onBack={() => navigation.goBack()}
-            onSubmit={() => navigation.navigate('MainTabs')}
+            onSubmitted={() => navigation.navigate('MainTabs', { screen: 'History' })}
           />
         )}
       </AppStack.Screen>
       <AppStack.Screen name="HazardDetail">
         {({ navigation, route }) => (
-          <HazardDetailScreen hazard={route.params?.hazard} onBack={() => navigation.goBack()} />
+          <HazardDetailScreen
+            hazard={route.params?.hazard}
+            user={user}
+            onBack={() => navigation.goBack()}
+          />
         )}
       </AppStack.Screen>
       <AppStack.Screen name="Notifications">
-        {({ navigation }) => <NotificationsScreen onBack={() => navigation.goBack()} />}
+        {({ navigation }) => (
+          <NotificationsScreen
+            user={user}
+            onBack={() => navigation.goBack()}
+            onOpenHazardDetail={(hazard) => navigation.navigate('HazardDetail', { hazard })}
+          />
+        )}
       </AppStack.Screen>
       <AppStack.Screen name="Settings">
         {({ navigation }) => (

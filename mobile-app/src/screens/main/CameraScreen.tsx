@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Location from 'expo-location';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { COLORS } from '../../constants';
+import { COLORS, SPACING } from '../../constants';
 import { BadgeChip, PrimaryButton } from '../../components';
 import { CapturedReport } from '../../types';
 import { cameraScreenStyles } from '../../styles/screens';
@@ -16,6 +17,7 @@ type CameraScreenProps = {
 
 export function CameraScreen({ onBack, onCapture }: CameraScreenProps) {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const [permission, requestPermission] = useCameraPermissions();
   const [isCameraReady, setIsCameraReady] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
@@ -93,7 +95,13 @@ export function CameraScreen({ onBack, onCapture }: CameraScreenProps) {
     <View style={cameraScreenStyles.container}>
       <CameraView ref={cameraRef} style={cameraScreenStyles.camera} facing="back" onCameraReady={() => setIsCameraReady(true)} />
 
-      <View style={cameraScreenStyles.overlay} pointerEvents="box-none">
+      <View
+        style={[
+          cameraScreenStyles.overlay,
+          { paddingTop: insets.top + SPACING.md, paddingBottom: insets.bottom + SPACING.lg },
+        ]}
+        pointerEvents="box-none"
+      >
         <View style={cameraScreenStyles.topRow}>
           <Pressable onPress={onBack} style={cameraScreenStyles.iconButton}>
             <MaterialIcons name="close" size={22} color={COLORS.white} />

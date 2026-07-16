@@ -14,6 +14,8 @@ export type MainTabParamList = {
   Profile: undefined;
 };
 
+import type { NavigatorScreenParams } from '@react-navigation/native';
+
 import type { Hazard } from './map';
 
 /** Captured photo plus GPS fix (null if location permission was denied/unavailable) handed off from Camera to Submission. */
@@ -24,7 +26,7 @@ export type CapturedReport = {
 };
 
 export type AppStackParamList = {
-  MainTabs: undefined;
+  MainTabs: NavigatorScreenParams<MainTabParamList> | undefined;
   Camera: undefined;
   Submission: CapturedReport;
   /** Opened from a map pin — carries the tapped hazard, or undefined for a direct/deep entry. */

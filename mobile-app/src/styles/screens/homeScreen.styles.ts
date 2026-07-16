@@ -1,6 +1,5 @@
 import { StyleSheet } from 'react-native';
 import { COLORS, FONT_SIZES, SPACING } from '../../constants';
-import { withAlpha } from '../../utils';
 
 export const homeScreenStyles = StyleSheet.create({
   container: {
@@ -9,13 +8,16 @@ export const homeScreenStyles = StyleSheet.create({
   },
   content: {
     padding: SPACING.lg,
-    paddingTop: SPACING.xl * 2,
     gap: SPACING.md,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  headerText: {
+    flex: 1,
+    paddingRight: SPACING.md,
   },
   greeting: {
     color: COLORS.disabled,
@@ -66,19 +68,33 @@ export const homeScreenStyles = StyleSheet.create({
   mapCard: {
     borderRadius: 16,
     overflow: 'hidden',
-    height: 180,
+    position: 'relative',
   },
-  mapImage: {
-    width: '100%',
-    height: '100%',
-  },
-  mapOverlay: {
+  mapHeader: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
+    backgroundColor: 'transparent',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
     padding: SPACING.md,
-    backgroundColor: withAlpha(COLORS.primary, 0.75),
+  },
+  mapImage: {
+    width: '100%',
+    height: 200,
+  },
+  mapIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mapTextWrap: {
+    flex: 1,
   },
   mapTitle: {
     color: COLORS.white,
@@ -87,6 +103,7 @@ export const homeScreenStyles = StyleSheet.create({
   },
   mapSubtitle: {
     color: COLORS.disabled,
+    fontSize: FONT_SIZES.sm,
     marginTop: 2,
   },
   sectionTitle: {

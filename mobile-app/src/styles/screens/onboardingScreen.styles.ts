@@ -4,11 +4,10 @@ import { withAlpha } from '../../utils';
 
 export const onboardingScreenStyles = StyleSheet.create({
   container: {
+    // Vertical padding is applied from safe-area insets in the component.
     flex: 1,
     backgroundColor: COLORS.background,
     paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.xl * 2,
-    paddingBottom: SPACING.xl,
   },
   headerRow: {
     flexDirection: 'row',
@@ -26,19 +25,13 @@ export const onboardingScreenStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   iconBadge: {
-    width: 70,
-    height: 70,
-    borderRadius: 20,
-    backgroundColor: withAlpha(COLORS.secondary, 0.25),
+    width: 132,
+    height: 132,
+    borderRadius: 40,
+    backgroundColor: withAlpha(COLORS.secondary, 0.18),
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: SPACING.lg,
-  },
-  previewImage: {
-    width: 220,
-    height: 300,
-    borderRadius: 24,
-    marginBottom: SPACING.lg,
+    marginBottom: SPACING.xl,
   },
   title: {
     fontSize: FONT_SIZES.xl,

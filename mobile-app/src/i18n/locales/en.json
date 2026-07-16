@@ -20,6 +20,26 @@
       "map": "Map",
       "history": "History",
       "profile": "Profile"
+    },
+    "severity": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "status": {
+      "active": "Active",
+      "in_review": "In review",
+      "pending": "Pending",
+      "resolved": "Resolved",
+      "fixed": "Fixed"
+    },
+    "states": {
+      "retry": "Retry",
+      "tryAgain": "Try again",
+      "loading": "Loading…",
+      "offlineTitle": "You're offline",
+      "errorTitle": "Something went wrong",
+      "emptyTitle": "Nothing here yet"
     }
   },
   "auth": {
@@ -90,8 +110,7 @@
     "alreadyHaveAccount": "Already have an account? Login"
   },
   "home": {
-    "greeting": "Good morning",
-    "helloUser": "Hello, User!",
+    "greeting": "Welcome back",
     "contributions": "Your Contributions",
     "stats": {
       "reports": "Reports",
@@ -99,21 +118,11 @@
       "trust": "Trust"
     },
     "communityMap": "Community Map",
-    "hazardsNearby": "5 hazards nearby",
+    "mapSubtitle": "Tap to explore hazards near you",
     "recentActivity": "Recent Activity",
-    "activity": {
-      "potholeReported": "Pothole reported",
-      "potholeSubtitle": "Jl. Sudirman · 2h ago",
-      "voteConfirmed": "Vote confirmed",
-      "voteSubtitle": "Jl. Thamrin · 5h ago",
-      "badgeEarned": "Badge earned",
-      "badgeSubtitle": "Road Hero · 1d ago"
-    },
-    "badges": {
-      "pending": "Pending",
-      "verified": "Verified",
-      "reward": "Reward"
-    }
+    "activityEmptyTitle": "No activity yet",
+    "activityEmptyMessage": "Report your first hazard to start building your contribution history.",
+    "activityStatus": "{{type}} · {{status}}"
   },
   "map": {
     "searchPlaceholder": "Search hazards...",
@@ -123,26 +132,8 @@
   "history": {
     "title": "My Reports",
     "summary": "{{count}} total reports",
-    "reports": {
-      "severePothole": {
-        "title": "Severe Pothole",
-        "location": "Jl. Sudirman, Jakarta",
-        "severity": "High",
-        "status": "Pending"
-      },
-      "roadCrack": {
-        "title": "Road Crack",
-        "location": "Jl. Thamrin, Jakarta",
-        "severity": "Medium",
-        "status": "Verified"
-      },
-      "brokenPavement": {
-        "title": "Broken Pavement",
-        "location": "Jl. Tun Razak, Kuala Lumpur",
-        "severity": "High",
-        "status": "Pending"
-      }
-    }
+    "emptyTitle": "No reports yet",
+    "emptyMessage": "Reports you submit will appear here. Tap the camera button to add your first one."
   },
   "profile": {
     "title": "Profile",
@@ -150,8 +141,8 @@
     "level": "Trusted Contributor",
     "stats": {
       "reports": "Reports",
-      "verifies": "Verifies",
-      "rank": "Rank"
+      "votes": "Votes",
+      "trust": "Trust"
     }
   },
   "camera": {
@@ -165,31 +156,24 @@
   },
   "hazardDetail": {
     "title": "Hazard Detail",
-    "hazardName": "Severe Pothole",
-    "hazardLocation": "Jl. Sudirman, Jakarta",
     "communityVerification": "Community Verification",
     "verificationQuestion": "Has this hazard been resolved?",
     "reporterTitle": "Reporter",
-    "reporterValue": "Trusted contributor Ahmad R."
+    "reporterUnknown": "Anonymous reporter",
+    "reportedOn": "Reported {{date}}",
+    "severityLabel": "{{severity}} severity",
+    "missingTitle": "Hazard unavailable",
+    "missingMessage": "We couldn't load this hazard. Please go back and try again.",
+    "photoCount": "{{index}} / {{total}}"
   },
   "notifications": {
     "title": "Notifications",
-    "items": {
-      "trustPoints": {
-        "title": "You earned 50 trust points!",
-        "subtitle": "Great contribution this week.",
-        "type": "Reward"
-      },
-      "reportFixed": {
-        "title": "Report marked as fixed",
-        "subtitle": "Jalan Gasing pothole is now resolved.",
-        "type": "Update"
-      },
-      "photoUpdate": {
-        "title": "Photo update requested",
-        "subtitle": "Please verify a hazard near Jalan Ampang.",
-        "type": "Action"
-      }
+    "emptyTitle": "No notifications",
+    "emptyMessage": "Updates about the reports you submit will appear here.",
+    "kinds": {
+      "reported": "Report submitted",
+      "in_review": "Report in review",
+      "resolved": "Report resolved"
     }
   },
   "settings": {
@@ -217,9 +201,18 @@
     "title": "Submit Report",
     "gpsCoordinates": "GPS Coordinates",
     "gpsUnavailable": "Location unavailable",
-    "aiSeverityAssessment": "AI Severity Assessment",
-    "aiSeverityValue": "High Severity (92% confidence)",
+    "locationRequired": "A GPS location is required to submit. Enable location and retake the photo.",
+    "aiSeverityAssessment": "Severity Assessment",
+    "severityValue": "{{severity}} · {{confidence}}% confidence",
+    "preliminaryNote": "Preliminary auto-estimate — pending AI verification.",
     "hazardType": "Hazard Type",
+    "hazardTypeHint": "Choose the defect type that best matches the photo.",
+    "descriptionLabel": "Description (optional)",
+    "descriptionPlaceholder": "Add any detail that helps crews find and assess the hazard…",
+    "submitting": "Submitting…",
+    "successTitle": "Report submitted",
+    "successMessage": "Thanks for helping keep the roads safe. Your report is now on the map.",
+    "errorTitle": "Submission failed",
     "hazardTags": {
       "pothole": "Pothole",
       "crack": "Crack",
