@@ -199,3 +199,6 @@ graphify-out/
 
 # documentation
 docs/
+
+# yolo
+ai-microservice/best.pt
