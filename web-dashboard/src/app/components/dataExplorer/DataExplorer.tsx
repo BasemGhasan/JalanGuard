@@ -110,8 +110,7 @@ export function DataExplorer() {
       const [{ data: defectTypeData }, { data: boundaryData }] = await Promise.all([
         supabase
           .from("hazards")
-          .select("defect_type")
-          .not("defect_type", "is", null),
+          .select("defect_type, defect_types"),
         supabase
           .from("administrative_boundaries")
           .select("name")
@@ -121,10 +120,18 @@ export function DataExplorer() {
 
       if (cancelled) return;
 
-      const defectRows = (defectTypeData ?? []) as Array<{ defect_type: string | null }>;
+      const defectRows = (defectTypeData ?? []) as Array<{
+        defect_type: string | null;
+        defect_types: string[] | null;
+      }>;
       const boundaryRows = (boundaryData ?? []) as Array<{ name: string | null }>;
 
-      setDefectTypes(sortUniqueStrings(defectRows.map((row) => row.defect_type).filter((value): value is string => Boolean(value))));
+      // Union of every primary + secondary AI-detected type, so a defect
+      // that's never anyone's "primary" type still appears as a filter option.
+      const allDefectTypes = defectRows.flatMap((row) =>
+        row.defect_types && row.defect_types.length > 0 ? row.defect_types : [row.defect_type]
+      );
+      setDefectTypes(sortUniqueStrings(allDefectTypes.filter((value): value is string => Boolean(value))));
       setLocation(sortUniqueStrings(boundaryRows.map((row) => row.name).filter((value): value is string => Boolean(value))));
     }
 

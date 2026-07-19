@@ -7,6 +7,7 @@ import { COLORS, SPACING }   from "../../../constants/theme";
 import { ImageSlider }       from "./ImageSlider";
 import { SeverityPill }      from "../ui/severityPill";
 import { formatDate }        from "../../../utils/formatters";
+import { getDefectTypes, formatDefectType } from "../../../utils/hazardDisplay";
 import type { Hazard }       from "../../../types/map";
 
 // 2. Interfaces
@@ -29,10 +30,7 @@ export function HazardCard({ hazard, onClose, startExpanded = false }: Readonly<
 
   // All AI-detected types; legacy rows fall back to the single defect_type.
   const defectTypes = useMemo<string[]>(
-    () =>
-      hazard.defect_types && hazard.defect_types.length > 0
-        ? hazard.defect_types
-        : [hazard.defect_type],
+    () => getDefectTypes(hazard),
     [hazard.defect_types, hazard.defect_type],
   );
 
@@ -110,7 +108,7 @@ export function HazardCard({ hazard, onClose, startExpanded = false }: Readonly<
             <span style={styles.badgeRow}>
               {defectTypes.map((type) => (
                 <span key={type} style={styles.typeBadge}>
-                  {type.replace(/_/g, " ")}
+                  {formatDefectType(type)}
                 </span>
               ))}
             </span>

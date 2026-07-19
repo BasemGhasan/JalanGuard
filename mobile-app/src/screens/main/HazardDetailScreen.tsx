@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { COLORS } from '../../constants';
 import { AppHeader, BadgeChip, InfoCard, StateView } from '../../components';
 import { useHazardVotes } from '../../hooks';
-import { formatDate, prettyDefectType, severityTone } from '../../utils';
+import { formatDate, prettyDefectTypes, severityTone } from '../../utils';
 import type { Hazard, UserProfile, VoteKind } from '../../types';
 import { hazardDetailScreenStyles as s, HERO_WIDTH } from '../../styles/screens';
 
@@ -42,7 +42,7 @@ export function HazardDetailScreen({ hazard, user, onBack }: HazardDetailScreenP
     );
   }
 
-  const title = prettyDefectType(hazard.defect_type);
+  const title = prettyDefectTypes(hazard);
   const location = `${hazard.latitude.toFixed(4)}, ${hazard.longitude.toFixed(4)}`;
   const reporter = hazard.reporter_name?.trim() || t('hazardDetail.reporterUnknown');
 

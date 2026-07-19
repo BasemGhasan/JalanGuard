@@ -71,7 +71,10 @@ export function useDataExplorer(
       query = query.eq("status", status);
     }
     if (defectType && defectType !== "all") {
-      query = query.eq("defect_type", defectType);
+      // Match if it's the primary type OR present anywhere in the full
+      // AI-detected set (legacy rows have a null defect_types array).
+      const escaped = defectType.replace(/"/g, '\\"');
+      query = query.or(`defect_type.eq."${escaped}",defect_types.cs.{"${escaped}"}`);
     }
     if (severity && severity !== "all") {
       query = query.eq("severity", severity);

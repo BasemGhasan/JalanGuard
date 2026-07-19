@@ -3,6 +3,7 @@ import { memo, useCallback } from "react";
 import { Marker, Popup } from "react-leaflet";
 import { markerDivIcon, severityMarkerColor } from "../../../utils/mapHelpers";
 import { COLORS, SEVERITY_BADGE }             from "../../../constants/theme";
+import { formatDefectTypes }                  from "../../../utils/hazardDisplay";
 import type { Hazard }                        from "../../../types/map";
 
 // 2. Interfaces
@@ -55,12 +56,7 @@ export const PinsLayer = memo(function PinsLayer({ hazards, onSelectHazard }: Pi
 
                 {/* Defect type headline — shows every AI-detected type. */}
                 <p className="pin-popup-type">
-                  {(hazard.defect_types && hazard.defect_types.length > 0
-                    ? hazard.defect_types
-                    : [hazard.defect_type]
-                  )
-                    .map((type) => type.replace(/_/g, " "))
-                    .join(" + ")}
+                  {formatDefectTypes(hazard)}
                 </p>
 
                 <div className="pin-popup-divider" />

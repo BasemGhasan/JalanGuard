@@ -14,6 +14,7 @@ import { File } from 'expo-file-system';
 
 import { supabase } from './supabase';
 import { toFriendlyError } from '../utils/errors';
+import { prettyDefectTypes } from '../utils/hazardDisplay';
 import type { Hazard, NewHazardInput, ActivityItem } from '../types';
 
 const BUCKET = 'hazard-images';
@@ -123,9 +124,7 @@ export async function getRecentActivity(userId: string, limit = 6): Promise<Acti
 
     return ((data as Hazard[] | null) ?? []).map((hazard) => {
       const kind = STATUS_TO_KIND[hazard.status] ?? 'in_review';
-      const prettyType = hazard.defect_type
-        .replace(/_/g, ' ')
-        .replace(/\b\w/g, (c) => c.toUpperCase());
+      const prettyType = prettyDefectTypes(hazard);
       return {
         id: hazard.id,
         kind,

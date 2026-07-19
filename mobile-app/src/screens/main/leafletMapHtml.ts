@@ -138,6 +138,12 @@ export const LEAFLET_MAP_HTML = `<!DOCTYPE html>
         }).addTo(map);
       }
 
+      // All AI-detected types for a hazard; legacy rows fall back to defect_type.
+      function defectTypesLabel(h) {
+        var types = (h.defect_types && h.defect_types.length) ? h.defect_types : [h.defect_type];
+        return types.map(function (t) { return String(t || '').replace(/_/g, ' '); }).join(' + ');
+      }
+
       function drawPins(hazards) {
         if (pinsLayer) { map.removeLayer(pinsLayer); pinsLayer = null; }
         pinsLayer = L.layerGroup();
@@ -147,7 +153,7 @@ export const LEAFLET_MAP_HTML = `<!DOCTYPE html>
           var html =
             '<div class="lg-badge" style="background:' + badge.bg + ';color:' + badge.text +
               ';border:1px solid ' + badge.border + '">' + String(h.severity).toUpperCase() + '</div>' +
-            '<div class="lg-type">' + String(h.defect_type || '').replace(/_/g, ' ') + '</div>' +
+            '<div class="lg-type">' + defectTypesLabel(h) + '</div>' +
             '<div class="lg-row"><span class="lg-label">STATUS</span><span>' + (h.status || '') + '</span></div>' +
             '<div class="lg-row"><span class="lg-label">LAT</span><span class="lg-mono">' + h.latitude.toFixed(4) + '</span></div>' +
             '<div class="lg-row"><span class="lg-label">LNG</span><span class="lg-mono">' + h.longitude.toFixed(4) + '</span></div>' +

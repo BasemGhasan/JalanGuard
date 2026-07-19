@@ -3,7 +3,7 @@ import { FlatList, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { AppHeader, BadgeChip, ListRow, StateView } from '../../components';
 import { useMyReports, useRefetchOnFocus } from '../../hooks';
-import { formatDate, prettyDefectType, severityTone, statusTone } from '../../utils';
+import { formatDate, prettyDefectTypes, severityTone, statusTone } from '../../utils';
 import type { Hazard, UserProfile } from '../../types';
 import { historyScreenStyles } from '../../styles/screens';
 
@@ -25,7 +25,7 @@ export function HistoryScreen({ user, onOpenHazardDetail }: HistoryScreenProps) 
     const thumb = item.image_urls?.[0] ?? item.image_url ?? undefined;
     return (
       <ListRow
-        title={prettyDefectType(item.defect_type)}
+        title={prettyDefectTypes(item)}
         subtitle={formatDate(item.created_at)}
         thumbnailUri={thumb}
         icon={thumb ? undefined : 'warning'}

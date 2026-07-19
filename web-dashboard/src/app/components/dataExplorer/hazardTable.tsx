@@ -21,6 +21,7 @@ import { AlertCircle, FileX, Loader2 } from "lucide-react";
 import { COLORS, FONT_SIZES, SPACING } from "../../../constants/theme";
 import { SeverityPill } from "../ui/severityPill";
 import { formatDate } from "../../../utils/formatters";
+import { getDefectTypes, formatDefectType } from "../../../utils/hazardDisplay";
 import type { HazardWithState } from "../../../types/map";
 
 // 2. Interfaces
@@ -107,8 +108,14 @@ function TableRow({ hazard, onRowClick }: TableRowProps) {
     >
       <td style={tdStyle}>{formatDate(hazard.created_at)}</td>
       <td style={tdStyle}>{hazard.malaysian_location?.location_name ?? "—"}</td>
-      <td style={{ ...tdStyle, textTransform: "capitalize", maxWidth: 200 }}>
-        {hazard.defect_type.replace(/_/g, " ")}
+      <td style={{ ...tdStyle, whiteSpace: "normal", maxWidth: 200 }}>
+        <span style={typeBadgeRow}>
+          {getDefectTypes(hazard).map((type) => (
+            <span key={type} style={typeBadge}>
+              {formatDefectType(type)}
+            </span>
+          ))}
+        </span>
       </td>
       <td style={tdStyle}>
         <SeverityPill severity={hazard.severity} />
@@ -125,6 +132,24 @@ const tdStyle = {
   fontSize:      FONT_SIZES.sm + 2,
   color:         COLORS.textPrimary,
   verticalAlign: "middle" as const,
+  whiteSpace:    "nowrap" as const,
+} as const;
+
+const typeBadgeRow = {
+  display:  "flex",
+  flexWrap: "wrap" as const,
+  gap:      4,
+} as const;
+
+const typeBadge = {
+  fontSize:      FONT_SIZES.sm,
+  fontWeight:    600,
+  color:         COLORS.textPrimary,
+  background:    COLORS.glintFaint,
+  border:        `1px solid ${COLORS.borderSoft}`,
+  borderRadius:  999,
+  padding:       "2px 8px",
+  textTransform: "capitalize" as const,
   whiteSpace:    "nowrap" as const,
 } as const;
 

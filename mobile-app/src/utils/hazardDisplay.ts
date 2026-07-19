@@ -4,11 +4,26 @@
  * consistent instead of being re-derived ad hoc per screen.
  */
 import type { BadgeTone } from '../styles/components';
-import type { Severity } from '../types';
+import type { Hazard, Severity } from '../types';
+
+/**
+ * All AI-detected defect types for a hazard (e.g. ["crack", "pothole"]).
+ * Falls back to `[defect_type]` for legacy rows where `defect_types` is empty/null.
+ */
+export function getDefectTypes(hazard: Pick<Hazard, 'defect_type' | 'defect_types'>): string[] {
+  return hazard.defect_types && hazard.defect_types.length > 0
+    ? hazard.defect_types
+    : [hazard.defect_type];
+}
 
 /** "pot_hole" → "Pot Hole". */
 export function prettyDefectType(value: string): string {
   return value.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/** All defect types, formatted and joined, e.g. "Crack + Pothole". */
+export function prettyDefectTypes(hazard: Pick<Hazard, 'defect_type' | 'defect_types'>): string {
+  return getDefectTypes(hazard).map(prettyDefectType).join(' + ');
 }
 
 /** Badge colour for a severity level. */

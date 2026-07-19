@@ -4,6 +4,7 @@ import autoTable from "jspdf-autotable";
 import type { HazardWithState } from "../types/map";
 import imgToBase64 from "./imgToBase64";
 import { COLORS } from "../constants/theme";
+import { getDefectTypes, formatDefectType } from "./hazardDisplay";
 
 // ==========================================
 // 📊 DATA FORMATTING HELPER
@@ -12,7 +13,7 @@ import { COLORS } from "../constants/theme";
 // 1. Helper: Flatten the data so it exports cleanly (no nested objects)
 const formatDataForExport = (data: HazardWithState[]) => {
     return data.map((hazard) => ({
-        Type: hazard.defect_type.replace("_", " ").toUpperCase(),
+        Type: getDefectTypes(hazard).map(formatDefectType).join(" + ").toUpperCase(),
         Severity: hazard.severity.toUpperCase(),
         Status: hazard.status.toUpperCase(),
         Location: hazard.malaysian_location?.location_name || "Unknown",
