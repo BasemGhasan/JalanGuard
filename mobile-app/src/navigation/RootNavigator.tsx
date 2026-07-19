@@ -197,32 +197,20 @@ function AuthStackNavigator({
   onLogin: (email: string, password: string) => Promise<void>;
   onRegister: (fullName: string, email: string, password: string) => Promise<{ needsConfirmation: boolean }>;
 }) {
-  const { t } = useTranslation();
-
   return (
-    <AuthStack.Navigator
-      initialRouteName="Splash"
-      screenOptions={{
-        headerTitleAlign: 'center',
-      }}
-    >
-      <AuthStack.Screen
-        name="Splash"
-        component={SplashScreen}
-        options={{ headerShown: false }}
-      />
-      <AuthStack.Screen name="Onboarding" component={OnboardingScreen} options={{ title: t('auth.titles.welcome') }} />
-      <AuthStack.Screen name="Login" options={{ title: t('navigation.auth.login') }}>
+    // Headerless: every auth screen renders its own centred title via AuthHero,
+    // and the default header's white background clashed with the dark screens.
+    // Back is still available via the OS gesture/button and the in-screen links.
+    <AuthStack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
+      <AuthStack.Screen name="Splash" component={SplashScreen} />
+      <AuthStack.Screen name="Onboarding" component={OnboardingScreen} />
+      <AuthStack.Screen name="Login">
         {(props) => <LoginScreen {...props} onLogin={onLogin} />}
       </AuthStack.Screen>
-      <AuthStack.Screen name="Register" options={{ title: t('navigation.auth.register') }}>
+      <AuthStack.Screen name="Register">
         {(props) => <RegisterScreen {...props} onRegister={onRegister} />}
       </AuthStack.Screen>
-      <AuthStack.Screen
-        name="ForgotPassword"
-        component={ForgotPasswordScreen}
-        options={{ title: t('navigation.auth.resetPassword') }}
-      />
+      <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
     </AuthStack.Navigator>
   );
 }

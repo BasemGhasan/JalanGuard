@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -53,10 +54,18 @@ export function OnboardingScreen({ navigation }: Props) {
 
   // Every exit from the carousel — Skip, Get started, or the login link —
   // marks it seen, so it never reappears on a later launch.
+  //
+  // Onboarding is dropped from the stack on the way out, and Login is always
+  // seeded as the root so that Register sits exactly one level above it. That
+  // keeps the auth stack at most two deep no matter how the user got there.
   const leaveOnboarding = useCallback(
     (destination: 'Login' | 'Register') => {
       void markOnboardingSeen();
-      navigation.replace(destination);
+      if (destination === 'Login') {
+        navigation.replace('Login');
+      } else {
+        navigation.reset({ index: 1, routes: [{ name: 'Login' }, { name: 'Register' }] });
+      }
     },
     [navigation],
   );
@@ -84,6 +93,9 @@ export function OnboardingScreen({ navigation }: Props) {
         { paddingTop: insets.top + SPACING.md, paddingBottom: insets.bottom + SPACING.lg },
       ]}
     >
+      {/* The only light-backgrounded screen — needs dark status-bar content. */}
+      <StatusBar style="dark" backgroundColor={COLORS.background} />
+
       <View style={onboardingScreenStyles.headerRow}>
         <View />
         <Pressable onPress={handleSkip} hitSlop={8}>

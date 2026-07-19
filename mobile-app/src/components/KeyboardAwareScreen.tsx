@@ -6,7 +6,8 @@ import {
   StyleProp,
   ViewStyle,
 } from 'react-native';
-import { COLORS } from '../constants';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { COLORS, SPACING } from '../constants';
 import { keyboardAwareScreenStyles } from '../styles/components';
 
 type KeyboardAwareScreenProps = {
@@ -29,12 +30,18 @@ type KeyboardAwareScreenProps = {
  *
  * Screens pass their existing container style as `contentStyle`; it must use
  * `flexGrow` rather than `flex` since it lands on a scroll content container.
+ *
+ * These screens run headerless, so the wrapper also owns the safe-area insets
+ * that the navigation header used to provide — without them the content would
+ * sit under the status bar / notch.
  */
 export function KeyboardAwareScreen({
   contentStyle,
   backgroundColor = COLORS.primary,
   children,
 }: KeyboardAwareScreenProps) {
+  const insets = useSafeAreaInsets();
+
   return (
     <KeyboardAvoidingView
       style={[keyboardAwareScreenStyles.flex, { backgroundColor }]}
@@ -42,7 +49,11 @@ export function KeyboardAwareScreen({
     >
       <ScrollView
         style={keyboardAwareScreenStyles.flex}
-        contentContainerStyle={[keyboardAwareScreenStyles.content, contentStyle]}
+        contentContainerStyle={[
+          keyboardAwareScreenStyles.content,
+          contentStyle,
+          { paddingTop: insets.top + SPACING.lg, paddingBottom: insets.bottom + SPACING.lg },
+        ]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >

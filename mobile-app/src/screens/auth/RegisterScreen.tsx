@@ -3,7 +3,7 @@ import { Alert, Pressable, Text } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { AuthStackParamList } from '../../types';
-import { PrimaryButton, FormField, KeyboardAwareScreen } from '../../components';
+import { AuthHero, PrimaryButton, FormField, KeyboardAwareScreen } from '../../components';
 import { isValidEmail } from '../../utils';
 import { registerScreenStyles } from '../../styles/screens';
 
@@ -45,7 +45,7 @@ export function RegisterScreen({ navigation, onRegister }: Props) {
       if (needsConfirmation) {
         // Email confirmation required — no session yet, so guide the user back.
         Alert.alert(t('auth.alerts.checkEmailTitle'), t('auth.alerts.checkEmailMessage'));
-        navigation.navigate('Login');
+        navigation.popTo('Login');
       }
       // Otherwise the auth listener signs the user straight into the app.
     } catch (error) {
@@ -58,8 +58,11 @@ export function RegisterScreen({ navigation, onRegister }: Props) {
 
   return (
     <KeyboardAwareScreen contentStyle={registerScreenStyles.container}>
-      <Text style={registerScreenStyles.title}>{t('auth.titles.createAccount')}</Text>
-      <Text style={registerScreenStyles.subtitle}>{t('auth.subtitles.register')}</Text>
+      <AuthHero
+        icon="person-add-alt"
+        title={t('auth.titles.createAccount')}
+        subtitle={t('auth.subtitles.register')}
+      />
 
       <FormField
         icon="person-outline"
@@ -87,9 +90,18 @@ export function RegisterScreen({ navigation, onRegister }: Props) {
         style={registerScreenStyles.inputSpacing}
       />
 
-      <PrimaryButton label={buttonLabel} onPress={handleRegister} disabled={submitting} icon="chevron-right" />
+      <PrimaryButton
+        label={buttonLabel}
+        onPress={handleRegister}
+        disabled={submitting}
+        icon="chevron-right"
+        style={registerScreenStyles.submitButton}
+      />
 
-      <Pressable onPress={() => navigation.navigate('Login')}>
+      {/* popTo, not navigate: in React Navigation 7 `navigate` pushes a second
+          Login instead of returning to the existing one, which is what let
+          Login ⇄ Register bounce back and forth stacking screens forever. */}
+      <Pressable onPress={() => navigation.popTo('Login')}>
         <Text style={registerScreenStyles.linkText}>{t('auth.links.hasAccount')}</Text>
       </Pressable>
     </KeyboardAwareScreen>

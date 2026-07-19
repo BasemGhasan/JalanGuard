@@ -6,27 +6,18 @@ export const loginScreenStyles = StyleSheet.create({
   // not flex, or the form can't scroll clear of the keyboard.
   container: {
     flexGrow: 1,
-    padding: SPACING.lg,
+    paddingHorizontal: SPACING.lg,
     justifyContent: 'center',
-  },
-  title: {
-    fontSize: FONT_SIZES.xl,
-    fontWeight: '700',
-    color: COLORS.white,
-  },
-  subtitle: {
-    marginTop: SPACING.sm,
-    marginBottom: SPACING.lg,
-    color: COLORS.disabled,
-    fontSize: FONT_SIZES.sm,
   },
   passwordWrap: {
     marginTop: SPACING.md,
   },
+  // The forgot-password link sits between the password field and the button,
+  // so its margins provide the button's breathing room here.
   forgotWrap: {
     alignSelf: 'flex-end',
-    marginTop: SPACING.sm,
-    marginBottom: SPACING.md,
+    marginTop: SPACING.md,
+    marginBottom: SPACING.lg,
   },
   forgotText: {
     color: COLORS.surface,

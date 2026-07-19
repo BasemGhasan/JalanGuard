@@ -3,7 +3,7 @@ import { Alert, Pressable, Text } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { AuthStackParamList } from '../../types';
-import { PrimaryButton, FormField, KeyboardAwareScreen } from '../../components';
+import { AuthHero, PrimaryButton, FormField, KeyboardAwareScreen } from '../../components';
 import { isValidEmail } from '../../utils';
 import { resetPassword } from '../../services';
 import { forgotPasswordScreenStyles } from '../../styles/screens';
@@ -25,7 +25,7 @@ export function ForgotPasswordScreen({ navigation }: Props) {
     try {
       await resetPassword(email);
       Alert.alert(t('auth.alerts.resetEmailSentTitle'), t('auth.alerts.resetEmailSentMessage'));
-      navigation.navigate('Login');
+      navigation.popTo('Login');
     } catch (error) {
       const message = error instanceof Error ? error.message : t('auth.alerts.genericMessage');
       Alert.alert(t('auth.alerts.resetFailedTitle'), message);
@@ -36,8 +36,11 @@ export function ForgotPasswordScreen({ navigation }: Props) {
 
   return (
     <KeyboardAwareScreen contentStyle={forgotPasswordScreenStyles.container}>
-      <Text style={forgotPasswordScreenStyles.title}>{t('auth.titles.resetPassword')}</Text>
-      <Text style={forgotPasswordScreenStyles.subtitle}>{t('auth.subtitles.resetPassword')}</Text>
+      <AuthHero
+        icon="lock-reset"
+        title={t('auth.titles.resetPassword')}
+        subtitle={t('auth.subtitles.resetPassword')}
+      />
 
       <FormField
         icon="mail-outline"
@@ -52,9 +55,12 @@ export function ForgotPasswordScreen({ navigation }: Props) {
         onPress={handleSendResetLink}
         disabled={submitting}
         icon="chevron-right"
+        style={forgotPasswordScreenStyles.submitButton}
       />
 
-      <Pressable onPress={() => navigation.navigate('Login')}>
+      {/* popTo returns to the Login already in the stack rather than pushing a
+          duplicate — see the note in RegisterScreen. */}
+      <Pressable onPress={() => navigation.popTo('Login')}>
         <Text style={forgotPasswordScreenStyles.linkText}>{t('common.actions.backToLogin')}</Text>
       </Pressable>
     </KeyboardAwareScreen>

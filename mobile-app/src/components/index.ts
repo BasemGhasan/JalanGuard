@@ -1,5 +1,6 @@
 export * from './LoadingSpinner';
 export * from './AppHeader';
+export * from './AuthHero';
 export * from './PrimaryButton';
 export * from './FormField';
 export * from './InfoCard';

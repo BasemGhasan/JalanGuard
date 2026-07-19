@@ -3,7 +3,7 @@ import { Alert, Pressable, Text } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { AuthStackParamList } from '../../types';
-import { PrimaryButton, FormField, KeyboardAwareScreen } from '../../components';
+import { AuthHero, PrimaryButton, FormField, KeyboardAwareScreen } from '../../components';
 import { isValidEmail } from '../../utils';
 import { loginScreenStyles } from '../../styles/screens';
 
@@ -51,8 +51,11 @@ export function LoginScreen({ navigation, onLogin }: Props) {
 
   return (
     <KeyboardAwareScreen contentStyle={loginScreenStyles.container}>
-      <Text style={loginScreenStyles.title}>{t('auth.titles.welcomeBack')}</Text>
-      <Text style={loginScreenStyles.subtitle}>{t('auth.subtitles.login')}</Text>
+      <AuthHero
+        icon="shield"
+        title={t('auth.titles.welcomeBack')}
+        subtitle={t('auth.subtitles.login')}
+      />
 
       <FormField
         icon="mail-outline"

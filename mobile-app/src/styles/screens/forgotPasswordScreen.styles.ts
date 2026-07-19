@@ -1,24 +1,17 @@
 import { StyleSheet } from 'react-native';
-import { COLORS, FONT_SIZES, SPACING } from '../../constants';
+import { COLORS, SPACING } from '../../constants';
 
 export const forgotPasswordScreenStyles = StyleSheet.create({
   // Applied as a scroll content container by KeyboardAwareScreen — flexGrow,
   // not flex, or the form can't scroll clear of the keyboard.
   container: {
     flexGrow: 1,
-    padding: SPACING.lg,
+    paddingHorizontal: SPACING.lg,
     justifyContent: 'center',
   },
-  title: {
-    fontSize: FONT_SIZES.xl,
-    fontWeight: '700',
-    color: COLORS.white,
-  },
-  subtitle: {
-    marginTop: SPACING.sm,
-    marginBottom: SPACING.lg,
-    color: COLORS.disabled,
-    fontSize: FONT_SIZES.sm,
+  // Matches the register form: the button gets more air than the field gaps.
+  submitButton: {
+    marginTop: SPACING.lg,
   },
   linkText: {
     marginTop: SPACING.lg,

@@ -38,11 +38,10 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <NavigationContainer>
-        {/* Auth/onboarding screens are light-themed; the main app is dark. */}
-        <StatusBar
-          style={isAuthenticated ? 'light' : 'dark'}
-          backgroundColor={isAuthenticated ? COLORS.primary : COLORS.background}
-        />
+        {/* Splash, the auth forms and the main app are all dark-backgrounded,
+            so light status-bar content is the right default. Onboarding is the
+            one light screen and overrides this itself. */}
+        <StatusBar style="light" backgroundColor={COLORS.primary} />
         <RootNavigator
           isAuthenticated={isAuthenticated}
           user={user}
