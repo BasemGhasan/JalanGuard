@@ -27,6 +27,15 @@ export function HazardCard({ hazard, onClose, startExpanded = false }: Readonly<
     return [];
   }, [hazard.image_urls, hazard.image_url]);
 
+  // All AI-detected types; legacy rows fall back to the single defect_type.
+  const defectTypes = useMemo<string[]>(
+    () =>
+      hazard.defect_types && hazard.defect_types.length > 0
+        ? hazard.defect_types
+        : [hazard.defect_type],
+    [hazard.defect_types, hazard.defect_type],
+  );
+
   const handleClose = useCallback(
     (e: React.MouseEvent) => { 
       e.stopPropagation(); 
@@ -96,7 +105,16 @@ export function HazardCard({ hazard, onClose, startExpanded = false }: Readonly<
 
         {/* ── Meta rows ──────────────────────────────────────────────────── */}
         <div style={styles.meta}>
-          <MetaRow label="TYPE"      value={hazard.defect_type.replace(/_/g, " ")} />
+          <div style={styles.metaRow}>
+            <span style={styles.metaLabel}>TYPE</span>
+            <span style={styles.badgeRow}>
+              {defectTypes.map((type) => (
+                <span key={type} style={styles.typeBadge}>
+                  {type.replace(/_/g, " ")}
+                </span>
+              ))}
+            </span>
+          </div>
           <MetaRow label="STATUS"    value={hazard.status}                         />
           <MetaRow label="REPORTED"  value={formatDate(hazard.created_at)}         />
           {isExpanded && (
@@ -195,5 +213,22 @@ const styles = {
     color:         COLORS.textPrimary,
     fontWeight:    500,
     textTransform: "capitalize" as const,
+  },
+  badgeRow: {
+    display:  "flex",
+    flexWrap: "wrap" as const,
+    gap:      4,
+    justifyContent: "flex-end" as const,
+  },
+  typeBadge: {
+    fontSize:      11,
+    fontWeight:    600,
+    color:         COLORS.textPrimary,
+    background:    COLORS.surface,
+    border:        `1px solid ${COLORS.borderSoft}`,
+    borderRadius:  999,
+    padding:       "2px 8px",
+    textTransform: "capitalize" as const,
+    whiteSpace:    "nowrap" as const,
   },
 } as const;

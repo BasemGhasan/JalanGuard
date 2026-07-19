@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { COLORS, FONT_SIZES, SPACING } from '../../constants';
+import { withAlpha } from '../../utils';
 
 export const submissionScreenStyles = StyleSheet.create({
   container: {
@@ -38,29 +39,65 @@ export const submissionScreenStyles = StyleSheet.create({
     fontWeight: '600',
     marginTop: SPACING.sm,
   },
-  sectionHint: {
-    color: COLORS.disabled,
-    fontSize: FONT_SIZES.sm,
-    marginTop: 2,
-  },
   tagRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: SPACING.sm,
     marginTop: SPACING.sm,
+    alignItems: 'center',
   },
-  tag: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: 8,
-    borderRadius: 999,
+  // AI validation status card (analyzing / error states).
+  aiCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
     backgroundColor: COLORS.accent,
-    color: COLORS.disabled,
-    fontWeight: '600',
-    overflow: 'hidden',
+    borderRadius: 14,
+    padding: SPACING.md,
   },
-  tagActive: {
-    backgroundColor: COLORS.secondary,
+  aiCardError: {
+    backgroundColor: withAlpha(COLORS.error, 0.12),
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: withAlpha(COLORS.error, 0.4),
+  },
+  aiCardText: {
+    flex: 1,
+    gap: 2,
+  },
+  aiCardTitle: {
     color: COLORS.white,
+    fontSize: FONT_SIZES.md,
+    fontWeight: '600',
+  },
+  aiCardHint: {
+    color: COLORS.disabled,
+    fontSize: FONT_SIZES.sm,
+  },
+  aiErrorTitle: {
+    color: COLORS.error,
+    fontSize: FONT_SIZES.md,
+    fontWeight: '700',
+  },
+  aiVerifiedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    marginTop: SPACING.xs,
+  },
+  aiVerifiedText: {
+    color: COLORS.success,
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '700',
+  },
+  severityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginTop: SPACING.sm,
+  },
+  confidenceText: {
+    color: COLORS.disabled,
+    fontSize: FONT_SIZES.sm,
   },
   descriptionInput: {
     backgroundColor: COLORS.accent,

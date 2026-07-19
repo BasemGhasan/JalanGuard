@@ -18,18 +18,6 @@ import type { Hazard, NewHazardInput, ActivityItem } from '../types';
 
 const BUCKET = 'hazard-images';
 
-/**
- * Cheap file stat for the severity heuristic — reads the byte size without
- * loading the whole image into memory. Returns 0 if it can't be read.
- */
-export function getImageByteSize(uri: string): number {
-  try {
-    return new File(uri).size ?? 0;
-  } catch {
-    return 0;
-  }
-}
-
 /** Uploads one local photo, returning its public URL. Path: `<uid>/<ts>-<n>.jpg`. */
 async function uploadImage(userId: string, uri: string, index: number): Promise<string> {
   const bytes = await new File(uri).bytes();
@@ -63,6 +51,7 @@ export async function submitHazardReport(
       .from('hazards')
       .insert({
         defect_type: input.defectType,
+        defect_types: input.defectTypes.length ? input.defectTypes : [input.defectType],
         severity: input.severity,
         confidence: input.confidence,
         latitude: input.latitude,

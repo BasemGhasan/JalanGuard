@@ -18,7 +18,13 @@ export interface StateChoroplethStat {
 
 export interface Hazard {
   id: string;
+  /** Primary (most-severe) type. See `defect_types` for the full set. */
   defect_type: string;
+  /**
+   * All AI-detected hazard types for this report (e.g. ["crack", "pothole"]).
+   * Nullable for legacy rows; fall back to `[defect_type]` when absent.
+   */
+  defect_types: string[] | null;
   severity: "high" | "medium" | "low";
   status: string;
   latitude: number;

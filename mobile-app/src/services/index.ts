@@ -1,3 +1,4 @@
+export * from './aiService';
 export * from './authService';
 export * from './hazardService';
 export * from './voteService';

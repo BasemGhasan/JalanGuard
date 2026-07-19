@@ -1,22 +1,23 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   Text,
   TextInput,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { SPACING } from '../../constants';
-import { AppHeader, InfoCard, PrimaryButton } from '../../components';
-import { getImageByteSize, submitHazardReport } from '../../services';
-import { estimateSeverity } from '../../utils';
-import type { UserProfile } from '../../types';
+import { COLORS, SPACING } from '../../constants';
+import { AppHeader, BadgeChip, InfoCard, PrimaryButton } from '../../components';
+import { AiDetectionError, analyzeHazardPhoto, submitHazardReport } from '../../services';
+import type { AiDetectionResult, Severity, UserProfile } from '../../types';
+import type { BadgeTone } from '../../styles/components';
 import { submissionScreenStyles as s } from '../../styles/screens';
 
 type SubmissionScreenProps = {
@@ -29,16 +30,25 @@ type SubmissionScreenProps = {
   onSubmitted: () => void;
 };
 
-const HAZARD_TYPES = ['pothole', 'crack', 'debris'] as const;
-type HazardType = (typeof HAZARD_TYPES)[number];
+/** AI validation lifecycle for the captured photo. */
+type Analysis =
+  | { status: 'analyzing' }
+  | { status: 'success'; result: AiDetectionResult }
+  | { status: 'error'; message: string; noHazard: boolean };
+
+const SEVERITY_TONE: Record<Severity, BadgeTone> = {
+  high: 'danger',
+  medium: 'warning',
+  low: 'success',
+};
 
 /**
  * Review-and-submit screen for a captured hazard.
  *
- * Real end-to-end flow: uploads the photo to Supabase Storage and inserts a
- * `hazards` row (see `hazardService`). The severity shown is a transparent
- * client-side estimate (see `estimateSeverity`) standing in for the not-yet-built
- * YOLO service — labelled "preliminary" so it never masquerades as a real model.
+ * The photo is sent to the AI detection microservice FIRST (see `aiService`).
+ * The model must verify a hazard before anything is written to the database, and
+ * the detected **type(s)** and **severity** are auto-filled and locked — the user
+ * cannot change them. No detection ⇒ an error is shown and nothing is submitted.
  */
 export function SubmissionScreen({
   photoUri,
@@ -51,28 +61,44 @@ export function SubmissionScreen({
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
 
-  const [defectType, setDefectType] = useState<HazardType>('pothole');
+  const [analysis, setAnalysis] = useState<Analysis>({ status: 'analyzing' });
   const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const hasLocation = latitude !== null && longitude !== null;
 
-  // Size is a cheap stat; severity re-estimates when the chosen type changes.
-  const imageBytes = useMemo(() => getImageByteSize(photoUri), [photoUri]);
-  const estimate = useMemo(() => estimateSeverity(defectType, imageBytes), [defectType, imageBytes]);
+  // Run AI validation as soon as we have a photo (and re-run on "Try again").
+  const runAnalysis = useCallback(async () => {
+    setAnalysis({ status: 'analyzing' });
+    try {
+      const result = await analyzeHazardPhoto(photoUri);
+      setAnalysis({ status: 'success', result });
+    } catch (err) {
+      if (err instanceof AiDetectionError) {
+        setAnalysis({ status: 'error', message: err.message, noHazard: err.noHazard });
+      } else {
+        setAnalysis({
+          status: 'error',
+          message: err instanceof Error ? err.message : t('submission.errorTitle'),
+          noHazard: false,
+        });
+      }
+    }
+  }, [photoUri, t]);
+
+  useEffect(() => {
+    runAnalysis();
+  }, [runAnalysis]);
 
   const gpsValue = hasLocation
     ? `${latitude!.toFixed(4)}, ${longitude!.toFixed(4)}`
     : t('submission.gpsUnavailable');
 
-  const severityValue = t('submission.severityValue', {
-    severity: t(`common.severity.${estimate.severity}`),
-    confidence: Math.round(estimate.confidence * 100),
-  });
+  const canSubmit = analysis.status === 'success' && hasLocation && !submitting;
 
   const handleSubmit = useCallback(async () => {
-    if (submitting) return;
+    if (submitting || analysis.status !== 'success') return;
     if (!user) {
       setError(t('submission.errorTitle'));
       return;
@@ -82,14 +108,17 @@ export function SubmissionScreen({
       return;
     }
 
+    const { result } = analysis;
     setSubmitting(true);
     setError(null);
     try {
       await submitHazardReport(
         {
-          defectType,
-          severity: estimate.severity,
-          confidence: estimate.confidence,
+          // AI-driven, non-editable classification.
+          defectType: result.primaryType ?? result.defectTypes[0],
+          defectTypes: result.defectTypes,
+          severity: result.severity!,
+          confidence: result.confidence,
           latitude: latitude!,
           longitude: longitude!,
           description: description.trim() || null,
@@ -108,10 +137,9 @@ export function SubmissionScreen({
     }
   }, [
     submitting,
+    analysis,
     user,
     hasLocation,
-    defectType,
-    estimate,
     latitude,
     longitude,
     description,
@@ -133,21 +161,71 @@ export function SubmissionScreen({
         <InfoCard icon="location-on" title={t('submission.gpsCoordinates')} value={gpsValue} />
         {!hasLocation && <Text style={s.warningText}>{t('submission.locationRequired')}</Text>}
 
-        <InfoCard icon="analytics" title={t('submission.aiSeverityAssessment')} value={severityValue} />
-        <Text style={s.noteText}>{t('submission.preliminaryNote')}</Text>
+        {/* ── AI validation: analyzing / error / detected ─────────────────── */}
+        {analysis.status === 'analyzing' && (
+          <View style={s.aiCard}>
+            <ActivityIndicator color={COLORS.secondary} />
+            <View style={s.aiCardText}>
+              <Text style={s.aiCardTitle}>{t('submission.analyzingTitle')}</Text>
+              <Text style={s.aiCardHint}>{t('submission.analyzingHint')}</Text>
+            </View>
+          </View>
+        )}
 
-        <Text style={s.sectionTitle}>{t('submission.hazardType')}</Text>
-        <Text style={s.sectionHint}>{t('submission.hazardTypeHint')}</Text>
-        <View style={s.tagRow}>
-          {HAZARD_TYPES.map((type) => {
-            const active = defectType === type;
-            return (
-              <Pressable key={type} onPress={() => setDefectType(type)}>
-                <Text style={[s.tag, active && s.tagActive]}>{t(`submission.hazardTags.${type}`)}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
+        {analysis.status === 'error' && (
+          <View style={[s.aiCard, s.aiCardError]}>
+            <MaterialIcons
+              name={analysis.noHazard ? 'search-off' : 'error-outline'}
+              size={22}
+              color={COLORS.error}
+            />
+            <View style={s.aiCardText}>
+              <Text style={s.aiErrorTitle}>
+                {analysis.noHazard
+                  ? t('submission.noHazardTitle')
+                  : t('submission.analysisFailedTitle')}
+              </Text>
+              <Text style={s.aiCardHint}>{analysis.message}</Text>
+            </View>
+          </View>
+        )}
+
+        {analysis.status === 'success' && (
+          <>
+            <View style={s.aiVerifiedRow}>
+              <MaterialIcons name="verified" size={16} color={COLORS.success} />
+              <Text style={s.aiVerifiedText}>{t('submission.aiVerified')}</Text>
+            </View>
+
+            <Text style={s.sectionTitle}>{t('submission.hazardTypeDetected')}</Text>
+            <View style={s.tagRow}>
+              {analysis.result.defectTypes.map((type) => (
+                <BadgeChip key={type} label={t(`submission.hazardTags.${type}`)} tone="accent" />
+              ))}
+            </View>
+            <Text style={s.noteText}>
+              {analysis.result.defectTypes.length > 1
+                ? t('submission.multiTypeNote')
+                : t('submission.hazardTypeLockedHint')}
+            </Text>
+
+            <Text style={s.sectionTitle}>{t('submission.aiSeverityAssessment')}</Text>
+            <View style={s.severityRow}>
+              <BadgeChip
+                label={t(`common.severity.${analysis.result.severity!}`)}
+                tone={SEVERITY_TONE[analysis.result.severity!]}
+              />
+              {analysis.result.confidence !== null && (
+                <Text style={s.confidenceText}>
+                  {t('submission.confidenceValue', {
+                    confidence: Math.round(analysis.result.confidence * 100),
+                  })}
+                </Text>
+              )}
+            </View>
+            <Text style={s.noteText}>{t('submission.severityLockedHint')}</Text>
+          </>
+        )}
 
         <Text style={s.sectionTitle}>{t('submission.descriptionLabel')}</Text>
         <TextInput
@@ -163,12 +241,20 @@ export function SubmissionScreen({
 
       <View style={[s.submitWrap, { paddingBottom: insets.bottom + SPACING.md }]}>
         {error && <Text style={s.errorText}>{error}</Text>}
-        <PrimaryButton
-          label={submitting ? t('submission.submitting') : t('common.actions.submitReport')}
-          icon="chevron-right"
-          onPress={handleSubmit}
-          disabled={submitting || !hasLocation}
-        />
+        {analysis.status === 'error' ? (
+          <PrimaryButton
+            label={analysis.noHazard ? t('submission.retakePhoto') : t('submission.retry')}
+            icon={analysis.noHazard ? 'photo-camera' : 'refresh'}
+            onPress={analysis.noHazard ? onBack : runAnalysis}
+          />
+        ) : (
+          <PrimaryButton
+            label={submitting ? t('submission.submitting') : t('common.actions.submitReport')}
+            icon="chevron-right"
+            onPress={handleSubmit}
+            disabled={!canSubmit}
+          />
+        )}
       </View>
     </KeyboardAvoidingView>
   );

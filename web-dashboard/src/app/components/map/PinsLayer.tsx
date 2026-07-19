@@ -53,9 +53,14 @@ export const PinsLayer = memo(function PinsLayer({ hazards, onSelectHazard }: Pi
                   </span>
                 </div>
 
-                {/* Defect type headline */}
+                {/* Defect type headline — shows every AI-detected type. */}
                 <p className="pin-popup-type">
-                  {hazard.defect_type.replace(/_/g, " ")}
+                  {(hazard.defect_types && hazard.defect_types.length > 0
+                    ? hazard.defect_types
+                    : [hazard.defect_type]
+                  )
+                    .map((type) => type.replace(/_/g, " "))
+                    .join(" + ")}
                 </p>
 
                 <div className="pin-popup-divider" />
