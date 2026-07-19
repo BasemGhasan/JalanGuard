@@ -6,6 +6,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { AuthStackParamList } from '../types';
 import { COLORS, SPACING } from '../constants';
+import { markOnboardingSeen } from '../utils';
 import { onboardingScreenStyles } from '../styles/screens';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Onboarding'>;
@@ -50,21 +51,31 @@ export function OnboardingScreen({ navigation }: Props) {
   const activeSlide = useMemo(() => slides[stepIndex], [slides, stepIndex]);
   const isLastSlide = useMemo(() => stepIndex === slides.length - 1, [slides.length, stepIndex]);
 
+  // Every exit from the carousel — Skip, Get started, or the login link —
+  // marks it seen, so it never reappears on a later launch.
+  const leaveOnboarding = useCallback(
+    (destination: 'Login' | 'Register') => {
+      void markOnboardingSeen();
+      navigation.replace(destination);
+    },
+    [navigation],
+  );
+
   const handleSkip = useCallback(() => {
-    navigation.navigate('Register');
-  }, [navigation]);
+    leaveOnboarding('Register');
+  }, [leaveOnboarding]);
 
   const handleNext = useCallback(() => {
     setStepIndex((prev) => Math.min(prev + 1, slides.length - 1));
   }, [slides.length]);
 
   const handleGetStarted = useCallback(() => {
-    navigation.navigate('Register');
-  }, [navigation]);
+    leaveOnboarding('Register');
+  }, [leaveOnboarding]);
 
   const handleLoginNavigate = useCallback(() => {
-    navigation.navigate('Login');
-  }, [navigation]);
+    leaveOnboarding('Login');
+  }, [leaveOnboarding]);
 
   return (
     <View

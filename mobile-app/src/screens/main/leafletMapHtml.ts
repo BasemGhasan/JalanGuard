@@ -3,10 +3,12 @@
  *
  * This is the mobile equivalent of the web dashboard's react-leaflet MapPage:
  * same CARTO dark tiles, same Malaysia bounds/center, same choropleth
- * (dominant-severity fill) and pin layers. RN drives it entirely through two
- * bridges:
+ * (dominant-severity fill) and pin layers. It differs from the dashboard in two
+ * phone-specific ways: a lower zoom floor (a narrow viewport needs it to fit the
+ * whole country) and an initial fly-to the device's location. RN drives it
+ * entirely through two bridges:
  *   - RN → WebView: `window.__render(payload)` is injected whenever data or the
- *     active view changes.
+ *     active view changes; `window.__locate(lat, lng)` centres on the user.
  *   - WebView → RN: `window.ReactNativeWebView.postMessage(...)` reports when the
  *     map is ready and when a hazard pin is tapped.
  *
@@ -53,19 +55,24 @@ export const LEAFLET_MAP_HTML = `<!DOCTYPE html>
         if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(JSON.stringify(msg));
       }
 
+      // Phone viewports are far narrower than the dashboard's, so the whole of
+      // Malaysia only fits below the web map's zoom 6 floor. Half-step zoom
+      // snapping lets us sit at 4.5 without an awkward jump back up to 5.
       var map = L.map('map', {
         zoomControl: false,
         attributionControl: false,
-        minZoom: 6,
+        minZoom: 4.5,
+        zoomSnap: 0.5,
         maxBounds: [[0.8, 99.6], [7.5, 119.3]],
         maxBoundsViscosity: 1.0,
         preferCanvas: true
-      }).setView([4.2105, 109.5], 6);
+      }).setView([4.2105, 109.5], 4.5);
 
       L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
 
       var choroplethLayer = null;
       var pinsLayer = null;
+      var userMarker = null;
       var hazardsById = {};
 
       function dominantColor(p) {
@@ -105,6 +112,24 @@ export const LEAFLET_MAP_HTML = `<!DOCTYPE html>
           iconAnchor: [7, 7]
         });
       }
+
+      // RN → WebView: centre on the device's position and drop a "you are here"
+      // dot. Called once per mount, after expo-location resolves.
+      window.__locate = function (lat, lng, zoom) {
+        if (userMarker) { map.removeLayer(userMarker); userMarker = null; }
+        userMarker = L.marker([lat, lng], {
+          interactive: false,
+          keyboard: false,
+          icon: L.divIcon({
+            className: '',
+            html: '<div style="width:16px;height:16px;border-radius:50%;background:#3B82F6;' +
+                  'border:3px solid #fff;box-shadow:0 0 0 6px rgba(59,130,246,0.25);"></div>',
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+          })
+        }).addTo(map);
+        map.setView([lat, lng], zoom || 13);
+      };
 
       // Called from popup HTML (inline onclick) to open the native detail screen.
       window.selectHazard = function (id) {

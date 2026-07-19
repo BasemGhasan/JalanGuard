@@ -3,6 +3,7 @@ export * from './AppHeader';
 export * from './PrimaryButton';
 export * from './FormField';
 export * from './InfoCard';
+export * from './KeyboardAwareScreen';
 export * from './BadgeChip';
 export * from './ListRow';
 export * from './ReportTabButton';

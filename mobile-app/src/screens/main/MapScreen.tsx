@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
+import * as Location from 'expo-location';
 import { COLORS, SPACING } from '../../constants';
 import { useMapData } from '../../hooks';
 import type { Hazard, MapView as MapViewMode } from '../../types';
@@ -25,13 +26,20 @@ const ADM_OPTIONS: Array<{ level: 0 | 1 | 2; label: string }> = [
  * and feeds it live Supabase data via `useMapData`. The choropleth/pins toggle
  * and ADM-level toggle are native overlays; tapping a pin's "View details"
  * posts the hazard back over the bridge and opens the native detail screen.
+ *
+ * On mount the map centres on the device's location; if permission is denied or
+ * the fix fails it stays on the country-wide default view.
  */
 export function MapScreen({ onOpenHazardDetail }: MapScreenProps) {
   const webRef = useRef<WebView>(null);
   const insets = useSafeAreaInsets();
   const [ready, setReady] = useState(false);
-  const [mapView, setMapView] = useState<MapViewMode>('choropleth');
+  const [mapView, setMapView] = useState<MapViewMode>('pins');
   const [admLevel, setAdmLevel] = useState<0 | 1 | 2>(1);
+  const [userCoords, setUserCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+  // Guards the fly-to so it only happens on the first load, never again — the
+  // user is free to pan/zoom away once the map has settled.
+  const didCentreRef = useRef(false);
 
   const { stats, hazards, loading, error, retry } = useMapData(admLevel);
 
@@ -46,6 +54,43 @@ export function MapScreen({ onOpenHazardDetail }: MapScreenProps) {
     const js = `window.__render && window.__render(${JSON.stringify(payload)}); true;`;
     webRef.current?.injectJavaScript(js);
   }, [ready, payload]);
+
+  // Resolve the device's position once, in parallel with the WebView loading.
+  useEffect(() => {
+    let active = true;
+
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (!active || status !== 'granted') return;
+
+        const position = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+        if (active) {
+          setUserCoords({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        }
+      } catch {
+        // No fix available — the country-wide default view stands.
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Centre on the user once both the map and the location fix are available.
+  useEffect(() => {
+    if (!ready || !userCoords || didCentreRef.current) return;
+    didCentreRef.current = true;
+    webRef.current?.injectJavaScript(
+      `window.__locate && window.__locate(${userCoords.latitude}, ${userCoords.longitude}); true;`,
+    );
+  }, [ready, userCoords]);
 
   const handleMessage = useCallback(
     (event: WebViewMessageEvent) => {

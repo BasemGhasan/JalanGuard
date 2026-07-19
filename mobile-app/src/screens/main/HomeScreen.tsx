@@ -51,12 +51,12 @@ export function HomeScreen({ user, onOpenMap, onOpenNotifications }: HomeScreenP
   const renderActivity = (item: ActivityItem) => {
     const statusLabel = t(`common.status.${item.hazard.status}`, { defaultValue: item.hazard.status });
     return (
+      // No chevron: these rows are read-only summaries, not navigation targets.
       <ListRow
         key={item.id}
         title={item.title}
         subtitle={`${formatDate(item.createdAt)} · ${statusLabel}`}
         icon={KIND_ICON[item.kind]}
-        rightIcon="chevron-right"
       >
         <BadgeChip label={statusLabel} tone={KIND_TONE[item.kind]} />
       </ListRow>

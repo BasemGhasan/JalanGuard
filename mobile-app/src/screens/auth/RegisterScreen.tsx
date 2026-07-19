@@ -1,9 +1,9 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, Pressable, Text, View } from 'react-native';
+import { Alert, Pressable, Text } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { AuthStackParamList } from '../../types';
-import { PrimaryButton, FormField } from '../../components';
+import { PrimaryButton, FormField, KeyboardAwareScreen } from '../../components';
 import { isValidEmail } from '../../utils';
 import { registerScreenStyles } from '../../styles/screens';
 
@@ -57,7 +57,7 @@ export function RegisterScreen({ navigation, onRegister }: Props) {
   }, [email, fullName, navigation, onRegister, password, t]);
 
   return (
-    <View style={registerScreenStyles.container}>
+    <KeyboardAwareScreen contentStyle={registerScreenStyles.container}>
       <Text style={registerScreenStyles.title}>{t('auth.titles.createAccount')}</Text>
       <Text style={registerScreenStyles.subtitle}>{t('auth.subtitles.register')}</Text>
 
@@ -92,6 +92,6 @@ export function RegisterScreen({ navigation, onRegister }: Props) {
       <Pressable onPress={() => navigation.navigate('Login')}>
         <Text style={registerScreenStyles.linkText}>{t('auth.links.hasAccount')}</Text>
       </Pressable>
-    </View>
+    </KeyboardAwareScreen>
   );
 }

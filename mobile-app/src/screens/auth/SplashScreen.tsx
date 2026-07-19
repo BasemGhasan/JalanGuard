@@ -5,6 +5,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { AuthStackParamList } from '../../types';
 import { COLORS } from '../../constants';
+import { hasSeenOnboarding } from '../../utils';
 import { splashScreenStyles } from '../../styles/screens';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Splash'>;
@@ -13,11 +14,17 @@ export function SplashScreen({ navigation }: Props) {
   const { t } = useTranslation();
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      navigation.replace('Onboarding');
+    let active = true;
+
+    // Onboarding is first-run only; returning users land straight on login.
+    // The flag lookup runs alongside the splash delay so it costs no extra time.
+    const timeoutId = setTimeout(async () => {
+      const seen = await hasSeenOnboarding();
+      if (active) navigation.replace(seen ? 'Login' : 'Onboarding');
     }, 1600);
 
     return () => {
+      active = false;
       clearTimeout(timeoutId);
     };
   }, [navigation]);

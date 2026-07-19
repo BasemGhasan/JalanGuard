@@ -1,5 +1,14 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { COLORS } from '../../constants';
@@ -89,7 +98,11 @@ export function ProfileScreen({ user, onLogout, onOpenSettings }: ProfileScreenP
         animationType="fade"
         onRequestClose={() => setDeleteVisible(false)}
       >
-        <View style={profileScreenStyles.modalOverlay}>
+        {/* Centred card lifts with the keyboard so the password field stays visible. */}
+        <KeyboardAvoidingView
+          style={profileScreenStyles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
           <View style={profileScreenStyles.modalCard}>
             <Text style={profileScreenStyles.modalTitle}>Delete account</Text>
             <Text style={profileScreenStyles.modalHint}>
@@ -123,7 +136,7 @@ export function ProfileScreen({ user, onLogout, onOpenSettings }: ProfileScreenP
               <Text style={profileScreenStyles.modalCancelText}>Cancel</Text>
             </Pressable>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </ScrollView>
   );

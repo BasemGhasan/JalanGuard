@@ -1,9 +1,9 @@
 import React, { useCallback, useState } from 'react';
-import { Alert, Pressable, Text, View } from 'react-native';
+import { Alert, Pressable, Text } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { AuthStackParamList } from '../../types';
-import { PrimaryButton, FormField } from '../../components';
+import { PrimaryButton, FormField, KeyboardAwareScreen } from '../../components';
 import { isValidEmail } from '../../utils';
 import { resetPassword } from '../../services';
 import { forgotPasswordScreenStyles } from '../../styles/screens';
@@ -35,7 +35,7 @@ export function ForgotPasswordScreen({ navigation }: Props) {
   }, [email, navigation, t]);
 
   return (
-    <View style={forgotPasswordScreenStyles.container}>
+    <KeyboardAwareScreen contentStyle={forgotPasswordScreenStyles.container}>
       <Text style={forgotPasswordScreenStyles.title}>{t('auth.titles.resetPassword')}</Text>
       <Text style={forgotPasswordScreenStyles.subtitle}>{t('auth.subtitles.resetPassword')}</Text>
 
@@ -57,6 +57,6 @@ export function ForgotPasswordScreen({ navigation }: Props) {
       <Pressable onPress={() => navigation.navigate('Login')}>
         <Text style={forgotPasswordScreenStyles.linkText}>{t('common.actions.backToLogin')}</Text>
       </Pressable>
-    </View>
+    </KeyboardAwareScreen>
   );
 }

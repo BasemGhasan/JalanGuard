@@ -2,9 +2,10 @@ import { StyleSheet } from 'react-native';
 import { COLORS, FONT_SIZES, SPACING } from '../../constants';
 
 export const forgotPasswordScreenStyles = StyleSheet.create({
+  // Applied as a scroll content container by KeyboardAwareScreen — flexGrow,
+  // not flex, or the form can't scroll clear of the keyboard.
   container: {
-    flex: 1,
-    backgroundColor: COLORS.primary,
+    flexGrow: 1,
     padding: SPACING.lg,
     justifyContent: 'center',
   },
