@@ -89,9 +89,13 @@ export function Navbar({ active, onNavigate }: NavbarProps) {
           <button style={linkStyle("map")} onClick={handleNavToMap}>
             Live Map
           </button>
-          <button style={linkStyle("docs")} onClick={handleNavToDocs}>
-            Documentation
-          </button>
+          {/* Documentation covers the developer API — meaningless without an
+              API key, so it's hidden until there's a session to view it with. */}
+          {isLoggedIn && (
+            <button style={linkStyle("docs")} onClick={handleNavToDocs}>
+              Documentation
+            </button>
+          )}
           <button style={linkStyle("explorer")} onClick={handleNavToExplorer}>
             Data Explorer
           </button>

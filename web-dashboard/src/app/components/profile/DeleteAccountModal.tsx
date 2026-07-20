@@ -12,10 +12,12 @@ import { useDeleteAccount } from "../../../hooks/useDeleteAccount";
 interface DeleteAccountModalProps {
     onClose: () => void;
     onDeleted?: () => void;
+    /** Whether this account also has a mobile/citizen side to preserve. */
+    isCitizen: boolean;
 }
 
 // 3. Component Definition
-export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ onClose, onDeleted }) => {
+export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ onClose, onDeleted, isCitizen }) => {
     const { deleteAccount, loading, error } = useDeleteAccount();
     const [password, setPassword] = useState("");
 
@@ -45,7 +47,9 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ onClose,
             <div style={styles.header}>
                 <div style={styles.titleRow}>
                     <AlertTriangle size={20} color={COLORS.error} />
-                    <h2 id="delete-account-title" style={styles.title}>Delete Account</h2>
+                    <h2 id="delete-account-title" style={styles.title}>
+                      {isCitizen ? "Remove Developer Access" : "Delete Account"}
+                    </h2>
                 </div>
                 <button style={styles.closeBtn} onClick={onClose} disabled={loading} title="Cancel">
                     <X size={18} color={COLORS.textMuted} />
@@ -55,7 +59,9 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ onClose,
             {/* Body */}
             <div style={styles.body}>
                 <p style={styles.warningText}>
-                    Are you sure you want to permanently delete your account? This action cannot be undone, and you will lose access to the Developer Dashboard.
+                    {isCitizen
+                      ? "This removes developer access and deletes your API key. This won't affect your mobile JalanGuard account."
+                      : "Are you sure you want to permanently delete your account? This action cannot be undone, and you will lose access to the Developer Dashboard."}
                 </p>
 
                 <form onSubmit={handleSubmit} style={styles.form}>
@@ -80,7 +86,7 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ onClose,
                             Cancel
                         </AppButton>
                         <AppButton variant="danger" type="submit" loading={loading} disabled={isSubmitDisabled}>
-                            {loading ? "Deleting…" : "Delete Account"}
+                            {loading ? "Working…" : (isCitizen ? "Remove Developer Access" : "Delete Account")}
                         </AppButton>
                     </div>
                 </form>

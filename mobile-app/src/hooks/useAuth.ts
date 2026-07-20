@@ -14,6 +14,10 @@ const INITIAL_STATE: AuthState = { isAuthenticated: false, user: null };
 export function useAuth() {
   const [authState, setAuthState] = useState<AuthState>(INITIAL_STATE);
   const [loadingState, setLoadingState] = useState(false);
+  // A recovery code produces a real session, but the user hasn't chosen a new
+  // password yet — treating it as signed in would drop them into the app with
+  // the forgotten password still active. Held until USER_UPDATED commits one.
+  const [needsPasswordReset, setNeedsPasswordReset] = useState(false);
 
   // Rehydrate the persisted session (used by App.tsx during the splash gate).
   const checkAuthStatus = useCallback(async () => {
@@ -29,7 +33,12 @@ export function useAuth() {
   useEffect(() => {
     const {
       data: { subscription },
-    } = authService.onAuthStateChange(setAuthState);
+    } = authService.onAuthStateChange((state, event) => {
+      setAuthState(state);
+      // Any subsequent event (USER_UPDATED after the new password is set, a
+      // normal sign-in, or a sign-out) ends the recovery hold.
+      setNeedsPasswordReset(event === 'PASSWORD_RECOVERY');
+    });
     return () => subscription.unsubscribe();
   }, []);
 
@@ -63,5 +72,15 @@ export function useAuth() {
     }
   }, []);
 
-  return { ...authState, loadingState, checkAuthStatus, login, register, logout };
+  return {
+    ...authState,
+    // Hold the user in the auth stack until the recovery password is committed.
+    isAuthenticated: authState.isAuthenticated && !needsPasswordReset,
+    needsPasswordReset,
+    loadingState,
+    checkAuthStatus,
+    login,
+    register,
+    logout,
+  };
 }

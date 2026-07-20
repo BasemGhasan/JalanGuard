@@ -7,6 +7,7 @@
  * ignores stale responses when deps change mid-flight.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
+import i18n from '../i18n';
 
 export interface AsyncDataState<T> {
   data: T | null;
@@ -49,7 +50,7 @@ export function useAsyncData<T>(fetcher: () => Promise<T>, enabled = true): Asyn
         if (active) setData(result);
       })
       .catch((err: unknown) => {
-        if (active) setError(err instanceof Error ? err : new Error('An unknown error occurred'));
+        if (active) setError(err instanceof Error ? err : new Error(i18n.t('errors.generic')));
       })
       .finally(() => {
         if (active) setLoading(false);

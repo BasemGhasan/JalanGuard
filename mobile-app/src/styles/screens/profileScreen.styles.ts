@@ -2,6 +2,10 @@ import { StyleSheet } from 'react-native';
 import { COLORS, FONT_SIZES, SPACING } from '../../constants';
 
 export const profileScreenStyles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: COLORS.primary,
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.primary,

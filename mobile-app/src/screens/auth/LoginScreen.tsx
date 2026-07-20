@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { AuthStackParamList } from '../../types';
 import { AuthHero, PrimaryButton, FormField, KeyboardAwareScreen } from '../../components';
 import { isValidEmail } from '../../utils';
+import { EmailNotVerifiedError } from '../../services';
 import { loginScreenStyles } from '../../styles/screens';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'> & {
@@ -38,12 +39,21 @@ export function LoginScreen({ navigation, onLogin }: Props) {
       await onLogin(email, password);
       // On success the auth listener flips the navigator to the main app.
     } catch (error) {
+      // An unverified account isn't a dead end — send them to enter the code.
+      if (error instanceof EmailNotVerifiedError) {
+        Alert.alert(
+          t('auth.alerts.emailNotVerifiedTitle'),
+          t('auth.alerts.emailNotVerifiedMessage'),
+          [{ text: t('common.actions.verifyNow'), onPress: () => navigation.navigate('VerifyEmail', { email: error.email }) }],
+        );
+        return;
+      }
       const message = error instanceof Error ? error.message : t('auth.alerts.genericMessage');
       Alert.alert(t('auth.alerts.loginFailedTitle'), message);
     } finally {
       setSubmitting(false);
     }
-  }, [email, onLogin, password, t]);
+  }, [email, navigation, onLogin, password, t]);
 
   const handleForgotPassword = useCallback(() => {
     navigation.navigate('ForgotPassword');

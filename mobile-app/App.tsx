@@ -13,6 +13,7 @@ import { LoadingSpinner } from './src/components';
 import { useAuth } from './src/hooks';
 import { COLORS } from './src/constants/theme';
 import './src/i18n';
+import { loadSavedLanguage } from './src/i18n/language';
 
 export default function App() {
   const { t } = useTranslation();
@@ -21,7 +22,9 @@ export default function App() {
 
   useEffect(() => {
     const initialize = async () => {
-      await checkAuthStatus();
+      // Apply the saved language before the first render so the UI never
+      // flashes English on a device set to Malay.
+      await Promise.all([loadSavedLanguage(), checkAuthStatus()]);
       setIsInitializing(false);
     };
     initialize();

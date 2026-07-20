@@ -1,7 +1,7 @@
 // 1. Imports — External
 import { useState, useCallback, useMemo } from "react";
 import {
-  Shield, Mail, Lock, User, CheckCircle, ChevronRight,
+  Shield, Mail, Lock, KeyRound,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -15,19 +15,28 @@ import ErrorBanner from "../ui/errorBanner";
 import { Card } from "../ui/card";
 import { AppButton } from "../ui/appButton";
 
-// 2. Interfaces / Types
+// 2. Constants / Interfaces / Types
+
+/** Length of the token Supabase emits via `{{ .Token }}` in the email templates. */
+const CODE_LENGTH = 8;
 
 /**
  * Internal view states.
- * "signup-sent" and "forgot-sent" are read-only success screens.
- * "password-reset" is the set-new-password form (reached via PASSWORD_RECOVERY).
+ *
+ * There is no independent web signup. A JalanGuard account can only be
+ * *created* on mobile — the web dashboard exists to add developer access to
+ * an account that already exists, using the same email/password. Logging in
+ * here for the first time grants that access automatically; every later
+ * login is a normal sign-in. See `handleLogin`.
+ *
+ * "forgot-code"    — exchange the recovery code for a session.
+ * "password-reset" — set the new password (reached via PASSWORD_RECOVERY, which
+ *                    verifyOtp fires once the recovery code is accepted).
  */
 export type AuthView =
   | "login"
-  | "signup"
   | "forgot"
-  | "signup-sent"
-  | "forgot-sent"
+  | "forgot-code"
   | "password-reset";
 
 interface AuthPageProps {
@@ -127,12 +136,14 @@ const fieldStyles = {
  * Centralised authentication page.
  *
  * Hosts all auth views inside a single dark-themed card:
- * login          — email + password → signInWithPassword
- * signup         — name + email + password → signUp
+ * login          — email + password → signInWithPassword, then grants the
+ *                  developer role if this is the account's first web login
  * forgot         — email → resetPasswordForEmail
- * signup-sent    — "check your email" success screen
- * forgot-sent    — "reset link sent" success screen
+ * forgot-code    — 8-digit code → verifyOtp({ type: "recovery" })
  * password-reset — new-password + confirm → updateUser (PASSWORD_RECOVERY flow)
+ *
+ * No flow uses an emailed link: every confirmation is a typed code, so nothing
+ * depends on a redirect URL being reachable from the user's device.
  *
  * The parent passes `initialView` to force the card into a specific view, and
  * `onNavigate` to redirect the user after a successful action.
@@ -141,11 +152,12 @@ export function AuthPage({ onNavigate, initialView }: AuthPageProps) {
   const [view, setView] = useState<AuthView>(initialView ?? "login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   // ── Input change handlers ────────────────────────────────────────────────
   const handleEmailChange = useCallback(
@@ -154,27 +166,36 @@ export function AuthPage({ onNavigate, initialView }: AuthPageProps) {
   const handlePasswordChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value), [],
   );
-  const handleFullNameChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setFullName(e.target.value), [],
-  );
   const handleNewPasswordChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value), [],
   );
   const handleConfirmPasswordChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value), [],
   );
+  /** Digits only, capped at CODE_LENGTH — the emailed token is always an 8-digit number. */
+  const handleCodeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setCode(e.target.value.replace(/\D/g, "").slice(0, CODE_LENGTH)), [],
+  );
 
   // ── View switching — always clear errors on transition ───────────────────
   const switchTo = useCallback((v: AuthView) => {
     setView(v);
     setError(null);
+    setNotice(null);
   }, []);
 
   const handleSwitchToLogin = useCallback(() => switchTo("login"), [switchTo]);
-  const handleSwitchToSignUp = useCallback(() => switchTo("signup"), [switchTo]);
   const handleSwitchToForgot = useCallback(() => switchTo("forgot"), [switchTo]);
 
-// ── Auth actions ─────────────────────────────────────────────────────────
+  // ── Auth actions ─────────────────────────────────────────────────────────
+  /**
+   * The only way in on web. A JalanGuard account can only be *created* on
+   * mobile (auth.users ties one email to one login, so there's nothing left
+   * for a web "sign up" to create); this sign-in doubles as developer
+   * registration by granting the role the first time it succeeds for an
+   * account that doesn't have it yet.
+   */
   const handleLogin = useCallback(async () => {
     if (!email.trim() || !password) {
       setError("Please enter your email and password.");
@@ -182,283 +203,290 @@ export function AuthPage({ onNavigate, initialView }: AuthPageProps) {
     }
     setLoading(true);
     setError(null);
-    
-    // FIX 1: Change signUp to signInWithPassword
-    const { error: authError } = await supabase.auth.signInWithPassword({
+
+    const { data, error: authError } = await supabase.auth.signInWithPassword({
       email: email.trim(), password,
     });
-    
-    setLoading(false);
-    if (authError) { setError(authError.message); }
-    else { onNavigate("key"); }
-  }, [email, password, onNavigate]);
 
-  const handleSignUp = useCallback(async () => {
-    if (!fullName.trim() || !email.trim() || !password) {
-      setError("Please fill in all fields.");
+    if (authError) {
+      setLoading(false);
+      setError("Incorrect email or password.");
       return;
     }
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_developer")
+      .eq("id", data.user.id)
+      .single();
+
+    if (!profile?.is_developer) {
+      const { error: grantError } = await supabase.rpc("grant_account_role", { target_role: "developer" });
+      if (grantError) {
+        setLoading(false);
+        setError(grantError.message);
+        return;
+      }
+      toast.success("Developer access added to your JalanGuard account.");
+    }
+
+    setLoading(false);
+    onNavigate("key");
+  }, [email, password, onNavigate]);
+
+  const handleForgot = useCallback(async () => {
+    if (!email.trim()) {
+      setError("Please enter your email address.");
       return;
     }
     setLoading(true);
     setError(null);
 
-    // FIX 2: Destructure 'data' alongside 'error: signUpError'
-    const { data, error: signUpError } = await supabase.auth.signUp({
+    // No redirectTo: the recovery email carries a code, not a link.
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim());
+
+    setLoading(false);
+
+    if (resetError) {
+      setError(resetError.message);
+    } else {
+      setCode("");
+      switchTo("forgot-code");
+    }
+  }, [email, switchTo]);
+
+  /**
+   * Exchanges the recovery code for a session.
+   *
+   * verifyOtp with type "recovery" fires PASSWORD_RECOVERY, which flips
+   * `needsPasswordReset` in AuthContext — App then re-renders this page in
+   * "password-reset" mode, so there's no manual view switch here.
+   */
+  const handleVerifyRecovery = useCallback(async () => {
+    if (code.length !== CODE_LENGTH) {
+      setError(`Please enter the ${CODE_LENGTH}-digit code from your email.`);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+
+    const { error: verifyError } = await supabase.auth.verifyOtp({
       email: email.trim(),
-      password,
-      options: {
-        data: {
-          full_name: fullName.trim(), // Caught by new.raw_user_meta_data->>'full_name'
-          role: 'developer',          // Triggers the is_developer boolean logic
-        },
-        emailRedirectTo: window.location.origin,
-      },
+      token: code,
+      type: "recovery",
     });
 
     setLoading(false);
 
-    if (signUpError) {
-      setError(signUpError.message);
-    } else if (data?.user?.identities && data.user.identities.length === 0) {
-      // This will now successfully catch existing emails
-      setError("This email is already registered. Please log in.");
-    } else {
-      setView("signup-sent");
+    if (verifyError) setError(verifyError.message);
+  }, [code, email]);
+
+  /** Re-sends the recovery code. */
+  const handleResendCode = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    setNotice(null);
+
+    const { error: resendError } = await supabase.auth.resetPasswordForEmail(email.trim());
+
+    setLoading(false);
+
+    if (resendError) setError(resendError.message);
+    else setNotice(`We sent a new code to ${email.trim()}.`);
+  }, [email]);
+
+  /**
+   * Commits the new password on the live recovery session established by
+   * handleVerifyRecovery. The USER_UPDATED event clears needsPasswordReset in
+   * AuthContext automatically.
+   */
+  const handlePasswordReset = useCallback(async () => {
+    if (!newPassword) {
+      setError("Please enter a new password.");
+      return;
     }
-  }, [fullName, email, password]);
-    const handleForgot = useCallback(async () => {
-      if (!email.trim()) {
-        setError("Please enter your email address.");
-        return;
-      }
-      setLoading(true);
-      setError(null);
+    if (newPassword.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
 
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-        email.trim(),
-        {
-          redirectTo: window.location.origin,
-        }
-      );
+    const { error: authError } = await supabase.auth.updateUser({ password: newPassword });
 
-      setLoading(false);
+    setLoading(false);
 
-      if (resetError) {
-        setError(resetError.message);
-      } else {
-        setView("forgot-sent");
-      }
-    }, [email]);
+    if (authError) {
+      setError(authError.message);
+    } else {
+      toast.success("Password updated!", {
+        description: "You're now signed in with your new password.",
+      });
+      onNavigate("key");
+    }
+  }, [newPassword, confirmPassword, onNavigate]);
 
-    /**
-     * PASSWORD_RECOVERY flow: user clicked the reset-email link and arrived with
-     * a live recovery session. updateUser() commits the new password; the
-     * USER_UPDATED event clears needsPasswordReset in AuthContext automatically.
-     */
-    const handlePasswordReset = useCallback(async () => {
-      if (!newPassword) {
-        setError("Please enter a new password.");
-        return;
-      }
-      if (newPassword.length < 8) {
-        setError("Password must be at least 8 characters.");
-        return;
-      }
-      if (newPassword !== confirmPassword) {
-        setError("Passwords do not match.");
-        return;
-      }
-      setLoading(true);
-      setError(null);
+  /** Submit the active form on Enter key. */
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key !== "Enter" || loading) return;
+      if (view === "login") void handleLogin();
+      if (view === "forgot") void handleForgot();
+      if (view === "forgot-code") void handleVerifyRecovery();
+      if (view === "password-reset") void handlePasswordReset();
+    },
+    [view, loading, handleLogin, handleForgot, handleVerifyRecovery, handlePasswordReset],
+  );
 
-      const { error: authError } = await supabase.auth.updateUser({ password: newPassword });
-
-      setLoading(false);
-
-      if (authError) {
-        setError(authError.message);
-      } else {
-        toast.success("Password updated!", {
-          description: "You're now signed in with your new password.",
-        });
-        onNavigate("key");
-      }
-    }, [newPassword, confirmPassword, onNavigate]);
-
-    /** Submit the active form on Enter key. */
-    const handleKeyDown = useCallback(
-      (e: React.KeyboardEvent) => {
-        if (e.key !== "Enter" || loading) return;
-        if (view === "login") void handleLogin();
-        if (view === "signup") void handleSignUp();
-        if (view === "forgot") void handleForgot();
-        if (view === "password-reset") void handlePasswordReset();
+  // ── Derived: card title / subtitle per view ──────────────────────────────
+  const { title, subtitle } = useMemo(() => {
+    const map: Record<AuthView, { title: string; subtitle: string }> = {
+      "login": {
+        title: "Developer Dashboard",
+        subtitle: "Sign in with your mobile JalanGuard account.",
       },
-      [view, loading, handleLogin, handleSignUp, handleForgot, handlePasswordReset],
-    );
+      "forgot": { title: "Reset Password", subtitle: `We'll email you an ${CODE_LENGTH}-digit reset code.` },
+      "forgot-code": { title: "Enter Reset Code", subtitle: `Enter the ${CODE_LENGTH}-digit code we sent to ${email.trim()}.` },
+      "password-reset": { title: "Set New Password", subtitle: "Choose a strong password for your account." },
+    };
+    return map[view];
+  }, [view, email]);
 
-    // ── Derived: card title / subtitle per view ──────────────────────────────
-    const { title, subtitle } = useMemo(() => {
-      const map: Record<AuthView, { title: string; subtitle: string }> = {
-        "login": { title: "Welcome Back", subtitle: "Sign in to your developer account." },
-        "signup": { title: "Create Account", subtitle: "Join the open-source road safety ecosystem." },
-        "forgot": { title: "Reset Password", subtitle: "We'll email you a secure reset link." },
-        "signup-sent": { title: "Check Your Email", subtitle: "Tap the confirmation link to activate." },
-        "forgot-sent": { title: "Reset Link Sent", subtitle: "Check your inbox and click the link." },
-        "password-reset": { title: "Set New Password", subtitle: "Choose a strong password for your account." },
-      };
-      return map[view];
-    }, [view]);
+  // ── Derived: CTA label ───────────────────────────────────────────────────
+  const ctaLabel = useMemo(() => {
+    if (view === "forgot") return "Send Reset Code";
+    if (view === "forgot-code") return "Verify Code";
+    if (view === "password-reset") return "Set New Password";
+    return "Login";
+  }, [view]);
 
-    // ── Derived: CTA label ───────────────────────────────────────────────────
-    const ctaLabel = useMemo(() => {
-      if (view === "signup") return "Create Account";
-      if (view === "forgot") return "Send Reset Link";
-      if (view === "password-reset") return "Set New Password";
-      return "Login";
-    }, [view]);
+  // ── Derived: which action the CTA fires ─────────────────────────────────
+  const handleCta = useMemo(() => {
+    if (view === "forgot") return handleForgot;
+    if (view === "forgot-code") return handleVerifyRecovery;
+    if (view === "password-reset") return handlePasswordReset;
+    return handleLogin;
+  }, [view, handleForgot, handleVerifyRecovery, handlePasswordReset, handleLogin]);
 
-    // ── Derived: which action the CTA fires ─────────────────────────────────
-    const handleCta = useMemo(() => {
-      if (view === "signup") return handleSignUp;
-      if (view === "forgot") return handleForgot;
-      if (view === "password-reset") return handlePasswordReset;
-      return handleLogin;
-    }, [view, handleSignUp, handleForgot, handlePasswordReset, handleLogin]);
+  const isCodeView = view === "forgot-code";
+  /** Views that ask for an email address up front. */
+  const showsEmailField = view === "login" || view === "forgot";
 
-    const isFormView = view === "login" || view === "signup" || view === "forgot" || view === "password-reset";
-    const isSuccessView = view === "signup-sent" || view === "forgot-sent";
+  return (
+    <div style={styles.page}>
+      <Card style={styles.card} onKeyDown={handleKeyDown}>
 
-    return (
-      <div style={styles.page}>
-        <Card style={styles.card} onKeyDown={handleKeyDown}>
-
-          {/* ── Brand header ──────────────────────────────────────────────── */}
-          <div style={styles.brand}>
-            <div style={styles.iconWrap}>
-              <Shield size={28} color={COLORS.white} />
-            </div>
-            <span style={styles.brandTag}>JalanGuard</span>
-            <h1 style={styles.title}>{title}</h1>
-            <p style={styles.subtitle}>{subtitle}</p>
+        {/* ── Brand header ──────────────────────────────────────────────── */}
+        <div style={styles.brand}>
+          <div style={styles.iconWrap}>
+            <Shield size={28} color={COLORS.white} />
           </div>
+          <span style={styles.brandTag}>JalanGuard</span>
+          <h1 style={styles.title}>{title}</h1>
+          <p style={styles.subtitle}>{subtitle}</p>
+        </div>
 
-          {/* ── Success states ────────────────────────────────────────────── */}
-          {isSuccessView && (
-            <div style={styles.successWrap}>
-              <div style={styles.successIcon}>
-                <CheckCircle size={28} color={COLORS.success} />
+        {/* ── Form views ───────────────────────────────────────────────────
+            Every view is a form: the old "check your email" dead ends are
+            replaced by code-entry views. */}
+        <div style={styles.form}>
+            {error && <ErrorBanner message={error} />}
+            {notice && <p style={styles.notice}>{notice}</p>}
+
+            {/* Login + Forgot: Email */}
+            {showsEmailField && (
+              <AuthField
+                icon={Mail} label="Email Address" type="email"
+                placeholder="you@example.com"
+                value={email} onChange={handleEmailChange} disabled={loading}
+              />
+            )}
+
+            {/* Code view: the 8-digit token from the email */}
+            {isCodeView && (
+              <AuthField
+                icon={KeyRound} label="Verification Code" type="text"
+                placeholder={"0".repeat(CODE_LENGTH)}
+                value={code} onChange={handleCodeChange} disabled={loading}
+              />
+            )}
+
+            {/* Login only: Password */}
+            {view === "login" && (
+              <AuthField
+                icon={Lock} label="Password" type="password"
+                placeholder="••••••••••••"
+                value={password} onChange={handlePasswordChange} disabled={loading}
+              />
+            )}
+
+            {/* Password Reset: New Password + Confirm */}
+            {view === "password-reset" && (
+              <>
+                <AuthField
+                  icon={Lock} label="New Password" type="password"
+                  placeholder="At least 8 characters"
+                  value={newPassword} onChange={handleNewPasswordChange} disabled={loading}
+                />
+                <AuthField
+                  icon={Lock} label="Confirm Password" type="password"
+                  placeholder="Repeat your new password"
+                  value={confirmPassword} onChange={handleConfirmPasswordChange} disabled={loading}
+                />
+              </>
+            )}
+
+            {/* Login only: forgot-password link */}
+            {view === "login" && (
+              <div style={{ textAlign: "right" }}>
+                <button style={styles.linkBtn} onClick={handleSwitchToForgot} disabled={loading}>
+                  Forgot password?
+                </button>
               </div>
-              <button style={styles.linkBtn} onClick={handleSwitchToLogin}>
-                Back to Login{" "}
-                <ChevronRight size={13} style={{ display: "inline", verticalAlign: "middle" }} />
+            )}
+
+            {/* Primary CTA */}
+            <AppButton
+              variant="primary"
+              fullWidth
+              onClick={handleCta}
+              loading={loading}
+              style={styles.ctaBtn}
+            >
+              {loading ? "Processing…" : ctaLabel}
+            </AppButton>
+
+            {/* Code view: resend */}
+            {isCodeView && (
+              <button style={styles.linkBtn} onClick={handleResendCode} disabled={loading}>
+                Didn't get the code? Resend
               </button>
-            </div>
-          )}
+            )}
 
-          {/* ── Active form views ─────────────────────────────────────────── */}
-          {isFormView && (
-            <div style={styles.form}>
-              {error && <ErrorBanner message={error} />}
-
-              {/* Sign Up only: Full Name */}
-              {view === "signup" && (
-                <AuthField
-                  icon={User} label="Full Name" type="text"
-                  placeholder="Ada Lovelace"
-                  value={fullName} onChange={handleFullNameChange} disabled={loading}
-                />
-              )}
-
-              {/* Login + Sign Up + Forgot: Email */}
-              {view !== "password-reset" && (
-                <AuthField
-                  icon={Mail} label="Email Address" type="email"
-                  placeholder="developer@example.com"
-                  value={email} onChange={handleEmailChange} disabled={loading}
-                />
-              )}
-
-              {/* Login + Sign Up: Password */}
-              {(view === "login" || view === "signup") && (
-                <AuthField
-                  icon={Lock} label="Password" type="password"
-                  placeholder={view === "signup" ? "At least 8 characters" : "••••••••••••"}
-                  value={password} onChange={handlePasswordChange} disabled={loading}
-                />
-              )}
-
-              {/* Password Reset: New Password + Confirm */}
-              {view === "password-reset" && (
-                <>
-                  <AuthField
-                    icon={Lock} label="New Password" type="password"
-                    placeholder="At least 8 characters"
-                    value={newPassword} onChange={handleNewPasswordChange} disabled={loading}
-                  />
-                  <AuthField
-                    icon={Lock} label="Confirm Password" type="password"
-                    placeholder="Repeat your new password"
-                    value={confirmPassword} onChange={handleConfirmPasswordChange} disabled={loading}
-                  />
-                </>
-              )}
-
-              {/* Login only: forgot-password link */}
-              {view === "login" && (
-                <div style={{ textAlign: "right" }}>
-                  <button style={styles.linkBtn} onClick={handleSwitchToForgot} disabled={loading}>
-                    Forgot password?
+            {/* Footer */}
+            {view !== "password-reset" && (
+              <div style={styles.footer}>
+                {view === "login" && (
+                  <span style={styles.footerText}>
+                    Don't have a JalanGuard account? Create one in the mobile app.
+                  </span>
+                )}
+                {(view === "forgot" || isCodeView) && (
+                  <button style={styles.footerLink} onClick={handleSwitchToLogin}>
+                    ← Back to Login
                   </button>
-                </div>
-              )}
-
-              {/* Primary CTA */}
-              <AppButton
-                variant="primary"
-                fullWidth
-                onClick={handleCta}
-                loading={loading}
-                style={styles.ctaBtn}
-              >
-                {loading ? "Processing…" : ctaLabel}
-              </AppButton>
-
-              {/* Footer: view toggle links (not shown for password-reset) */}
-              {view !== "password-reset" && (
-                <div style={styles.footer}>
-                  {view === "login" && (
-                    <>
-                      <span style={styles.footerText}>Don't have an account?</span>
-                      <button style={styles.footerLink} onClick={handleSwitchToSignUp}>
-                        Register here
-                      </button>
-                    </>
-                  )}
-                  {view === "signup" && (
-                    <>
-                      <span style={styles.footerText}>Already have an account?</span>
-                      <button style={styles.footerLink} onClick={handleSwitchToLogin}>
-                        Login here
-                      </button>
-                    </>
-                  )}
-                  {view === "forgot" && (
-                    <button style={styles.footerLink} onClick={handleSwitchToLogin}>
-                      ← Back to Login
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-        </Card>
-      </div>
-    );
-  }
+                )}
+              </div>
+            )}
+        </div>
+      </Card>
+    </div>
+  );
+}
 
 // 5. Styles
 const styles = {
@@ -528,6 +556,7 @@ const styles = {
       gap: SPACING.sm,
       paddingTop: SPACING.md,
       borderTop: `1px solid ${COLORS.borderFaint}`,
+      textAlign: "center" as const,
     },
     footerText: {
       color: COLORS.textMuted,
@@ -550,21 +579,11 @@ const styles = {
       cursor: "pointer",
       padding: 0,
     },
-    successWrap: {
-      display: "flex",
-      flexDirection: "column" as const,
-      alignItems: "center",
-      gap: SPACING.md,
-      paddingBottom: SPACING.md,
-    },
-    successIcon: {
-      width: 64,
-      height: 64,
-      borderRadius: "50%",
-      background: COLORS.successBg,
-      border: `1px solid ${COLORS.successBorder}`,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
+    /** Non-error feedback, e.g. confirmation that a new code was sent. */
+    notice: {
+      margin: 0,
+      color: COLORS.success,
+      fontSize: FONT_SIZES.sm + 2,
+      textAlign: "center" as const,
     },
   } as const;

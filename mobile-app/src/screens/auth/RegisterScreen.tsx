@@ -43,9 +43,8 @@ export function RegisterScreen({ navigation, onRegister }: Props) {
     try {
       const { needsConfirmation } = await onRegister(fullName, email, password);
       if (needsConfirmation) {
-        // Email confirmation required — no session yet, so guide the user back.
-        Alert.alert(t('auth.alerts.checkEmailTitle'), t('auth.alerts.checkEmailMessage'));
-        navigation.popTo('Login');
+        // No session yet — send the user to enter the 8-digit code we emailed.
+        navigation.navigate('VerifyEmail', { email: email.trim() });
       }
       // Otherwise the auth listener signs the user straight into the app.
     } catch (error) {

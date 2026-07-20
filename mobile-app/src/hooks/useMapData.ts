@@ -10,6 +10,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 import { supabase } from '../services/supabase';
 import type { Geometry, Hazard, StateChoroplethStat } from '../types/map';
+import i18n from '../i18n';
 
 const CACHE_TTL_MS = 10 * 60 * 1000;
 
@@ -156,7 +157,7 @@ export function useMapData(admLevel: 0 | 1 | 2 = 1): UseMapDataReturn {
         setHazards(hazardsCache.current?.data ?? []);
       } catch (err: unknown) {
         if (active) {
-          setError(err instanceof Error ? err : new Error('An unknown error occurred'));
+          setError(err instanceof Error ? err : new Error(i18n.t('errors.generic')));
         }
       } finally {
         if (active) setLoading(false);

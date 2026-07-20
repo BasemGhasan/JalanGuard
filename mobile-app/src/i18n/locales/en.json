@@ -8,10 +8,13 @@
       "getStarted": "Get Started",
       "login": "Login",
       "logout": "Logout",
+      "cancel": "Cancel",
+      "retry": "Retry",
       "backToLogin": "Back to Login",
+      "verifyNow": "Verify now",
       "viewDetails": "View Details",
       "submitReport": "Submit Report",
-      "sendResetLink": "Send Reset Link",
+      "sendResetCode": "Send Reset Code",
       "yesFixed": "Yes, fixed",
       "stillBroken": "Still broken"
     },
@@ -42,34 +45,53 @@
       "emptyTitle": "Nothing here yet"
     }
   },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "offline": "Could not reach the server. Check your internet connection and try again.",
+    "loadVotes": "Could not load votes.",
+    "saveVote": "Could not save your vote."
+  },
   "auth": {
     "titles": {
       "welcomeBack": "Welcome Back",
       "createAccount": "Create Account",
       "resetPassword": "Reset Password",
+      "verifyEmail": "Verify Your Email",
       "splashTagline": "AI-Powered Road Safety",
-      "welcome": "Welcome"
+      "welcome": "Welcome",
+      "setNewPassword": "Set New Password"
     },
     "subtitles": {
       "login": "Login to continue reporting hazards",
       "register": "Join the community and help make roads safer",
-      "resetPassword": "Enter your email and we will send a reset link."
+      "resetPassword": "Enter your email and we will send you an 8-digit reset code.",
+      "verifyEmail": "Enter the 8-digit code we sent to {{email}}",
+      "setNewPassword": "Enter the 8-digit code sent to {{email}} and choose a new password"
     },
     "placeholders": {
       "fullName": "Full Name",
       "email": "Email Address",
-      "password": "Password"
+      "password": "Password",
+      "verificationCode": "8-digit code",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password"
     },
     "buttons": {
       "login": "Login",
       "signingIn": "Signing in...",
       "createAccount": "Create Account",
-      "creating": "Creating..."
+      "creating": "Creating...",
+      "verifyEmail": "Verify Email",
+      "verifying": "Verifying...",
+      "setNewPassword": "Update Password",
+      "updatingPassword": "Updating..."
     },
     "links": {
       "forgotPassword": "Forgot Password?",
       "noAccount": "Do not have an account? Sign up",
-      "hasAccount": "Already have an account? Login"
+      "hasAccount": "Already have an account? Login",
+      "resendCode": "Didn't get the code? Resend",
+      "resending": "Sending a new code..."
     },
     "alerts": {
       "invalidEmailTitle": "Invalid email",
@@ -84,8 +106,19 @@
       "registerFailedTitle": "Registration Failed",
       "resetFailedTitle": "Reset Failed",
       "genericMessage": "Something went wrong. Please try again.",
-      "checkEmailTitle": "Confirm Your Email",
-      "checkEmailMessage": "We've sent a confirmation link to your email. Tap it to activate your account."
+      "emailAlreadyRegistered": "This email is already registered. Please log in.",
+      "incorrectPassword": "Incorrect password. Please try again.",
+      "emailNotVerifiedTitle": "Email not verified",
+      "emailNotVerifiedMessage": "Confirm your email address before signing in. We can send you a new code.",
+      "verifyFailedTitle": "Verification failed",
+      "invalidCodeMessage": "That code is invalid or has expired. Request a new one.",
+      "codeResentTitle": "Code sent",
+      "codeResentMessage": "We sent a new code to {{email}}.",
+      "resendFailedTitle": "Could not resend",
+      "passwordMismatchTitle": "Passwords do not match",
+      "passwordMismatchMessage": "Make sure both password fields are identical.",
+      "passwordUpdatedTitle": "Password updated",
+      "passwordUpdatedMessage": "You're now signed in with your new password."
     }
   },
   "onboarding": {
@@ -121,13 +154,19 @@
     "mapSubtitle": "Tap to explore hazards near you",
     "recentActivity": "Recent Activity",
     "activityEmptyTitle": "No activity yet",
-    "activityEmptyMessage": "Report your first hazard to start building your contribution history.",
-    "activityStatus": "{{type}} · {{status}}"
+    "activityEmptyMessage": "Report your first hazard to start building your contribution history."
   },
   "map": {
-    "searchPlaceholder": "Search hazards...",
-    "bottomTitle": "Severe Pothole",
-    "bottomSubtitle": "Jl. Sudirman - 0.3 km away"
+    "loadError": "Couldn't load map data.",
+    "view": {
+      "areas": "Areas",
+      "pins": "Pins"
+    },
+    "adm": {
+      "country": "Country",
+      "states": "States",
+      "districts": "Districts"
+    }
   },
   "history": {
     "title": "My Reports",
@@ -143,7 +182,58 @@
       "reports": "Reports",
       "votes": "Votes",
       "trust": "Trust"
+    },
+    "delete": {
+      "link": "Delete account",
+      "title": "Delete account",
+      "hint": "This permanently deletes your JalanGuard account — including web developer access, if you have any. Hazards you've reported stay on the map for public safety, but will no longer show your name. Enter your password to confirm.",
+      "confirm": "Delete permanently",
+      "deleting": "Deleting…",
+      "passwordRequiredTitle": "Password required",
+      "passwordRequiredMessage": "Enter your password to confirm deletion.",
+      "failedTitle": "Delete failed",
+      "failedFallback": "Could not delete account.",
+      "failedMessage": "Failed to delete account: {{message}}"
     }
+  },
+  "account": {
+    "title": "Account",
+    "profileSection": "Profile",
+    "emailLabel": "Email",
+    "emailHint": "Your email address can't be changed from the app.",
+    "saveName": "Save name",
+    "saving": "Saving…",
+    "savedTitle": "Saved",
+    "nameSavedMessage": "Your display name has been updated.",
+    "passwordSection": "Password",
+    "currentPasswordPlaceholder": "Current password",
+    "newPasswordPlaceholder": "New password",
+    "changePassword": "Change password",
+    "passwordSavedMessage": "Your password has been changed.",
+    "saveFailedTitle": "Couldn't save",
+    "passwordRequiredTitle": "Password required",
+    "currentPasswordRequired": "Enter your current password to confirm.",
+    "samePasswordTitle": "Choose a different password",
+    "samePasswordMessage": "Your new password must be different from the current one."
+  },
+  "notificationSettings": {
+    "title": "Notifications",
+    "intro": "Choose what JalanGuard should notify you about.",
+    "options": {
+      "myReports": {
+        "label": "Updates on my reports",
+        "subtitle": "Votes, status changes and resolutions on hazards you submitted."
+      },
+      "nearbyHazards": {
+        "label": "New hazards near me",
+        "subtitle": "When someone reports a hazard close to your location."
+      },
+      "trustMilestones": {
+        "label": "Trust score & milestones",
+        "subtitle": "When your trust score changes or you reach a contribution milestone."
+      }
+    },
+    "footnote": "Push delivery isn't enabled yet — these preferences are saved and will apply as soon as it is."
   },
   "camera": {
     "live": "LIVE",
@@ -178,6 +268,20 @@
   },
   "settings": {
     "title": "Settings",
+    "comingSoon": "Coming soon",
+    "sections": {
+      "general": "General",
+      "language": "Language",
+      "more": "More"
+    },
+    "language": {
+      "label": "App language",
+      "subtitle": "Applies across the whole app",
+      "options": {
+        "en": "EN",
+        "ms": "BM"
+      }
+    },
     "items": {
       "account": {
         "label": "Account",
@@ -225,13 +329,6 @@
       "pothole": "Pothole",
       "crack": "Crack",
       "debris": "Debris"
-    }
-  },
-  "navigation": {
-    "auth": {
-      "login": "Login",
-      "register": "Register",
-      "resetPassword": "Reset Password"
     }
   }
 }

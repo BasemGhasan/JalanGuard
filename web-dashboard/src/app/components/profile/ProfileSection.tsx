@@ -10,6 +10,7 @@ import { Card } from "../ui/card";
 import { SectionLabel } from "../ui/sectionLabel";
 import { ProfileField } from "./ProfileField";
 import { DeleteAccountModal } from "./DeleteAccountModal";
+import type { Page } from "../Navbar";
 
 interface VerifiedBadgeProps {
   confirmed: boolean;
@@ -36,7 +37,11 @@ function VerifiedBadge({ confirmed }: Readonly<VerifiedBadgeProps>) {
   return <span style={style}>{confirmed ? "Verified" : "Pending"}</span>;
 }
 
-export function ProfileSection() {
+interface ProfileSectionProps {
+  onNavigate: (p: Page) => void;
+}
+
+export function ProfileSection({ onNavigate }: Readonly<ProfileSectionProps>) {
   const { session } = useAuth();
   const { profile, loading, error, saveProfile, requestEmailUpdate, verifyEmailOtp } = useProfile();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -112,13 +117,17 @@ export function ProfileSection() {
           disabled={loading}
         >
           <Trash2 size={14} />
-          Delete Account
+          {profile?.is_citizen ? "Remove Developer Access" : "Delete Account"}
         </button>
       </div>
 
       {/* ── Delete Account Modal ─────────────────────────────────────────── */}
       {showDeleteModal && (
-        <DeleteAccountModal onClose={handleCloseDeleteModal} />
+        <DeleteAccountModal
+          onClose={handleCloseDeleteModal}
+          onDeleted={() => onNavigate("map")}
+          isCitizen={profile?.is_citizen ?? false}
+        />
       )}
     </Card>
   );

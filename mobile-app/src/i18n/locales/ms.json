@@ -8,10 +8,13 @@
       "getStarted": "Mula",
       "login": "Log Masuk",
       "logout": "Log Keluar",
+      "cancel": "Batal",
+      "retry": "Cuba Semula",
       "backToLogin": "Kembali ke Log Masuk",
+      "verifyNow": "Sahkan sekarang",
       "viewDetails": "Lihat Butiran",
       "submitReport": "Hantar Laporan",
-      "sendResetLink": "Hantar Pautan Tetapan Semula",
+      "sendResetCode": "Hantar Kod Tetapan Semula",
       "yesFixed": "Ya, sudah dibaiki",
       "stillBroken": "Masih rosak"
     },
@@ -42,34 +45,53 @@
       "emptyTitle": "Belum ada apa-apa di sini"
     }
   },
+  "errors": {
+    "generic": "Sesuatu tidak kena. Sila cuba lagi.",
+    "offline": "Tidak dapat menghubungi pelayan. Sila semak sambungan internet anda dan cuba lagi.",
+    "loadVotes": "Tidak dapat memuatkan undian.",
+    "saveVote": "Tidak dapat menyimpan undian anda."
+  },
   "auth": {
     "titles": {
       "welcomeBack": "Selamat Kembali",
       "createAccount": "Cipta Akaun",
       "resetPassword": "Tetapkan Semula Kata Laluan",
+      "verifyEmail": "Sahkan Emel Anda",
       "splashTagline": "Keselamatan Jalan Berkuasa AI",
-      "welcome": "Selamat Datang"
+      "welcome": "Selamat Datang",
+      "setNewPassword": "Tetapkan Kata Laluan Baharu"
     },
     "subtitles": {
       "login": "Log masuk untuk terus melaporkan bahaya jalan",
       "register": "Sertai komuniti dan bantu jadikan jalan lebih selamat",
-      "resetPassword": "Masukkan emel anda dan kami akan hantar pautan tetapan semula."
+      "resetPassword": "Masukkan emel anda dan kami akan hantar kod tetapan semula 8 digit.",
+      "verifyEmail": "Masukkan kod 8 digit yang kami hantar ke {{email}}",
+      "setNewPassword": "Masukkan kod 8 digit yang dihantar ke {{email}} dan pilih kata laluan baharu"
     },
     "placeholders": {
       "fullName": "Nama Penuh",
       "email": "Alamat Emel",
-      "password": "Kata Laluan"
+      "password": "Kata Laluan",
+      "verificationCode": "Kod 8 digit",
+      "newPassword": "Kata laluan baharu",
+      "confirmPassword": "Sahkan kata laluan baharu"
     },
     "buttons": {
       "login": "Log Masuk",
       "signingIn": "Sedang log masuk...",
       "createAccount": "Cipta Akaun",
-      "creating": "Sedang mencipta..."
+      "creating": "Sedang mencipta...",
+      "verifyEmail": "Sahkan Emel",
+      "verifying": "Sedang mengesahkan...",
+      "setNewPassword": "Kemas Kini Kata Laluan",
+      "updatingPassword": "Mengemas kini..."
     },
     "links": {
       "forgotPassword": "Lupa Kata Laluan?",
       "noAccount": "Belum ada akaun? Daftar",
-      "hasAccount": "Sudah ada akaun? Log masuk"
+      "hasAccount": "Sudah ada akaun? Log masuk",
+      "resendCode": "Tidak menerima kod? Hantar semula",
+      "resending": "Menghantar kod baharu..."
     },
     "alerts": {
       "invalidEmailTitle": "Emel tidak sah",
@@ -84,8 +106,19 @@
       "registerFailedTitle": "Pendaftaran Gagal",
       "resetFailedTitle": "Set Semula Gagal",
       "genericMessage": "Sesuatu tidak kena. Sila cuba lagi.",
-      "checkEmailTitle": "Sahkan E-mel Anda",
-      "checkEmailMessage": "Kami telah menghantar pautan pengesahan ke e-mel anda. Ketik untuk mengaktifkan akaun anda."
+      "emailAlreadyRegistered": "Emel ini sudah didaftarkan. Sila log masuk.",
+      "incorrectPassword": "Kata laluan salah. Sila cuba lagi.",
+      "emailNotVerifiedTitle": "Emel belum disahkan",
+      "emailNotVerifiedMessage": "Sahkan alamat emel anda sebelum log masuk. Kami boleh hantar kod baharu.",
+      "verifyFailedTitle": "Pengesahan gagal",
+      "invalidCodeMessage": "Kod itu tidak sah atau telah luput. Sila minta kod baharu.",
+      "codeResentTitle": "Kod dihantar",
+      "codeResentMessage": "Kami telah hantar kod baharu ke {{email}}.",
+      "resendFailedTitle": "Tidak dapat hantar semula",
+      "passwordMismatchTitle": "Kata laluan tidak sepadan",
+      "passwordMismatchMessage": "Pastikan kedua-dua medan kata laluan adalah sama.",
+      "passwordUpdatedTitle": "Kata laluan dikemas kini",
+      "passwordUpdatedMessage": "Anda kini log masuk dengan kata laluan baharu anda."
     }
   },
   "onboarding": {
@@ -121,13 +154,19 @@
     "mapSubtitle": "Ketik untuk meneroka bahaya berhampiran anda",
     "recentActivity": "Aktiviti Terkini",
     "activityEmptyTitle": "Belum ada aktiviti",
-    "activityEmptyMessage": "Laporkan bahaya pertama anda untuk mula membina sejarah sumbangan.",
-    "activityStatus": "{{type}} · {{status}}"
+    "activityEmptyMessage": "Laporkan bahaya pertama anda untuk mula membina sejarah sumbangan."
   },
   "map": {
-    "searchPlaceholder": "Cari bahaya...",
-    "bottomTitle": "Lubang Jalan Teruk",
-    "bottomSubtitle": "Jl. Sudirman - 0.3 km dari sini"
+    "loadError": "Tidak dapat memuatkan data peta.",
+    "view": {
+      "areas": "Kawasan",
+      "pins": "Penanda"
+    },
+    "adm": {
+      "country": "Negara",
+      "states": "Negeri",
+      "districts": "Daerah"
+    }
   },
   "history": {
     "title": "Laporan Saya",
@@ -143,7 +182,58 @@
       "reports": "Laporan",
       "votes": "Undian",
       "trust": "Kepercayaan"
+    },
+    "delete": {
+      "link": "Padam akaun",
+      "title": "Padam akaun",
+      "hint": "Ini akan memadam akaun JalanGuard anda secara kekal — termasuk akses pembangun web, jika ada. Bahaya yang anda laporkan akan kekal di peta demi keselamatan awam, tetapi nama anda tidak lagi dipaparkan. Masukkan kata laluan anda untuk mengesahkan.",
+      "confirm": "Padam secara kekal",
+      "deleting": "Memadam…",
+      "passwordRequiredTitle": "Kata laluan diperlukan",
+      "passwordRequiredMessage": "Masukkan kata laluan anda untuk mengesahkan pemadaman.",
+      "failedTitle": "Pemadaman gagal",
+      "failedFallback": "Tidak dapat memadam akaun.",
+      "failedMessage": "Gagal memadam akaun: {{message}}"
     }
+  },
+  "account": {
+    "title": "Akaun",
+    "profileSection": "Profil",
+    "emailLabel": "Emel",
+    "emailHint": "Alamat emel anda tidak boleh diubah melalui aplikasi.",
+    "saveName": "Simpan nama",
+    "saving": "Menyimpan…",
+    "savedTitle": "Disimpan",
+    "nameSavedMessage": "Nama paparan anda telah dikemas kini.",
+    "passwordSection": "Kata Laluan",
+    "currentPasswordPlaceholder": "Kata laluan semasa",
+    "newPasswordPlaceholder": "Kata laluan baharu",
+    "changePassword": "Tukar kata laluan",
+    "passwordSavedMessage": "Kata laluan anda telah ditukar.",
+    "saveFailedTitle": "Tidak dapat menyimpan",
+    "passwordRequiredTitle": "Kata laluan diperlukan",
+    "currentPasswordRequired": "Masukkan kata laluan semasa anda untuk mengesahkan.",
+    "samePasswordTitle": "Pilih kata laluan berbeza",
+    "samePasswordMessage": "Kata laluan baharu anda mesti berbeza daripada yang semasa."
+  },
+  "notificationSettings": {
+    "title": "Notifikasi",
+    "intro": "Pilih perkara yang anda mahu JalanGuard beritahu.",
+    "options": {
+      "myReports": {
+        "label": "Kemas kini laporan saya",
+        "subtitle": "Undian, perubahan status dan penyelesaian bagi bahaya yang anda hantar."
+      },
+      "nearbyHazards": {
+        "label": "Bahaya baharu berhampiran",
+        "subtitle": "Apabila seseorang melaporkan bahaya berhampiran lokasi anda."
+      },
+      "trustMilestones": {
+        "label": "Skor kepercayaan & pencapaian",
+        "subtitle": "Apabila skor kepercayaan anda berubah atau anda mencapai satu pencapaian sumbangan."
+      }
+    },
+    "footnote": "Penghantaran pemberitahuan belum diaktifkan — pilihan ini disimpan dan akan digunakan sebaik sahaja ia tersedia."
   },
   "camera": {
     "live": "LANGSUNG",
@@ -178,6 +268,20 @@
   },
   "settings": {
     "title": "Tetapan",
+    "comingSoon": "Akan datang",
+    "sections": {
+      "general": "Umum",
+      "language": "Bahasa",
+      "more": "Lain-lain"
+    },
+    "language": {
+      "label": "Bahasa aplikasi",
+      "subtitle": "Digunakan di seluruh aplikasi",
+      "options": {
+        "en": "EN",
+        "ms": "BM"
+      }
+    },
     "items": {
       "account": {
         "label": "Akaun",
@@ -225,13 +329,6 @@
       "pothole": "Lubang Jalan",
       "crack": "Retakan",
       "debris": "Halangan"
-    }
-  },
-  "navigation": {
-    "auth": {
-      "login": "Log Masuk",
-      "register": "Daftar",
-      "resetPassword": "Tetapkan Semula Kata Laluan"
     }
   }
 }

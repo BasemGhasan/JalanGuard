@@ -20,7 +20,7 @@ import { COLORS } from "../constants/theme";
 
 // 2. Inner shell — must live inside AuthProvider to call useAuth()
 /**
- * AppInner owns the page routing state and wires up three redirect effects:
+ * AppInner owns the page routing state and wires up four redirect effects:
  *
  * 1. Email confirmation — when the user arrives from a signup confirmation email
  *    (INITIAL_HASH_TYPE === "signup"), redirect to developer settings once the
@@ -31,8 +31,21 @@ import { COLORS } from "../constants/theme";
  *    calls supabase.auth.updateUser(); on success onNavigate("key") is called and
  *    the USER_UPDATED event clears needsPasswordReset in the context.
  *
- * 3. Session expiry — redirect away from the protected "key" page if the session
- *    is lost (e.g. token expired, manual sign-out from another tab).
+ * 3. Session expiry — redirect away from the protected "key" and "docs" pages if
+ *    the session is lost (e.g. token expired, manual sign-out from another tab).
+ *    Docs covers the developer API, so it's gated the same as the key page —
+ *    not just unlinked from the navbar, but unreachable once logged out.
+ *
+ * 4. Post-auth redirect — the authoritative router to "key" once a session
+ *    exists. AuthPage's own handlers also call onNavigate("key") right after
+ *    a successful sign-in, but that update and the session update from
+ *    onAuthStateChange land as two separate state updates; if this effect's
+ *    session update were to land after the handler's setPage("key"), Effect 3
+ *    above would see (page==="key" && !session) for one render and bounce
+ *    straight back to "auth", leaving the user stuck on the login form despite
+ *    a real session existing until they refreshed manually. This effect is the
+ *    fallback that guarantees a hand-off to "key" always completes, regardless
+ *    of which of the two updates lands first.
  */
 function AppInner() {
   const { session, loading: authLoading, needsPasswordReset } = useAuth();
@@ -62,8 +75,13 @@ function AppInner() {
 
   // ── Effect 3: Session-expiry guard ───────────────────────────────────────
   useEffect(() => {
-    if (!session && page === "key") setPage("auth");
+    if (!session && (page === "key" || page === "docs")) setPage("auth");
   }, [session, page]);
+
+  // ── Effect 4: Post-auth redirect ─────────────────────────────────────────
+  useEffect(() => {
+    if (session && page === "auth" && !needsPasswordReset) setPage("key");
+  }, [session, page, needsPasswordReset]);
 
   /** Central navigation handler. The session guard logic was moved to render. */
   const navigate = useCallback(
@@ -84,10 +102,10 @@ function AppInner() {
       )}
 
       {page === "map" && <MapPage />}
-      {page === "docs" && <DocsPage />}
-      {/* Route guard during render */}
+      {/* Route guards during render */}
+      {page === "docs" && session && <DocsPage />}
       {page === "key" && session && <KeyPage onNavigate={navigate} />}
-      {(page === "auth" || (page === "key" && !session)) && (
+      {(page === "auth" || (page === "key" && !session) || (page === "docs" && !session)) && (
         <AuthPage
           /**
            * key forces a fresh mount (and therefore a fresh useState) whenever

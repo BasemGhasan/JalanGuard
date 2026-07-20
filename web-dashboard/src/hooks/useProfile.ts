@@ -116,23 +116,15 @@ export function useProfile(): UseProfileReturn {
     if (error) throw error;
   };
 
-  // 2. Verifies the 6-digit code and syncs the new email to your public.profiles table
-  const verifyEmailOtp = async (newEmail: string, tokenOrHash: string) => {
-    const trimmed = tokenOrHash.trim();
-    const otpPayload = trimmed.includes(".")
-      ? {
-        email: newEmail,
-        token_hash: trimmed,
-        type: "email_change" as const,
-      }
-      : {
-        email: newEmail,
-        token: trimmed,
-        type: "email_change" as const,
-      };
-
-    // Verify with Supabase Auth
-    const { data, error } = await supabase.auth.verifyOtp(otpPayload as any);
+  // 2. Verifies the 8-digit code and syncs the new email to your public.profiles table.
+  //    Token-only: every auth email in this project emits `{{ .Token }}`, so
+  //    there is no link (and therefore no token_hash) to handle.
+  const verifyEmailOtp = async (newEmail: string, token: string) => {
+    const { data, error } = await supabase.auth.verifyOtp({
+      email: newEmail,
+      token: token.trim(),
+      type: "email_change",
+    });
 
     if (error) throw error;
 

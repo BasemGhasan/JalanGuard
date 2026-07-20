@@ -7,3 +7,5 @@ export * from './SubmissionScreen';
 export * from './HazardDetailScreen';
 export * from './NotificationsScreen';
 export * from './SettingsScreen';
+export * from './AccountSettingsScreen';
+export * from './NotificationSettingsScreen';

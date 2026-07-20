@@ -12,3 +12,7 @@ export * from './registerScreen.styles';
 export * from './settingsScreen.styles';
 export * from './splashScreen.styles';
 export * from './submissionScreen.styles';
+export * from './accountSettingsScreen.styles';
+export * from './notificationSettingsScreen.styles';
+export * from './verifyEmailScreen.styles';
+export * from './resetPasswordScreen.styles';

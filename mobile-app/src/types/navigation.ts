@@ -4,6 +4,10 @@ export type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
   ForgotPassword: undefined;
+  /** Carries the address the 8-digit signup code was sent to. */
+  VerifyEmail: { email: string };
+  /** Carries the address the 8-digit recovery code was sent to. */
+  ResetPassword: { email: string };
 };
 
 export type MainTabParamList = {
@@ -33,4 +37,8 @@ export type AppStackParamList = {
   HazardDetail: { hazard: Hazard } | undefined;
   Notifications: undefined;
   Settings: undefined;
+  /** Settings → Account: edit display name and change password. */
+  AccountSettings: undefined;
+  /** Settings → Notifications: per-category notification toggles. */
+  NotificationSettings: undefined;
 };

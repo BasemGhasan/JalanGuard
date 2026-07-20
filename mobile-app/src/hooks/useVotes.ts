@@ -9,6 +9,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { castVote, getMyVote, getVoteSummary } from '../services';
 import type { VoteKind, VoteSummary } from '../types';
+import i18n from '../i18n';
 
 export function useHazardVotes(hazardId: string | undefined, userId: string | undefined) {
   const [summary, setSummary] = useState<VoteSummary>({ fixed: 0, broken: 0 });
@@ -38,7 +39,7 @@ export function useHazardVotes(hazardId: string | undefined, userId: string | un
       setSummary(nextSummary);
       setMyVote(nextVote);
     } catch (err) {
-      if (activeRef.current) setError(err instanceof Error ? err : new Error('Could not load votes.'));
+      if (activeRef.current) setError(err instanceof Error ? err : new Error(i18n.t('errors.loadVotes')));
     } finally {
       if (activeRef.current) setLoading(false);
     }
@@ -60,7 +61,7 @@ export function useHazardVotes(hazardId: string | undefined, userId: string | un
         setMyVote(result);
         setSummary(nextSummary);
       } catch (err) {
-        if (activeRef.current) setError(err instanceof Error ? err : new Error('Could not save your vote.'));
+        if (activeRef.current) setError(err instanceof Error ? err : new Error(i18n.t('errors.saveVote')));
       } finally {
         if (activeRef.current) setVoting(false);
       }

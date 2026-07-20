@@ -49,7 +49,7 @@ export function ProfileScreen({ user, onLogout, onOpenSettings }: ProfileScreenP
   const handleDelete = useCallback(async () => {
     if (!user?.email) return;
     if (!password) {
-      Alert.alert('Password required', 'Enter your password to confirm deletion.');
+      Alert.alert(t('profile.delete.passwordRequiredTitle'), t('profile.delete.passwordRequiredMessage'));
       return;
     }
     setDeleting(true);
@@ -58,39 +58,47 @@ export function ProfileScreen({ user, onLogout, onOpenSettings }: ProfileScreenP
       // routes the app back to the login stack automatically.
       await authService.deleteAccount(user.email, password);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Could not delete account.';
-      Alert.alert('Delete failed', message);
+      const message = error instanceof Error ? error.message : t('profile.delete.failedFallback');
+      Alert.alert(t('profile.delete.failedTitle'), message);
     } finally {
       setDeleting(false);
       setPassword('');
       setDeleteVisible(false);
     }
-  }, [password, user?.email]);
+  }, [password, t, user?.email]);
 
   return (
-    <ScrollView style={profileScreenStyles.container} contentContainerStyle={profileScreenStyles.content}>
+    // AppHeader sits outside the ScrollView: the scroll content centres its
+    // children, which collapsed the header row to its content width and pushed
+    // the settings button up against the title instead of into the corner.
+    <View style={profileScreenStyles.screen}>
       <AppHeader title={t('profile.title')} rightIcon="settings" onRightPress={onOpenSettings} />
 
-      <View style={profileScreenStyles.avatar}>
-        <Text style={profileScreenStyles.avatarText}>{initials}</Text>
-      </View>
-      <Text style={profileScreenStyles.name}>{user?.name ?? t('profile.userName')}</Text>
-      <Text style={profileScreenStyles.level}>{user?.email ?? t('profile.level')}</Text>
+      <ScrollView
+        style={profileScreenStyles.container}
+        contentContainerStyle={profileScreenStyles.content}
+      >
+        <View style={profileScreenStyles.avatar}>
+          <Text style={profileScreenStyles.avatarText}>{initials}</Text>
+        </View>
+        <Text style={profileScreenStyles.name}>{user?.name ?? t('profile.userName')}</Text>
+        <Text style={profileScreenStyles.level}>{user?.email ?? t('profile.level')}</Text>
 
-      <View style={profileScreenStyles.statsWrap}>
-        <InfoCard icon="warning" title={t('profile.stats.reports')} value={statValue(stats?.reports)} />
-        <InfoCard icon="thumb-up" title={t('profile.stats.votes')} value={statValue(stats?.votes)} />
-        <InfoCard icon="emoji-events" title={t('profile.stats.trust')} value={statValue(stats?.trustScore)} />
-      </View>
+        <View style={profileScreenStyles.statsWrap}>
+          <InfoCard icon="warning" title={t('profile.stats.reports')} value={statValue(stats?.reports)} />
+          <InfoCard icon="thumb-up" title={t('profile.stats.votes')} value={statValue(stats?.votes)} />
+          <InfoCard icon="emoji-events" title={t('profile.stats.trust')} value={statValue(stats?.trustScore)} />
+        </View>
 
-      <Pressable style={profileScreenStyles.logoutButton} onPress={onLogout}>
-        <MaterialIcons name="logout" size={18} color={COLORS.error} />
-        <Text style={profileScreenStyles.logoutText}>{t('common.actions.logout')}</Text>
-      </Pressable>
+        <Pressable style={profileScreenStyles.logoutButton} onPress={onLogout}>
+          <MaterialIcons name="logout" size={18} color={COLORS.error} />
+          <Text style={profileScreenStyles.logoutText}>{t('common.actions.logout')}</Text>
+        </Pressable>
 
-      <Pressable style={profileScreenStyles.deleteLink} onPress={() => setDeleteVisible(true)}>
-        <Text style={profileScreenStyles.deleteLinkText}>Delete account</Text>
-      </Pressable>
+        <Pressable style={profileScreenStyles.deleteLink} onPress={() => setDeleteVisible(true)}>
+          <Text style={profileScreenStyles.deleteLinkText}>{t('profile.delete.link')}</Text>
+        </Pressable>
+      </ScrollView>
 
       <Modal
         visible={deleteVisible}
@@ -104,22 +112,20 @@ export function ProfileScreen({ user, onLogout, onOpenSettings }: ProfileScreenP
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <View style={profileScreenStyles.modalCard}>
-            <Text style={profileScreenStyles.modalTitle}>Delete account</Text>
-            <Text style={profileScreenStyles.modalHint}>
-              This permanently deletes your account and reports. Enter your password to confirm.
-            </Text>
+            <Text style={profileScreenStyles.modalTitle}>{t('profile.delete.title')}</Text>
+            <Text style={profileScreenStyles.modalHint}>{t('profile.delete.hint')}</Text>
 
             <FormField
               icon="lock-outline"
               value={password}
               onChangeText={setPassword}
-              placeholder="Password"
+              placeholder={t('auth.placeholders.password')}
               secureTextEntry
               style={profileScreenStyles.modalInput}
             />
 
             <PrimaryButton
-              label={deleting ? 'Deleting…' : 'Delete permanently'}
+              label={deleting ? t('profile.delete.deleting') : t('profile.delete.confirm')}
               onPress={handleDelete}
               disabled={deleting}
               icon="delete-outline"
@@ -133,11 +139,13 @@ export function ProfileScreen({ user, onLogout, onOpenSettings }: ProfileScreenP
               }}
               disabled={deleting}
             >
-              <Text style={profileScreenStyles.modalCancelText}>Cancel</Text>
+              <Text style={profileScreenStyles.modalCancelText}>
+                {t('common.actions.cancel')}
+              </Text>
             </Pressable>
           </View>
         </KeyboardAvoidingView>
       </Modal>
-    </ScrollView>
+    </View>
   );
 }

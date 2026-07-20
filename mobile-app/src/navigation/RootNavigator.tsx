@@ -7,6 +7,7 @@ import { COLORS } from '../constants';
 import { ReportTabButton } from '../components';
 import { AppStackParamList, AuthStackParamList, Hazard, MainTabParamList, UserProfile } from '../types';
 import {
+  AccountSettingsScreen,
   CameraScreen,
   HazardDetailScreen,
   HistoryScreen,
@@ -14,13 +15,16 @@ import {
   HomeScreen,
   LoginScreen,
   MapScreen,
+  NotificationSettingsScreen,
   NotificationsScreen,
   OnboardingScreen,
   ProfileScreen,
   RegisterScreen,
+  ResetPasswordScreen,
   SettingsScreen,
   SplashScreen,
   SubmissionScreen,
+  VerifyEmailScreen,
 } from '../screens';
 
 function EmptyReportPlaceholder() {
@@ -183,8 +187,21 @@ function AppStackNavigator({
       </AppStack.Screen>
       <AppStack.Screen name="Settings">
         {({ navigation }) => (
-          <SettingsScreen onBack={() => navigation.goBack()} onLogout={onLogout} />
+          <SettingsScreen
+            onBack={() => navigation.goBack()}
+            onLogout={onLogout}
+            onOpenAccount={() => navigation.navigate('AccountSettings')}
+            onOpenNotifications={() => navigation.navigate('NotificationSettings')}
+          />
         )}
+      </AppStack.Screen>
+      <AppStack.Screen name="AccountSettings">
+        {({ navigation }) => (
+          <AccountSettingsScreen user={user} onBack={() => navigation.goBack()} />
+        )}
+      </AppStack.Screen>
+      <AppStack.Screen name="NotificationSettings">
+        {({ navigation }) => <NotificationSettingsScreen onBack={() => navigation.goBack()} />}
       </AppStack.Screen>
     </AppStack.Navigator>
   );
@@ -211,6 +228,8 @@ function AuthStackNavigator({
         {(props) => <RegisterScreen {...props} onRegister={onRegister} />}
       </AuthStack.Screen>
       <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      <AuthStack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
+      <AuthStack.Screen name="ResetPassword" component={ResetPasswordScreen} />
     </AuthStack.Navigator>
   );
 }

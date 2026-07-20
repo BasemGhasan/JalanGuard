@@ -122,7 +122,7 @@ export function KeyPage({ onNavigate }: Readonly<KeyPageProps>) {
           </div>
 
           {/* ── Profile card (self-contained — data + UI via ProfileSection) */}
-          <ProfileSection />
+          <ProfileSection onNavigate={onNavigate} />
 
           {/* ── API key card ──────────────────────────────────────────── */}
           <Card>

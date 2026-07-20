@@ -24,8 +24,8 @@ export function ForgotPasswordScreen({ navigation }: Props) {
     setSubmitting(true);
     try {
       await resetPassword(email);
-      Alert.alert(t('auth.alerts.resetEmailSentTitle'), t('auth.alerts.resetEmailSentMessage'));
-      navigation.popTo('Login');
+      // The email carries an 8-digit code, not a link — collect it next.
+      navigation.navigate('ResetPassword', { email: email.trim() });
     } catch (error) {
       const message = error instanceof Error ? error.message : t('auth.alerts.genericMessage');
       Alert.alert(t('auth.alerts.resetFailedTitle'), message);
@@ -42,6 +42,7 @@ export function ForgotPasswordScreen({ navigation }: Props) {
         subtitle={t('auth.subtitles.resetPassword')}
       />
 
+
       <FormField
         icon="mail-outline"
         value={email}
@@ -51,7 +52,7 @@ export function ForgotPasswordScreen({ navigation }: Props) {
       />
 
       <PrimaryButton
-        label={t('common.actions.sendResetLink')}
+        label={t('common.actions.sendResetCode')}
         onPress={handleSendResetLink}
         disabled={submitting}
         icon="chevron-right"

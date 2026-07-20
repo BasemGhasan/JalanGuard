@@ -18,9 +18,9 @@ interface AuthContextValue {
    */
   loading:            boolean;
   /**
-   * True while the user is in a PASSWORD_RECOVERY session — i.e. they clicked
-   * the password-reset link in their email and arrived at the app with a
-   * short-lived recovery token. Cleared when USER_UPDATED or SIGNED_OUT fires.
+   * True while the user is in a PASSWORD_RECOVERY session — i.e. they entered
+   * the emailed recovery code and `verifyOtp` exchanged it for a short-lived
+   * recovery session. Cleared when USER_UPDATED or SIGNED_OUT fires.
    */
   needsPasswordReset: boolean;
 }
@@ -67,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(sess);
 
       if (event === "PASSWORD_RECOVERY") {
-        // User arrived via a password-reset email link
+        // verifyOtp accepted the emailed recovery code
         setNeedsPasswordReset(true);
       } else if (event === "USER_UPDATED" || event === "SIGNED_OUT") {
         // Password was changed or user signed out — recovery session is over

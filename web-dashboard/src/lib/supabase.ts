@@ -60,11 +60,15 @@ function createMissingQuery() {
  * value even after Supabase clears the URL.
  *
  * Possible values:
- *   "signup"       — user clicked an email-confirmation link
- *   "recovery"     — user clicked a password-reset link
+ *   "signup"       — email-confirmation redirect
+ *   "recovery"     — password-reset redirect
  *   "magiclink"    — magic-link login (not currently used)
- *   "email_change" — user confirmed an email-address change
+ *   "email_change" — email-address change confirmation
  *   null           — normal page load with no Supabase redirect
+ *
+ * NOTE: all auth emails in this project now carry an 8-digit `{{ .Token }}`
+ * rather than a link, so in practice this is always null. It is kept as a
+ * safety net for any legacy link still sitting in someone's inbox.
  */
 export const INITIAL_HASH_TYPE: string | null =
   typeof window !== "undefined"

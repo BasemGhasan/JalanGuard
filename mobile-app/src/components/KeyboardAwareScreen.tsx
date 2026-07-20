@@ -15,6 +15,11 @@ type KeyboardAwareScreenProps = {
   contentStyle?: StyleProp<ViewStyle>;
   /** Fills the area behind the content, including any keyboard inset. */
   backgroundColor?: string;
+  /**
+   * Pad for the status bar / notch. Turn off when an AppHeader already sits
+   * above this wrapper and has consumed the top inset itself.
+   */
+  applyTopInset?: boolean;
   children: React.ReactNode;
 };
 
@@ -38,6 +43,7 @@ type KeyboardAwareScreenProps = {
 export function KeyboardAwareScreen({
   contentStyle,
   backgroundColor = COLORS.primary,
+  applyTopInset = true,
   children,
 }: KeyboardAwareScreenProps) {
   const insets = useSafeAreaInsets();
@@ -52,7 +58,10 @@ export function KeyboardAwareScreen({
         contentContainerStyle={[
           keyboardAwareScreenStyles.content,
           contentStyle,
-          { paddingTop: insets.top + SPACING.lg, paddingBottom: insets.bottom + SPACING.lg },
+          {
+            paddingTop: applyTopInset ? insets.top + SPACING.lg : SPACING.lg,
+            paddingBottom: insets.bottom + SPACING.lg,
+          },
         ]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}

@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import * as Location from 'expo-location';
+import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING } from '../../constants';
 import { useMapData } from '../../hooks';
 import type { Hazard, MapView as MapViewMode } from '../../types';
@@ -13,10 +14,11 @@ type MapScreenProps = {
   onOpenHazardDetail: (hazard: Hazard) => void;
 };
 
-const ADM_OPTIONS: Array<{ level: 0 | 1 | 2; label: string }> = [
-  { level: 0, label: 'Country' },
-  { level: 1, label: 'States' },
-  { level: 2, label: 'Districts' },
+/** Labels are resolved at render time so a language switch re-labels them. */
+const ADM_OPTIONS: Array<{ level: 0 | 1 | 2; labelKey: string }> = [
+  { level: 0, labelKey: 'map.adm.country' },
+  { level: 1, labelKey: 'map.adm.states' },
+  { level: 2, labelKey: 'map.adm.districts' },
 ];
 
 /**
@@ -31,6 +33,7 @@ const ADM_OPTIONS: Array<{ level: 0 | 1 | 2; label: string }> = [
  * the fix fails it stays on the country-wide default view.
  */
 export function MapScreen({ onOpenHazardDetail }: MapScreenProps) {
+  const { t } = useTranslation();
   const webRef = useRef<WebView>(null);
   const insets = useSafeAreaInsets();
   const [ready, setReady] = useState(false);
@@ -135,7 +138,7 @@ export function MapScreen({ onOpenHazardDetail }: MapScreenProps) {
               style={[mapScreenStyles.toggleItem, active && mapScreenStyles.toggleItemActive]}
             >
               <Text style={[mapScreenStyles.toggleText, active && mapScreenStyles.toggleTextActive]}>
-                {view === 'choropleth' ? 'Areas' : 'Pins'}
+                {view === 'choropleth' ? t('map.view.areas') : t('map.view.pins')}
               </Text>
             </Pressable>
           );
@@ -156,7 +159,7 @@ export function MapScreen({ onOpenHazardDetail }: MapScreenProps) {
                 style={[mapScreenStyles.toggleItem, active && mapScreenStyles.toggleItemActive]}
               >
                 <Text style={[mapScreenStyles.toggleText, active && mapScreenStyles.toggleTextActive]}>
-                  {opt.label}
+                  {t(opt.labelKey)}
                 </Text>
               </Pressable>
             );
@@ -172,9 +175,9 @@ export function MapScreen({ onOpenHazardDetail }: MapScreenProps) {
 
       {!loading && error && (
         <View style={mapScreenStyles.overlay}>
-          <Text style={mapScreenStyles.errorText}>Couldn’t load map data.</Text>
+          <Text style={mapScreenStyles.errorText}>{t('map.loadError')}</Text>
           <Pressable style={mapScreenStyles.retryButton} onPress={retry}>
-            <Text style={mapScreenStyles.retryText}>Retry</Text>
+            <Text style={mapScreenStyles.retryText}>{t('common.actions.retry')}</Text>
           </Pressable>
         </View>
       )}

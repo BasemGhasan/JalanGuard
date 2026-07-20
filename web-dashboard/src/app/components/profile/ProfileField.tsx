@@ -18,34 +18,8 @@ interface ProfileFieldProps {
   readonly onVerifyOtp?: (newEmail: string, otpCode: string) => Promise<void>;
 }
 
-function parseOtpOrTokenHash(raw: string): { token?: string; tokenHash?: string } {
-  const input = raw.trim();
-
-  // Accept full confirmation links by extracting token fields from either query or hash.
-  if (input.startsWith("http://") || input.startsWith("https://")) {
-    try {
-      const url = new URL(input);
-      const fromQuery = url.searchParams.get("token") || url.searchParams.get("token_hash");
-      if (fromQuery) {
-        return url.searchParams.has("token_hash")
-          ? { tokenHash: fromQuery }
-          : { token: fromQuery };
-      }
-
-      const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
-      const fromHash = hashParams.get("token") || hashParams.get("token_hash");
-      if (fromHash) {
-        return hashParams.has("token_hash")
-          ? { tokenHash: fromHash }
-          : { token: fromHash };
-      }
-    } catch {
-      // Fall through to plain token handling.
-    }
-  }
-
-  return input.includes(".") ? { tokenHash: input } : { token: input };
-}
+/** Length of the token Supabase emits via `{{ .Token }}` in the email templates. */
+const CODE_LENGTH = 8;
 
 export function ProfileField({
   icon: Icon,
@@ -95,13 +69,12 @@ export function ProfileField({
       // Flow A: Email Two-Step Update
       if (isEmailUpdate && onRequestOtp && onVerifyOtp) {
         if (isWaitingForOtp) {
-          if (!otpCode.trim()) {
-            toast.error("Enter the OTP code or paste the confirmation link.");
+          if (otpCode.length !== CODE_LENGTH) {
+            toast.error(`Enter the ${CODE_LENGTH}-digit code from your email.`);
             return;
           }
 
-          const parsed = parseOtpOrTokenHash(otpCode);
-          await onVerifyOtp(editValue.trim(), parsed.tokenHash ?? parsed.token ?? "");
+          await onVerifyOtp(editValue.trim(), otpCode);
           toast.success("Email updated successfully!");
           setIsEditing(false);
           setIsWaitingForOtp(false);
@@ -152,10 +125,12 @@ export function ProfileField({
               <input
                 type="text"
                 value={otpCode}
-                onChange={(e) => setOtpCode(e.target.value)}
+                onChange={(e) =>
+                  setOtpCode(e.target.value.replace(/\D/g, "").slice(0, CODE_LENGTH))
+                }
                 disabled={loading}
                 style={{ ...styles.input, marginTop: 8 }}
-                placeholder="Enter OTP code or paste confirmation link"
+                placeholder={`${CODE_LENGTH}-digit code`}
               />
             )}
           </div>
