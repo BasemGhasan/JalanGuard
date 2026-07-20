@@ -2,19 +2,19 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { NotificationPreferences } from '../types';
 
 /**
- * Notification preferences, stored on the device.
+ * Notification preferences.
  *
- * These are kept local rather than on `profiles` because nothing server-side
- * consumes them yet — push delivery isn't wired up, so the Notifications screen
- * is currently the only reader. When a push backend lands, this module is the
- * single place that has to start syncing to Supabase.
+ * Stored on the device for instant toggle feedback, and mirrored to
+ * `profiles.notify_*` by `notificationService.syncNotificationPreferences` —
+ * the server needs its own copy because the DB triggers that enqueue
+ * notifications can't read device storage.
  */
 const NOTIFICATION_PREFS_KEY = 'jalanguard.notificationPrefs';
 
 export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
   myReports: true,
   nearbyHazards: true,
-  trustMilestones: false,
+  reportCheckins: true,
 };
 
 export async function getNotificationPreferences(): Promise<NotificationPreferences> {

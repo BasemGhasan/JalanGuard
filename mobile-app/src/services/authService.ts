@@ -276,6 +276,54 @@ export async function updateDisplayName(userId: string, fullName: string): Promi
 }
 
 /**
+ * Starts an email change: Supabase emails an 8-digit code to the NEW address.
+ *
+ * Nothing changes until `verifyEmailChange` accepts that code, so a typo is
+ * harmless — the account keeps its current address.
+ */
+export async function requestEmailChange(newEmail: string): Promise<void> {
+  try {
+    const { error } = await supabase.auth.updateUser({ email: newEmail.trim() });
+    if (error) throw error;
+  } catch (error) {
+    throw toFriendlyError(error);
+  }
+}
+
+/**
+ * Completes an email change with the code sent to the new address, then
+ * mirrors the new address onto the `profiles` row so anything reading the
+ * profile (rather than the auth user) stays consistent.
+ *
+ * Token-only, like every other flow in this app — the project's email
+ * templates emit `{{ .Token }}` rather than a link.
+ */
+export async function verifyEmailChange(newEmail: string, code: string): Promise<void> {
+  const trimmed = newEmail.trim();
+  try {
+    const { data, error } = await supabase.auth.verifyOtp({
+      email: trimmed,
+      token: code.trim(),
+      type: 'email_change',
+    });
+    if (error) throw error;
+
+    if (data.user?.id) {
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ email: trimmed })
+        .eq('id', data.user.id);
+      if (profileError) throw profileError;
+    }
+  } catch (error) {
+    if (error instanceof Error && /expired|invalid/i.test(error.message)) {
+      throw new Error(i18n.t('auth.alerts.invalidCodeMessage'));
+    }
+    throw toFriendlyError(error);
+  }
+}
+
+/**
  * Changes the account password after re-confirming the current one.
  *
  * Supabase's `updateUser` doesn't require the old password, so we re-sign-in

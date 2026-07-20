@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { FlatList, View } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { AppHeader, BadgeChip, ListRow, StateView } from '../../components';
-import { useRecentActivity } from '../../hooks';
+import { AppHeader, ListRow, StateView } from '../../components';
+import { useMyNotifications, useRefetchOnFocus } from '../../hooks';
+import { getHazardById, markNotificationsRead } from '../../services';
+import type { NotificationEntry } from '../../services';
 import { formatDate } from '../../utils';
-import type { ActivityItem, Hazard, UserProfile } from '../../types';
+import type { Hazard, UserProfile } from '../../types';
 import { notificationsScreenStyles } from '../../styles/screens';
 
 type NotificationsScreenProps = {
@@ -13,40 +16,62 @@ type NotificationsScreenProps = {
   onOpenHazardDetail: (hazard: Hazard) => void;
 };
 
-const KIND_ICON = {
-  reported: 'add-alert',
-  resolved: 'check-circle',
-  in_review: 'hourglass-empty',
-} as const;
-
-const KIND_TONE = {
-  reported: 'warning',
-  resolved: 'success',
-  in_review: 'neutral',
-} as const;
+const KIND_ICON: Record<NotificationEntry['kind'], keyof typeof MaterialIcons.glyphMap> = {
+  my_reports: 'campaign',
+  nearby_hazards: 'location-on',
+  report_checkin: 'event-repeat',
+};
 
 /**
- * Notifications derived from the user's real report activity and its lifecycle
- * status — there is no separate notifications table, so this stays honest to the
- * data rather than showing invented alerts. Loading/error/empty via StateView.
+ * The user's real notification history, read from `notification_outbox` — the
+ * same queue the push dispatcher drains, so this list and the pushes actually
+ * delivered stay in step by construction.
+ *
+ * Tapping an entry loads its hazard on demand: the outbox only stores the id,
+ * and the hazard may have changed (or been deleted) since the notification was
+ * queued, so fetching now is more truthful than embedding a stale snapshot.
  */
 export function NotificationsScreen({ user, onBack, onOpenHazardDetail }: NotificationsScreenProps) {
   const { t } = useTranslation();
-  const { data: activity, loading, error, retry } = useRecentActivity(user?.id, 20);
+  const { data: notifications, loading, error, retry } = useMyNotifications(user?.id);
+  useRefetchOnFocus(retry);
 
-  const renderItem = ({ item }: { item: ActivityItem }) => (
-    <ListRow
-      title={t(`notifications.kinds.${item.kind}`)}
-      subtitle={`${item.title} · ${formatDate(item.createdAt)}`}
-      icon={KIND_ICON[item.kind]}
-      rightIcon="chevron-right"
-      onPress={() => onOpenHazardDetail(item.hazard)}
-    >
-      <BadgeChip
-        label={t(`common.status.${item.hazard.status}`, { defaultValue: item.hazard.status })}
-        tone={KIND_TONE[item.kind]}
+  /**
+   * Opening this screen clears the unread badge. Deliberately fired once on
+   * mount rather than per-row: the badge means "there's something you haven't
+   * looked at", and the list is that look. The Home screen re-reads the count
+   * when it regains focus, so the badge is gone by the time you go back.
+   *
+   * Runs after the fetch that populated the list, so `readAt` on the rows
+   * already on screen stays as it was — unread ones keep their highlight for
+   * this visit instead of clearing under the user's eyes.
+   */
+  useEffect(() => {
+    if (!user?.id) return;
+    void markNotificationsRead().catch(() => {
+      // Non-fatal: the badge simply persists until the next visit.
+    });
+  }, [user?.id]);
+
+  const handleOpen = useCallback(
+    async (hazardId: string | null) => {
+      if (!hazardId) return;
+      const hazard = await getHazardById(hazardId);
+      if (hazard) onOpenHazardDetail(hazard);
+    },
+    [onOpenHazardDetail],
+  );
+
+  const renderItem = ({ item }: { item: NotificationEntry }) => (
+    <View style={item.readAt ? undefined : notificationsScreenStyles.unreadRow}>
+      <ListRow
+        title={item.title}
+        subtitle={`${item.body} · ${formatDate(item.createdAt)}`}
+        icon={KIND_ICON[item.kind]}
+        rightIcon={item.hazardId ? 'chevron-right' : undefined}
+        onPress={item.hazardId ? () => void handleOpen(item.hazardId) : undefined}
       />
-    </ListRow>
+    </View>
   );
 
   return (
@@ -57,7 +82,7 @@ export function NotificationsScreen({ user, onBack, onOpenHazardDetail }: Notifi
         <StateView loading={loading} error={error} onRetry={retry} />
       ) : (
         <FlatList
-          data={activity ?? []}
+          data={notifications ?? []}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={notificationsScreenStyles.listContainer}

@@ -41,9 +41,16 @@ interface ProfileSectionProps {
   onNavigate: (p: Page) => void;
 }
 
+/**
+ * Read-only profile card.
+ *
+ * Name and email are edited in the mobile app only (Settings → Account), so
+ * this section displays them without any editing affordance — see the note on
+ * ProfileField for why editing lives in one place.
+ */
 export function ProfileSection({ onNavigate }: Readonly<ProfileSectionProps>) {
   const { session } = useAuth();
-  const { profile, loading, error, saveProfile, requestEmailUpdate, verifyEmailOtp } = useProfile();
+  const { profile, loading, error } = useProfile();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const displayName = useMemo(
@@ -83,29 +90,15 @@ export function ProfileSection({ onNavigate }: Readonly<ProfileSectionProps>) {
       </div>
 
       <div style={styles.fields}>
-        <ProfileField
-          label="Full Name"
-          icon={User}
-          value={displayName}
-          editable
-          onSave={async (newValue) => {
-            const ok = await saveProfile({ full_name: newValue.trim() || null });
-            if (!ok) {
-              throw new Error(error ?? "Failed to update full name.");
-            }
-          }}
-        />
-        <ProfileField
-          label="Email"
-          icon={Mail}
-          value={displayEmail}
-          editable
-          isEmailUpdate
-          onRequestOtp={requestEmailUpdate}
-          onVerifyOtp={verifyEmailOtp}
-        />
-        {memberSince && <ProfileField label="Member Since" icon={Calendar} value={memberSince} editable={false} />}
+        <ProfileField label="Full Name" icon={User} value={displayName} />
+        <ProfileField label="Email" icon={Mail} value={displayEmail} />
+        {memberSince && <ProfileField label="Member Since" icon={Calendar} value={memberSince} />}
       </div>
+
+      <p style={styles.editHint}>
+        To change your name or email, open the JalanGuard mobile app and go to
+        Settings → Account.
+      </p>
 
       {error && <p style={styles.errorText}>{error}</p>}
 
@@ -195,6 +188,12 @@ const styles = {
   fields: {
     display: "flex",
     flexDirection: "column" as const,
+  },
+  editHint: {
+    color: COLORS.textMuted,
+    fontSize: FONT_SIZES.sm,
+    lineHeight: 1.5,
+    margin: `${SPACING.md}px 0 0`,
   },
   errorText: {
     color: COLORS.error,

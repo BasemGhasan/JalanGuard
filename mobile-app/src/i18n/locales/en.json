@@ -136,8 +136,8 @@
         "description": "Help keep reports accurate by voting whether hazards are still active or already fixed."
       },
       "four": {
-        "title": "Earn Trust Badges",
-        "description": "Contribute consistently, gain trust points, and unlock contributor badges in your profile."
+        "title": "Track Your Reports",
+        "description": "Follow each hazard you report from active to fixed, and get a reminder if one is still open after 30 days."
       }
     },
     "alreadyHaveAccount": "Already have an account? Login"
@@ -147,8 +147,7 @@
     "contributions": "Your Contributions",
     "stats": {
       "reports": "Reports",
-      "votes": "Votes",
-      "trust": "Trust"
+      "votes": "Votes"
     },
     "communityMap": "Community Map",
     "mapSubtitle": "Tap to explore hazards near you",
@@ -172,16 +171,21 @@
     "title": "My Reports",
     "summary": "{{count}} total reports",
     "emptyTitle": "No reports yet",
-    "emptyMessage": "Reports you submit will appear here. Tap the camera button to add your first one."
+    "emptyMessage": "Reports you submit will appear here. Tap the camera button to add your first one.",
+    "markFixed": "Mark fixed",
+    "deleteReport": "Delete",
+    "resolveConfirmTitle": "Mark this report as fixed?",
+    "resolveConfirmMessage": "It will be removed from the live map. You can still see it in your history.",
+    "deleteConfirmTitle": "Delete this report?",
+    "deleteConfirmMessage": "This permanently removes the report and its community votes. This cannot be undone.",
+    "actionFailedTitle": "Couldn't update report"
   },
   "profile": {
     "title": "Profile",
     "userName": "JalanGuard User",
-    "level": "Trusted Contributor",
     "stats": {
       "reports": "Reports",
-      "votes": "Votes",
-      "trust": "Trust"
+      "votes": "Votes"
     },
     "delete": {
       "link": "Delete account",
@@ -194,13 +198,12 @@
       "failedTitle": "Delete failed",
       "failedFallback": "Could not delete account.",
       "failedMessage": "Failed to delete account: {{message}}"
-    }
+    },
+    "level": "JalanGuard member"
   },
   "account": {
     "title": "Account",
     "profileSection": "Profile",
-    "emailLabel": "Email",
-    "emailHint": "Your email address can't be changed from the app.",
     "saveName": "Save name",
     "saving": "Saving…",
     "savedTitle": "Saved",
@@ -214,11 +217,23 @@
     "passwordRequiredTitle": "Password required",
     "currentPasswordRequired": "Enter your current password to confirm.",
     "samePasswordTitle": "Choose a different password",
-    "samePasswordMessage": "Your new password must be different from the current one."
+    "samePasswordMessage": "Your new password must be different from the current one.",
+    "emailSection": "Email Address",
+    "currentEmail": "Current: {{email}}",
+    "newEmailPlaceholder": "New email address",
+    "sendEmailCode": "Send confirmation code",
+    "emailCodeSentTitle": "Check your new inbox",
+    "emailCodeSentMessage": "We sent a confirmation code to {{email}}. Your address changes only once you enter it.",
+    "emailPendingHint": "Enter the code sent to {{email}} to confirm the change.",
+    "confirmEmailChange": "Confirm new email",
+    "emailSavedMessage": "Your email address has been updated.",
+    "sameEmailTitle": "That’s already your email",
+    "sameEmailMessage": "Enter a different address to change it.",
+    "codeLengthMessage": "Please enter the {{count}}-digit code from your email."
   },
   "notificationSettings": {
     "title": "Notifications",
-    "intro": "Choose what JalanGuard should notify you about.",
+    "intro": "Choose what JalanGuard should tell you about. These appear in the app under the bell icon.",
     "options": {
       "myReports": {
         "label": "Updates on my reports",
@@ -228,12 +243,11 @@
         "label": "New hazards near me",
         "subtitle": "When someone reports a hazard close to your location."
       },
-      "trustMilestones": {
-        "label": "Trust score & milestones",
-        "subtitle": "When your trust score changes or you reach a contribution milestone."
+      "reportCheckins": {
+        "label": "Check-ins on my reports",
+        "subtitle": "A friendly reminder after 30 days asking whether a hazard you reported is still there."
       }
-    },
-    "footnote": "Push delivery isn't enabled yet — these preferences are saved and will apply as soon as it is."
+    }
   },
   "camera": {
     "live": "LIVE",
@@ -254,25 +268,23 @@
     "severityLabel": "{{severity}} severity",
     "missingTitle": "Hazard unavailable",
     "missingMessage": "We couldn't load this hazard. Please go back and try again.",
-    "photoCount": "{{index}} / {{total}}"
+    "photoCount": "{{index}} / {{total}}",
+    "fixedPercent": "{{percent}}% say fixed",
+    "voteCount": "{{count}} votes",
+    "consensusNeedsVotes": "{{count}} more votes needed before {{percent}}% agreement can resolve this automatically.",
+    "consensusThreshold": "Reaching {{percent}}% agreement resolves this automatically.",
+    "resolvedBanner": "This hazard has been marked fixed and no longer appears on the map."
   },
   "notifications": {
     "title": "Notifications",
     "emptyTitle": "No notifications",
-    "emptyMessage": "Updates about the reports you submit will appear here.",
-    "kinds": {
-      "reported": "Report submitted",
-      "in_review": "Report in review",
-      "resolved": "Report resolved"
-    }
+    "emptyMessage": "Updates about your reports, hazards near you, and 30-day check-ins will appear here."
   },
   "settings": {
     "title": "Settings",
-    "comingSoon": "Coming soon",
     "sections": {
       "general": "General",
-      "language": "Language",
-      "more": "More"
+      "language": "Language"
     },
     "language": {
       "label": "App language",
@@ -289,15 +301,7 @@
       },
       "notifications": {
         "label": "Notifications",
-        "subtitle": "Alerts and push settings"
-      },
-      "privacy": {
-        "label": "Privacy",
-        "subtitle": "Permissions and visibility"
-      },
-      "help": {
-        "label": "Help & Support",
-        "subtitle": "FAQs and contact options"
+        "subtitle": "Choose what appears in your notifications"
       }
     }
   },

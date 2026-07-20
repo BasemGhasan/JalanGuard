@@ -12,13 +12,11 @@ export const splashScreenStyles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.md,
   },
-  logoCircle: {
-    width: 86,
-    height: 86,
-    borderRadius: 24,
-    backgroundColor: COLORS.secondary,
-    alignItems: 'center',
-    justifyContent: 'center',
+  // The logo art already carries its own circular badge and transparency, so
+  // it needs no background plate behind it — hence no wrapper View.
+  logo: {
+    width: 120,
+    height: 120,
   },
   brandText: {
     color: COLORS.white,

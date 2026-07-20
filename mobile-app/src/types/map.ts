@@ -36,8 +36,6 @@ export interface Hazard {
   status: string;
   latitude: number;
   longitude: number;
-  /** Legacy single-image URL — kept for backwards compatibility. */
-  image_url: string | null;
   /** Up to 5 Supabase Storage URLs for multi-image reports. */
   image_urls: string[] | null;
   state_id: number;

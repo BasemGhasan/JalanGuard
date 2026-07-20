@@ -8,11 +8,13 @@ import {
   DEFAULT_NOTIFICATION_PREFERENCES,
   getNotificationPreferences,
   saveNotificationPreferences,
+  syncNotificationPreferences,
 } from '../../services';
-import type { NotificationPreferences } from '../../types';
+import type { NotificationPreferences, UserProfile } from '../../types';
 import { notificationSettingsScreenStyles as s } from '../../styles/screens';
 
 type NotificationSettingsScreenProps = {
+  user: UserProfile | null;
   onBack: () => void;
 };
 
@@ -23,18 +25,18 @@ const OPTIONS: Array<{
 }> = [
   { key: 'myReports', icon: 'campaign' },
   { key: 'nearbyHazards', icon: 'location-on' },
-  { key: 'trustMilestones', icon: 'emoji-events' },
+  { key: 'reportCheckins', icon: 'event-repeat' },
 ];
 
 /**
  * Settings → Notifications: per-category toggles.
  *
- * Preferences are written to device storage on every change (no explicit save
- * button). Push delivery isn't wired up yet, so these currently record intent
- * only — the note at the bottom of the screen says so rather than implying
- * notifications are already being sent.
+ * Each change is written to device storage (instant feedback) and mirrored to
+ * `profiles.notify_*`, which is what the database triggers actually consult
+ * when deciding whether to enqueue a notification. Turning a category off
+ * stops new ones being created; anything already in the list stays.
  */
-export function NotificationSettingsScreen({ onBack }: NotificationSettingsScreenProps) {
+export function NotificationSettingsScreen({ user, onBack }: NotificationSettingsScreenProps) {
   const { t } = useTranslation();
   const [preferences, setPreferences] = useState<NotificationPreferences>(
     DEFAULT_NOTIFICATION_PREFERENCES,
@@ -50,13 +52,23 @@ export function NotificationSettingsScreen({ onBack }: NotificationSettingsScree
     };
   }, []);
 
-  const toggle = useCallback((key: keyof NotificationPreferences) => {
-    setPreferences((previous) => {
-      const next = { ...previous, [key]: !previous[key] };
-      void saveNotificationPreferences(next);
-      return next;
-    });
-  }, []);
+  const toggle = useCallback(
+    (key: keyof NotificationPreferences) => {
+      setPreferences((previous) => {
+        const next = { ...previous, [key]: !previous[key] };
+
+        void saveNotificationPreferences(next);
+        if (user) {
+          void syncNotificationPreferences(user.id, next).catch(() => {
+            // Local preference still applies; the server copy retries next toggle.
+          });
+        }
+
+        return next;
+      });
+    },
+    [user],
+  );
 
   return (
     <View style={s.screen}>
@@ -84,8 +96,6 @@ export function NotificationSettingsScreen({ onBack }: NotificationSettingsScree
             />
           </View>
         ))}
-
-        <Text style={s.footnote}>{t('notificationSettings.footnote')}</Text>
       </ScrollView>
     </View>
   );

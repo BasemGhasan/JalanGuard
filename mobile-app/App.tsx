@@ -30,6 +30,7 @@ export default function App() {
     initialize();
   }, [checkAuthStatus]);
 
+
   if (isInitializing) {
     return (
       <SafeAreaProvider>

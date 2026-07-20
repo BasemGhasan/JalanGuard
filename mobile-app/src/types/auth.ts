@@ -15,6 +15,6 @@ export type NotificationPreferences = {
   myReports: boolean;
   /** New hazards reported close to my location. */
   nearbyHazards: boolean;
-  /** Trust-score changes and contribution milestones. */
-  trustMilestones: boolean;
+  /** The 30-day "is this hazard still there?" reminder on my open reports. */
+  reportCheckins: boolean;
 };

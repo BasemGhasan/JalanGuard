@@ -87,7 +87,6 @@ export function ProfileScreen({ user, onLogout, onOpenSettings }: ProfileScreenP
         <View style={profileScreenStyles.statsWrap}>
           <InfoCard icon="warning" title={t('profile.stats.reports')} value={statValue(stats?.reports)} />
           <InfoCard icon="thumb-up" title={t('profile.stats.votes')} value={statValue(stats?.votes)} />
-          <InfoCard icon="emoji-events" title={t('profile.stats.trust')} value={statValue(stats?.trustScore)} />
         </View>
 
         <Pressable style={profileScreenStyles.logoutButton} onPress={onLogout}>

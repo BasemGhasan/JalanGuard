@@ -43,7 +43,7 @@ export function OnboardingScreen({ navigation }: Props) {
       {
         title: t('onboarding.slides.four.title'),
         description: t('onboarding.slides.four.description'),
-        icon: 'emoji-events',
+        icon: 'fact-check',
       },
     ],
     [t],

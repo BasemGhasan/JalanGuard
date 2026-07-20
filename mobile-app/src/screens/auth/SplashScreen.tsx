@@ -1,10 +1,8 @@
 import React, { useEffect } from 'react';
-import { Text, View } from 'react-native';
+import { Image, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { AuthStackParamList } from '../../types';
-import { COLORS } from '../../constants';
 import { hasSeenOnboarding } from '../../utils';
 import { splashScreenStyles } from '../../styles/screens';
 
@@ -32,9 +30,13 @@ export function SplashScreen({ navigation }: Props) {
   return (
     <View style={splashScreenStyles.container}>
       <View style={splashScreenStyles.brandWrap}>
-        <View style={splashScreenStyles.logoCircle}>
-          <MaterialIcons name="shield" size={42} color={COLORS.white} />
-        </View>
+        {/* The real app logo, not a placeholder glyph — this screen is the
+            first thing a user sees, so it should carry the actual brand mark. */}
+        <Image
+          source={require('../../../assets/logo.png')}
+          style={splashScreenStyles.logo}
+          resizeMode="contain"
+        />
         <Text style={splashScreenStyles.brandText}>{t('common.appName')}</Text>
       </View>
       <Text style={splashScreenStyles.tagline}>{t('auth.titles.splashTagline')}</Text>

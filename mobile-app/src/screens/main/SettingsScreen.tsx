@@ -86,25 +86,6 @@ export function SettingsScreen({
           </View>
         </View>
 
-        {/* Privacy and Help & Support are still being designed. Shown dimmed and
-            inert so they read as "not ready yet" rather than as broken rows. */}
-        <Text style={s.sectionTitle}>{t('settings.sections.more')}</Text>
-
-        <View style={s.disabledRow}>
-          <ListRow
-            title={t('settings.items.privacy.label')}
-            subtitle={t('settings.comingSoon')}
-            icon="lock"
-          />
-        </View>
-
-        <View style={s.disabledRow}>
-          <ListRow
-            title={t('settings.items.help.label')}
-            subtitle={t('settings.comingSoon')}
-            icon="help"
-          />
-        </View>
       </ScrollView>
 
       <Pressable style={s.logoutButton} onPress={handleLogout}>

@@ -46,11 +46,4 @@ export const notificationSettingsScreenStyles = StyleSheet.create({
     color: COLORS.disabled,
     fontSize: FONT_SIZES.sm,
   },
-  footnote: {
-    marginTop: SPACING.md,
-    color: COLORS.disabled,
-    fontSize: FONT_SIZES.sm,
-    fontStyle: 'italic',
-    lineHeight: FONT_SIZES.sm * 1.5,
-  },
 });

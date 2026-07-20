@@ -89,6 +89,70 @@ export async function getMyReports(userId: string): Promise<Hazard[]> {
   }
 }
 
+/**
+ * Marks one of the user's own reports as fixed.
+ *
+ * RLS ("hazards owner update") restricts this to rows the caller reported, so
+ * the `eq('reported_by')` here is belt-and-braces rather than the actual
+ * guard — it also keeps the failure mode as "0 rows updated" instead of a
+ * policy violation if called with someone else's id.
+ */
+export async function markReportFixed(hazardId: string, userId: string): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('hazards')
+      .update({ status: 'fixed' })
+      .eq('id', hazardId)
+      .eq('reported_by', userId);
+    if (error) throw error;
+  } catch (error) {
+    throw toFriendlyError(error, 'Could not update this report.');
+  }
+}
+
+/**
+ * Permanently deletes one of the user's own reports.
+ *
+ * Votes cascade with the hazard (hazard_votes.hazard_id ON DELETE CASCADE).
+ * The uploaded photos are deliberately left in storage: they are keyed by user
+ * id and cleaning them up would need a separate storage sweep, which is out of
+ * scope for a row delete.
+ */
+export async function deleteMyReport(hazardId: string, userId: string): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('hazards')
+      .delete()
+      .eq('id', hazardId)
+      .eq('reported_by', userId);
+    if (error) throw error;
+  } catch (error) {
+    throw toFriendlyError(error, 'Could not delete this report.');
+  }
+}
+
+/**
+ * Loads a single hazard by id, or null if it no longer exists.
+ *
+ * Used when opening a notification: the outbox only stores the hazard id, and
+ * the report may have been resolved or deleted since — so we read it fresh
+ * rather than trusting a snapshot taken when the notification was queued.
+ */
+export async function getHazardById(hazardId: string): Promise<Hazard | null> {
+  try {
+    const { data, error } = await supabase
+      .from('hazards')
+      .select('*')
+      .eq('id', hazardId)
+      .maybeSingle();
+
+    if (error) throw error;
+    return (data as Hazard | null) ?? null;
+  } catch (error) {
+    throw toFriendlyError(error, 'Could not load this hazard.');
+  }
+}
+
 /** Count of the user's reports (for stats), cheap head query. */
 export async function getMyReportCount(userId: string): Promise<number> {
   const { count, error } = await supabase

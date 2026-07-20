@@ -31,4 +31,11 @@ export const accountSettingsScreenStyles = StyleSheet.create({
   submitButton: {
     marginTop: SPACING.lg,
   },
+  linkText: {
+    marginTop: SPACING.md,
+    textAlign: 'center',
+    color: COLORS.disabled,
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '600',
+  },
 });

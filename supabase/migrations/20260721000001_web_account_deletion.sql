@@ -23,7 +23,12 @@
 -- 1. hazard reports are public safety data — they should survive a deleted
 --    account, just anonymised. reporter_name is already stored separately on
 --    the row for display, so nothing user-visible is lost by nulling the FK.
-ALTER TABLE public.hazards DROP CONSTRAINT hazards_reported_by_fkey;
+--
+--    IF EXISTS matters on a fresh database: the constraint is only present if
+--    an earlier migration created it, and on a clean install this ADD is what
+--    creates it for the first time. Without the guard the DROP would abort the
+--    whole migration.
+ALTER TABLE public.hazards DROP CONSTRAINT IF EXISTS hazards_reported_by_fkey;
 ALTER TABLE public.hazards
   ADD CONSTRAINT hazards_reported_by_fkey
   FOREIGN KEY (reported_by) REFERENCES public.profiles (id) ON DELETE SET NULL;

@@ -16,6 +16,15 @@ type HazardDetailScreenProps = {
   onBack: () => void;
 };
 
+/**
+ * Community auto-resolve thresholds, mirrored from
+ * `public.hazard_autoresolve_threshold()` so the UI can show progress toward
+ * the rule. The database remains the sole authority on actually applying it —
+ * these values only drive the meter's copy.
+ */
+const AUTO_RESOLVE_MIN_VOTES = 10;
+const AUTO_RESOLVE_PERCENT = 80;
+
 export function HazardDetailScreen({ hazard, user, onBack }: HazardDetailScreenProps) {
   const { t } = useTranslation();
   const [photoIndex, setPhotoIndex] = useState(0);
@@ -24,7 +33,7 @@ export function HazardDetailScreen({ hazard, user, onBack }: HazardDetailScreenP
 
   const images = useMemo(() => {
     if (!hazard) return [];
-    return hazard.image_urls?.length ? hazard.image_urls : hazard.image_url ? [hazard.image_url] : [];
+    return hazard.image_urls ?? [];
   }, [hazard]);
 
   // Guard against a missing hazard instead of rendering mock placeholder data.
@@ -45,6 +54,12 @@ export function HazardDetailScreen({ hazard, user, onBack }: HazardDetailScreenP
   const title = prettyDefectTypes(hazard);
   const location = `${hazard.latitude.toFixed(4)}, ${hazard.longitude.toFixed(4)}`;
   const reporter = hazard.reporter_name?.trim() || t('hazardDetail.reporterUnknown');
+
+  // Mirrors public.recompute_hazard_status — keep the thresholds in step.
+  const totalVotes = summary.fixed + summary.broken;
+  const fixedPercent = totalVotes > 0 ? Math.round((summary.fixed / totalVotes) * 100) : 0;
+  const votesNeeded = Math.max(0, AUTO_RESOLVE_MIN_VOTES - totalVotes);
+  const isResolved = hazard.status === 'fixed' || hazard.status === 'resolved';
 
   const voteButton = (kind: VoteKind, label: string, count: number) => {
     const active = myVote === kind;
@@ -106,6 +121,40 @@ export function HazardDetailScreen({ hazard, user, onBack }: HazardDetailScreenP
 
         <Text style={s.sectionTitle}>{t('hazardDetail.communityVerification')}</Text>
         <Text style={s.sectionHint}>{t('hazardDetail.verificationQuestion')}</Text>
+
+        {isResolved && (
+          <View style={s.resolvedBanner}>
+            <MaterialIcons name="verified" size={18} color={COLORS.success} />
+            <Text style={s.resolvedBannerText}>{t('hazardDetail.resolvedBanner')}</Text>
+          </View>
+        )}
+
+        {/* Consensus meter — how close this report is to auto-resolving. */}
+        <View style={s.consensusWrap}>
+          <View style={s.consensusHeader}>
+            <Text style={s.consensusPercent}>
+              {t('hazardDetail.fixedPercent', { percent: fixedPercent })}
+            </Text>
+            <Text style={s.consensusCount}>
+              {t('hazardDetail.voteCount', { count: totalVotes })}
+            </Text>
+          </View>
+
+          <View style={s.consensusTrack}>
+            <View style={[s.consensusFill, { width: `${fixedPercent}%` }]} />
+          </View>
+
+          {!isResolved && (
+            <Text style={s.consensusHint}>
+              {votesNeeded > 0
+                ? t('hazardDetail.consensusNeedsVotes', {
+                    count: votesNeeded,
+                    percent: AUTO_RESOLVE_PERCENT,
+                  })
+                : t('hazardDetail.consensusThreshold', { percent: AUTO_RESOLVE_PERCENT })}
+            </Text>
+          )}
+        </View>
 
         <View style={s.voteRow}>
           {voteButton('fixed', t('common.actions.yesFixed'), summary.fixed)}

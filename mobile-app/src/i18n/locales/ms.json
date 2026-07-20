@@ -136,8 +136,8 @@
         "description": "Bantu pastikan laporan tepat dengan mengundi sama ada bahaya masih aktif atau sudah dibaiki."
       },
       "four": {
-        "title": "Dapatkan Lencana Kepercayaan",
-        "description": "Sumbang secara konsisten, kumpul mata kepercayaan, dan buka lencana penyumbang dalam profil anda."
+        "title": "Jejaki Laporan Anda",
+        "description": "Ikuti setiap bahaya yang anda laporkan dari aktif hingga dibaiki, dan terima peringatan jika ia masih terbuka selepas 30 hari."
       }
     },
     "alreadyHaveAccount": "Sudah ada akaun? Log masuk"
@@ -147,8 +147,7 @@
     "contributions": "Sumbangan Anda",
     "stats": {
       "reports": "Laporan",
-      "votes": "Undian",
-      "trust": "Kepercayaan"
+      "votes": "Undian"
     },
     "communityMap": "Peta Komuniti",
     "mapSubtitle": "Ketik untuk meneroka bahaya berhampiran anda",
@@ -172,16 +171,21 @@
     "title": "Laporan Saya",
     "summary": "{{count}} jumlah laporan",
     "emptyTitle": "Belum ada laporan",
-    "emptyMessage": "Laporan yang anda hantar akan muncul di sini. Ketik butang kamera untuk menambah laporan pertama anda."
+    "emptyMessage": "Laporan yang anda hantar akan muncul di sini. Ketik butang kamera untuk menambah laporan pertama anda.",
+    "markFixed": "Tanda dibaiki",
+    "deleteReport": "Padam",
+    "resolveConfirmTitle": "Tanda laporan ini sebagai dibaiki?",
+    "resolveConfirmMessage": "Ia akan dikeluarkan dari peta langsung. Anda masih boleh melihatnya dalam sejarah anda.",
+    "deleteConfirmTitle": "Padam laporan ini?",
+    "deleteConfirmMessage": "Ini akan memadam laporan dan undian komuniti secara kekal. Tindakan ini tidak boleh dibatalkan.",
+    "actionFailedTitle": "Tidak dapat mengemas kini laporan"
   },
   "profile": {
     "title": "Profil",
     "userName": "Pengguna JalanGuard",
-    "level": "Penyumbang Dipercayai",
     "stats": {
       "reports": "Laporan",
-      "votes": "Undian",
-      "trust": "Kepercayaan"
+      "votes": "Undian"
     },
     "delete": {
       "link": "Padam akaun",
@@ -194,13 +198,12 @@
       "failedTitle": "Pemadaman gagal",
       "failedFallback": "Tidak dapat memadam akaun.",
       "failedMessage": "Gagal memadam akaun: {{message}}"
-    }
+    },
+    "level": "Ahli JalanGuard"
   },
   "account": {
     "title": "Akaun",
     "profileSection": "Profil",
-    "emailLabel": "Emel",
-    "emailHint": "Alamat emel anda tidak boleh diubah melalui aplikasi.",
     "saveName": "Simpan nama",
     "saving": "Menyimpan…",
     "savedTitle": "Disimpan",
@@ -214,11 +217,23 @@
     "passwordRequiredTitle": "Kata laluan diperlukan",
     "currentPasswordRequired": "Masukkan kata laluan semasa anda untuk mengesahkan.",
     "samePasswordTitle": "Pilih kata laluan berbeza",
-    "samePasswordMessage": "Kata laluan baharu anda mesti berbeza daripada yang semasa."
+    "samePasswordMessage": "Kata laluan baharu anda mesti berbeza daripada yang semasa.",
+    "emailSection": "Alamat Emel",
+    "currentEmail": "Semasa: {{email}}",
+    "newEmailPlaceholder": "Alamat emel baharu",
+    "sendEmailCode": "Hantar kod pengesahan",
+    "emailCodeSentTitle": "Semak peti masuk baharu anda",
+    "emailCodeSentMessage": "Kami telah hantar kod pengesahan ke {{email}}. Alamat anda hanya berubah setelah anda memasukkannya.",
+    "emailPendingHint": "Masukkan kod yang dihantar ke {{email}} untuk mengesahkan perubahan.",
+    "confirmEmailChange": "Sahkan emel baharu",
+    "emailSavedMessage": "Alamat emel anda telah dikemas kini.",
+    "sameEmailTitle": "Itu sudah emel anda",
+    "sameEmailMessage": "Masukkan alamat berbeza untuk menukarnya.",
+    "codeLengthMessage": "Sila masukkan kod {{count}} digit dari emel anda."
   },
   "notificationSettings": {
     "title": "Notifikasi",
-    "intro": "Pilih perkara yang anda mahu JalanGuard beritahu.",
+    "intro": "Pilih perkara yang anda mahu JalanGuard beritahu. Ia dipaparkan dalam aplikasi di bawah ikon loceng.",
     "options": {
       "myReports": {
         "label": "Kemas kini laporan saya",
@@ -228,12 +243,11 @@
         "label": "Bahaya baharu berhampiran",
         "subtitle": "Apabila seseorang melaporkan bahaya berhampiran lokasi anda."
       },
-      "trustMilestones": {
-        "label": "Skor kepercayaan & pencapaian",
-        "subtitle": "Apabila skor kepercayaan anda berubah atau anda mencapai satu pencapaian sumbangan."
+      "reportCheckins": {
+        "label": "Semakan laporan saya",
+        "subtitle": "Peringatan mesra selepas 30 hari bertanya sama ada bahaya yang anda laporkan masih ada."
       }
-    },
-    "footnote": "Penghantaran pemberitahuan belum diaktifkan — pilihan ini disimpan dan akan digunakan sebaik sahaja ia tersedia."
+    }
   },
   "camera": {
     "live": "LANGSUNG",
@@ -254,25 +268,23 @@
     "severityLabel": "Tahap {{severity}}",
     "missingTitle": "Bahaya tidak tersedia",
     "missingMessage": "Kami tidak dapat memuatkan bahaya ini. Sila kembali dan cuba lagi.",
-    "photoCount": "{{index}} / {{total}}"
+    "photoCount": "{{index}} / {{total}}",
+    "fixedPercent": "{{percent}}% kata dibaiki",
+    "voteCount": "{{count}} undian",
+    "consensusNeedsVotes": "{{count}} undian lagi diperlukan sebelum persetujuan {{percent}}% boleh menyelesaikannya secara automatik.",
+    "consensusThreshold": "Mencapai persetujuan {{percent}}% akan menyelesaikannya secara automatik.",
+    "resolvedBanner": "Bahaya ini telah ditanda sebagai dibaiki dan tidak lagi dipaparkan di peta."
   },
   "notifications": {
     "title": "Notifikasi",
     "emptyTitle": "Tiada notifikasi",
-    "emptyMessage": "Kemas kini tentang laporan yang anda hantar akan muncul di sini.",
-    "kinds": {
-      "reported": "Laporan dihantar",
-      "in_review": "Laporan dalam semakan",
-      "resolved": "Laporan selesai"
-    }
+    "emptyMessage": "Kemas kini tentang laporan anda, bahaya berhampiran, dan semakan 30 hari akan muncul di sini."
   },
   "settings": {
     "title": "Tetapan",
-    "comingSoon": "Akan datang",
     "sections": {
       "general": "Umum",
-      "language": "Bahasa",
-      "more": "Lain-lain"
+      "language": "Bahasa"
     },
     "language": {
       "label": "Bahasa aplikasi",
@@ -289,15 +301,7 @@
       },
       "notifications": {
         "label": "Notifikasi",
-        "subtitle": "Tetapan amaran dan pemberitahuan"
-      },
-      "privacy": {
-        "label": "Privasi",
-        "subtitle": "Kebenaran dan keterlihatan"
-      },
-      "help": {
-        "label": "Bantuan & Sokongan",
-        "subtitle": "Soalan lazim dan pilihan hubungan"
+        "subtitle": "Pilih apa yang dipaparkan dalam notifikasi anda"
       }
     }
   },

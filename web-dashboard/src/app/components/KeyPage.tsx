@@ -126,9 +126,10 @@ export function KeyPage({ onNavigate }: Readonly<KeyPageProps>) {
 
           {/* ── API key card ──────────────────────────────────────────── */}
           <Card>
-            <SectionLabel icon={(props: { size?: number; color?: string }) => (
-              <Key size={props.size ?? 14} color={props.color} />
-            )} label="Your API Key" />
+            {/* lucide icons satisfy SectionLabel's icon prop directly — the
+                inline wrapper this replaced only existed to work around the
+                prop's over-narrow `size` type. */}
+            <SectionLabel icon={Key} label="Your API Key" />
 
             {status === "loading" && (
               <div style={styles.loadingRow}>

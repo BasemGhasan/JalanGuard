@@ -5,7 +5,12 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING } from '../../constants';
 import { BadgeChip, ListRow, StateView } from '../../components';
-import { useContributionStats, useRecentActivity, useRefetchOnFocus } from '../../hooks';
+import {
+  useContributionStats,
+  useRecentActivity,
+  useRefetchOnFocus,
+  useUnreadNotificationCount,
+} from '../../hooks';
 import { formatDate } from '../../utils';
 import type { ActivityItem, UserProfile } from '../../types';
 import { homeScreenStyles } from '../../styles/screens';
@@ -34,14 +39,19 @@ export function HomeScreen({ user, onOpenMap, onOpenNotifications }: HomeScreenP
 
   const { data: stats, loading: statsLoading, retry: retryStats } = useContributionStats(user?.id);
   const { data: activity, loading, error, retry } = useRecentActivity(user?.id);
+  const { data: unread, retry: retryUnread } = useUnreadNotificationCount(user?.id);
 
-  // Refresh contributions + activity when returning to the Home tab (e.g. after
-  // submitting a report), since tab screens stay mounted and won't refetch.
+  // Refresh contributions, activity and the unread badge when returning to the
+  // Home tab (e.g. after submitting a report or reading notifications), since
+  // tab screens stay mounted and won't refetch on their own.
   const refreshHome = useCallback(() => {
     retryStats();
     retry();
-  }, [retryStats, retry]);
+    retryUnread();
+  }, [retryStats, retry, retryUnread]);
   useRefetchOnFocus(refreshHome);
+
+  const unreadCount = unread ?? 0;
 
   const statValue = (value: number | null | undefined): string =>
     statsLoading ? '…' : value == null ? '0' : String(value);
@@ -75,6 +85,13 @@ export function HomeScreen({ user, onOpenMap, onOpenNotifications }: HomeScreenP
         </View>
         <Pressable onPress={onOpenNotifications} style={homeScreenStyles.notificationButton}>
           <MaterialIcons name="notifications" size={22} color={COLORS.white} />
+          {unreadCount > 0 && (
+            <View style={homeScreenStyles.notificationBadge}>
+              <Text style={homeScreenStyles.notificationBadgeText}>
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </Text>
+            </View>
+          )}
         </Pressable>
       </View>
 
@@ -88,10 +105,6 @@ export function HomeScreen({ user, onOpenMap, onOpenNotifications }: HomeScreenP
           <View style={homeScreenStyles.statItem}>
             <Text style={homeScreenStyles.statValue}>{statValue(stats?.votes)}</Text>
             <Text style={homeScreenStyles.statLabel}>{t('home.stats.votes')}</Text>
-          </View>
-          <View style={homeScreenStyles.statItem}>
-            <Text style={homeScreenStyles.statValue}>{statValue(stats?.trustScore)}</Text>
-            <Text style={homeScreenStyles.statLabel}>{t('home.stats.trust')}</Text>
           </View>
         </View>
       </View>

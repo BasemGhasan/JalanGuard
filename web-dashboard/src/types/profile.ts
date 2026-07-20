@@ -14,5 +14,3 @@ export interface Profile {
   updated_at:   string;
 }
 
-/** Fields the user is allowed to change on their own profile. */
-export type ProfileUpdate = Pick<Profile, "full_name">;

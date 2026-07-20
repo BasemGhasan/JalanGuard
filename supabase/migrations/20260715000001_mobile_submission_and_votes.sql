@@ -85,6 +85,21 @@ ALTER TABLE public.hazard_votes
 ALTER TABLE public.hazard_votes
   ADD CONSTRAINT hazard_votes_vote_type_check CHECK (vote_type IN ('fixed', 'broken'));
 
+-- user_id → profiles(id). On the original project this FK already existed on
+-- the legacy table, so it was never written down; it is declared here (the
+-- first migration that runs after profiles exists) so a fresh install ends up
+-- with the same shape. Deleting an account removes that account's votes.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'hazard_votes_user_id_fkey'
+  ) THEN
+    ALTER TABLE public.hazard_votes
+      ADD CONSTRAINT hazard_votes_user_id_fkey
+      FOREIGN KEY (user_id) REFERENCES public.profiles (id) ON DELETE CASCADE;
+  END IF;
+END $$;
+
 ALTER TABLE public.hazard_votes ENABLE ROW LEVEL SECURITY;
 
 -- Any signed-in user can read votes (needed for tallies + "my vote").

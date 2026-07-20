@@ -6,7 +6,13 @@ import { COLORS, SPACING, FONT_SIZES } from "../../../constants/theme";
 
 // 2. Interfaces
 interface SectionLabelProps {
-  icon:  ComponentType<{ size?: number; color?: string }>;
+  /**
+   * `size` is `string | number` to match lucide-react's own prop type. Narrowing
+   * it to `number` made every lucide icon fail to typecheck when passed
+   * directly (e.g. `icon={User}`), because a component accepting the wider type
+   * isn't assignable to one declared with the narrower one.
+   */
+  icon:  ComponentType<{ size?: string | number; color?: string }>;
   label: string;
 }
 

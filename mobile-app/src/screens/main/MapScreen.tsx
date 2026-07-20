@@ -6,11 +6,13 @@ import * as Location from 'expo-location';
 import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING } from '../../constants';
 import { useMapData } from '../../hooks';
-import type { Hazard, MapView as MapViewMode } from '../../types';
+import type { Hazard, MapView as MapViewMode, UserProfile } from '../../types';
+import { updateLastKnownLocation } from '../../services';
 import { LEAFLET_MAP_HTML } from './leafletMapHtml';
 import { mapScreenStyles } from '../../styles/screens';
 
 type MapScreenProps = {
+  user: UserProfile | null;
   onOpenHazardDetail: (hazard: Hazard) => void;
 };
 
@@ -32,7 +34,7 @@ const ADM_OPTIONS: Array<{ level: 0 | 1 | 2; labelKey: string }> = [
  * On mount the map centres on the device's location; if permission is denied or
  * the fix fails it stays on the country-wide default view.
  */
-export function MapScreen({ onOpenHazardDetail }: MapScreenProps) {
+export function MapScreen({ user, onOpenHazardDetail }: MapScreenProps) {
   const { t } = useTranslation();
   const webRef = useRef<WebView>(null);
   const insets = useSafeAreaInsets();
@@ -75,6 +77,15 @@ export function MapScreen({ onOpenHazardDetail }: MapScreenProps) {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
           });
+          // Opening the map is the natural moment to refresh the coarse
+          // location the backend uses to decide "is this hazard near me".
+          if (user?.id) {
+            void updateLastKnownLocation(
+              user.id,
+              position.coords.latitude,
+              position.coords.longitude,
+            );
+          }
         }
       } catch {
         // No fix available — the country-wide default view stands.
@@ -84,7 +95,7 @@ export function MapScreen({ onOpenHazardDetail }: MapScreenProps) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [user?.id]);
 
   // Centre on the user once both the map and the location fix are available.
   useEffect(() => {

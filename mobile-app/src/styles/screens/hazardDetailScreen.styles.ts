@@ -82,6 +82,57 @@ export const hazardDetailScreenStyles = StyleSheet.create({
     marginTop: 2,
     marginBottom: SPACING.sm,
   },
+  // ── Consensus meter shown above the vote buttons ──────────────────────────
+  consensusWrap: {
+    marginBottom: SPACING.md,
+    gap: SPACING.xs,
+  },
+  consensusHeader: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+  },
+  consensusPercent: {
+    color: COLORS.white,
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '700',
+  },
+  consensusCount: {
+    color: COLORS.disabled,
+    fontSize: FONT_SIZES.sm,
+  },
+  consensusTrack: {
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: COLORS.accent,
+    overflow: 'hidden',
+  },
+  consensusFill: {
+    height: '100%',
+    borderRadius: 999,
+    backgroundColor: COLORS.success,
+  },
+  consensusHint: {
+    color: COLORS.disabled,
+    fontSize: FONT_SIZES.sm,
+  },
+  resolvedBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.35)',
+    borderRadius: 12,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  resolvedBannerText: {
+    color: COLORS.success,
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '600',
+    flexShrink: 1,
+  },
   voteRow: {
     flexDirection: 'row',
     gap: SPACING.sm,

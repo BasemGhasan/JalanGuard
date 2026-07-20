@@ -72,9 +72,6 @@ export const settingsScreenStyles = StyleSheet.create({
   languageOptionTextActive: {
     color: COLORS.white,
   },
-  disabledRow: {
-    opacity: 0.45,
-  },
   logoutButton: {
     margin: SPACING.lg,
     borderRadius: 12,

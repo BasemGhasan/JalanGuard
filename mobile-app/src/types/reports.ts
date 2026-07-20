@@ -48,7 +48,6 @@ export interface AiDetectionResult {
 export interface ReportStats {
   reports: number;
   votes: number;
-  trustScore: number | null;
 }
 
 export type VoteKind = 'fixed' | 'broken';

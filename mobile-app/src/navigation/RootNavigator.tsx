@@ -102,7 +102,7 @@ function MainTabsNavigator({
         )}
       </MainTabs.Screen>
       <MainTabs.Screen name="Map">
-        {() => <MapScreen onOpenHazardDetail={onOpenHazardDetail} />}
+        {() => <MapScreen user={user} onOpenHazardDetail={onOpenHazardDetail} />}
       </MainTabs.Screen>
       <MainTabs.Screen
         name="Report"
@@ -201,7 +201,9 @@ function AppStackNavigator({
         )}
       </AppStack.Screen>
       <AppStack.Screen name="NotificationSettings">
-        {({ navigation }) => <NotificationSettingsScreen onBack={() => navigation.goBack()} />}
+        {({ navigation }) => (
+          <NotificationSettingsScreen user={user} onBack={() => navigation.goBack()} />
+        )}
       </AppStack.Screen>
     </AppStack.Navigator>
   );
