@@ -1,6 +1,9 @@
 // 1. Imports — External
 import { useState, useCallback } from "react";
 
+// 1. Imports — Assets
+import logoImg from "../../assets/images/transparentCircledLogo.png";
+
 // 1. Imports — Local context / hooks / constants / components
 import { COLORS, FONT_SIZES } from "../../constants/theme";
 import { useAuth } from "../../context/AuthContext";
@@ -76,7 +79,7 @@ export function Navbar({ active, onNavigate }: NavbarProps) {
       <header style={styles.header}>
         <div style={styles.brandContainer}>
           {/* logo */}
-          <img src="/assets/images/transparentCircledLogo.PNG" alt="JalanGuard Logo" style={styles.logo} />
+          <img src={logoImg} alt="JalanGuard Logo" style={styles.logo} />
           {/* Brand */}
           <button style={styles.brand} onClick={() => globalThis.location.reload()}>
             JalanGuard{" "}
