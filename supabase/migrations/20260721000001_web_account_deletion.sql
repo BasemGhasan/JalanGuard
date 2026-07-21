@@ -21,8 +21,10 @@
 -- ============================================================
 
 -- 1. hazard reports are public safety data — they should survive a deleted
---    account, just anonymised. reporter_name is already stored separately on
---    the row for display, so nothing user-visible is lost by nulling the FK.
+--    account. reporter_name is already stored separately on the row for
+--    display and is untouched by this, so nothing user-visible changes when
+--    the FK is nulled — this is purely so delete_user() doesn't fail with a
+--    foreign-key violation, not an anonymisation step.
 --
 --    IF EXISTS matters on a fresh database: the constraint is only present if
 --    an earlier migration created it, and on a clean install this ADD is what

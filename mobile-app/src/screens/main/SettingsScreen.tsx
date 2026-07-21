@@ -1,9 +1,9 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { COLORS } from '../../constants';
-import { AppHeader, ListRow } from '../../components';
+import { AppHeader, ConfirmModal, ListRow } from '../../components';
 import { SUPPORTED_LANGUAGES, setLanguage, type LanguageCode } from '../../i18n/language';
 import { settingsScreenStyles as s } from '../../styles/screens';
 
@@ -21,8 +21,10 @@ export function SettingsScreen({
   onOpenNotifications,
 }: SettingsScreenProps) {
   const { t, i18n } = useTranslation();
+  const [logoutVisible, setLogoutVisible] = useState(false);
 
-  const handleLogout = useCallback(() => {
+  const handleConfirmLogout = useCallback(() => {
+    setLogoutVisible(false);
     void onLogout();
   }, [onLogout]);
 
@@ -88,10 +90,21 @@ export function SettingsScreen({
 
       </ScrollView>
 
-      <Pressable style={s.logoutButton} onPress={handleLogout}>
+      <Pressable style={s.logoutButton} onPress={() => setLogoutVisible(true)}>
         <MaterialIcons name="logout" size={20} color={COLORS.error} />
         <Text style={s.logoutText}>{t('common.actions.logout')}</Text>
       </Pressable>
+
+      <ConfirmModal
+        visible={logoutVisible}
+        icon="logout"
+        title={t('common.logoutConfirm.title')}
+        message={t('common.logoutConfirm.message')}
+        confirmLabel={t('common.logoutConfirm.confirm')}
+        cancelLabel={t('common.actions.cancel')}
+        onConfirm={handleConfirmLogout}
+        onCancel={() => setLogoutVisible(false)}
+      />
     </View>
   );
 }

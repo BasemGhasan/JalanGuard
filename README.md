@@ -16,7 +16,9 @@ Citizens photograph road defects on their phone; a YOLO model verifies and class
 - [Part 1 — Mobile (citizen app)](#part-1--mobile-citizen-app)
 - [Part 2 — Web (developer dashboard)](#part-2--web-developer-dashboard)
 - [Design system](#design-system)
+- [Database schema & ERD](#database-schema--erd)
 - [Troubleshooting](#troubleshooting)
+- [Unit test documentation](#unit-test-documentation)
 
 ---
 
@@ -322,6 +324,38 @@ Severity colours: **high** `#D42424` · **medium** `#EF551D` · **low** `#F1B70B
 
 ---
 
+## Database schema & ERD
+
+Full column-by-column documentation lives in **[`docs/DATABASE_SCHEMA.md`](docs/DATABASE_SCHEMA.md)**,
+and the entity-relationship diagram is **[`docs/diagrams/JalanGuard-ERD.drawio`](docs/diagrams/JalanGuard-ERD.drawio)**
+(open in [draw.io](https://app.diagrams.net/)). Both are generated from the migrations in
+`supabase/migrations/`, applied in filename order.
+
+Two tables you'll see in the Supabase dashboard but **not** in either document are worth
+understanding, since they're easy to mistake for missing/broken app tables:
+
+**`auth.users` — not one of our migrations, but included in the ERD.**
+It's created automatically by Supabase Auth (the GoTrue service) the moment the project exists —
+there is no `CREATE TABLE` for it anywhere in this repo, and every Supabase project gets one
+regardless of what the app does. It lives in the **`auth` schema**, not `public`, which is why
+Supabase's **Table Editor** doesn't show it by default (that view defaults to `public` — switch
+its schema dropdown to `auth` to find it there). The **Database → Tables** tab and the SQL editor
+show every schema, which is why it's visible there instead. It's included in the ERD — shown
+small, with only its `id` column — because `profiles.id` and `api_keys.user_id` are real foreign
+keys into it; the real table has 20+ Supabase-managed columns (`encrypted_password`,
+`email_confirmed_at`, …), none of which anything in this project reads directly.
+
+**`spatial_ref_sys` — not in the ERD at all, on purpose.**
+This one is created by PostGIS itself the moment `CREATE EXTENSION postgis;` runs (see
+`20260616042137_enterprise_gis_architecture.sql`) — it's PostGIS's own bookkeeping table, holding
+~8,500 static EPSG projection-system rows that are identical on every PostGIS install anywhere.
+Unlike `auth.users`, **nothing in the schema has a foreign key into it** — no JalanGuard table
+references it, so it's left out of the ERD entirely rather than drawn as an unconnected box. It's
+also why it's called out in [Security notes](#security-notes) below: it can't have RLS enabled
+because it belongs to the `postgis` extension, not to this project.
+
+---
+
 ## Troubleshooting
 
 | Symptom | Cause & fix |
@@ -336,6 +370,10 @@ Severity colours: **high** `#D42424` · **medium** `#EF551D` · **low** `#F1B70B
 | API: `500` on startup | `SUPABASE_SERVICE_ROLE_KEY` missing from `api-microservice/.env`. |
 
 ---
+
+## Unit test documentation
+
+The full unit test case suite lives in **[`UNIT_TESTS.md`](./UNIT_TESTS.md)** — 50 tables (607 test cases) covering every screen and interactive element in the mobile app and web dashboard, every endpoint in both FastAPI microservices, and the Supabase database triggers that drive auto-tagging, notifications, and account deletion. Tables follow the format defined in [`.github/unitTest.md`](./.github/unitTest.md) and are organized to map directly onto the system's use case diagram (Authentication, Map & Discovery, Hazard Reporting, Hazard Engagement, Notifications, Account Management, Developer/Open Data API).
 
 ## Security notes
 

@@ -6,6 +6,7 @@ export * from './FormField';
 export * from './InfoCard';
 export * from './KeyboardAwareScreen';
 export * from './BadgeChip';
+export * from './ConfirmModal';
 export * from './ListRow';
 export * from './ReportTabButton';
 export * from './StateView';

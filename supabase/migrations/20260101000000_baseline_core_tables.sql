@@ -103,8 +103,9 @@ END $$;
 --    Deleting the auth.users row cascades to public.profiles (which has
 --    `FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE`), which in
 --    turn cascades to the user's votes and notifications. Their hazard reports
---    survive as anonymised rows, because hazards.reported_by is ON DELETE SET
---    NULL — public safety data outlives the account that produced it.
+--    survive, because hazards.reported_by is ON DELETE SET NULL — public
+--    safety data outlives the account that produced it. reporter_name is a
+--    separate cached column and is untouched either way.
 --
 --    Scoped strictly to auth.uid(): it takes no parameters, so it can only
 --    ever delete the caller's own account.

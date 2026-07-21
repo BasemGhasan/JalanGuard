@@ -12,7 +12,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { COLORS } from '../../constants';
-import { AppHeader, FormField, InfoCard, PrimaryButton } from '../../components';
+import { AppHeader, ConfirmModal, FormField, InfoCard, PrimaryButton } from '../../components';
 import * as authService from '../../services';
 import { useContributionStats, useRefetchOnFocus } from '../../hooks';
 import type { UserProfile } from '../../types';
@@ -36,6 +36,7 @@ export function ProfileScreen({ user, onLogout, onOpenSettings }: ProfileScreenP
   const { t } = useTranslation();
 
   const [deleteVisible, setDeleteVisible] = useState(false);
+  const [logoutVisible, setLogoutVisible] = useState(false);
   const [password, setPassword] = useState('');
   const [deleting, setDeleting] = useState(false);
 
@@ -67,6 +68,11 @@ export function ProfileScreen({ user, onLogout, onOpenSettings }: ProfileScreenP
     }
   }, [password, t, user?.email]);
 
+  const handleConfirmLogout = useCallback(() => {
+    setLogoutVisible(false);
+    void onLogout();
+  }, [onLogout]);
+
   return (
     // AppHeader sits outside the ScrollView: the scroll content centres its
     // children, which collapsed the header row to its content width and pushed
@@ -89,7 +95,7 @@ export function ProfileScreen({ user, onLogout, onOpenSettings }: ProfileScreenP
           <InfoCard icon="thumb-up" title={t('profile.stats.votes')} value={statValue(stats?.votes)} />
         </View>
 
-        <Pressable style={profileScreenStyles.logoutButton} onPress={onLogout}>
+        <Pressable style={profileScreenStyles.logoutButton} onPress={() => setLogoutVisible(true)}>
           <MaterialIcons name="logout" size={18} color={COLORS.error} />
           <Text style={profileScreenStyles.logoutText}>{t('common.actions.logout')}</Text>
         </Pressable>
@@ -145,6 +151,17 @@ export function ProfileScreen({ user, onLogout, onOpenSettings }: ProfileScreenP
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      <ConfirmModal
+        visible={logoutVisible}
+        icon="logout"
+        title={t('common.logoutConfirm.title')}
+        message={t('common.logoutConfirm.message')}
+        confirmLabel={t('common.logoutConfirm.confirm')}
+        cancelLabel={t('common.actions.cancel')}
+        onConfirm={handleConfirmLogout}
+        onCancel={() => setLogoutVisible(false)}
+      />
     </View>
   );
 }

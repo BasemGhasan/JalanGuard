@@ -18,6 +18,11 @@
       "yesFixed": "Ya, sudah dibaiki",
       "stillBroken": "Masih rosak"
     },
+    "logoutConfirm": {
+      "title": "Log keluar?",
+      "message": "Anda perlu log masuk semula untuk mengakses akaun anda.",
+      "confirm": "Log keluar"
+    },
     "tabs": {
       "home": "Laman Utama",
       "map": "Peta",
@@ -190,7 +195,7 @@
     "delete": {
       "link": "Padam akaun",
       "title": "Padam akaun",
-      "hint": "Ini akan memadam akaun JalanGuard anda secara kekal — termasuk akses pembangun web, jika ada. Bahaya yang anda laporkan akan kekal di peta demi keselamatan awam, tetapi nama anda tidak lagi dipaparkan. Masukkan kata laluan anda untuk mengesahkan.",
+      "hint": "Ini akan memadam akaun JalanGuard anda secara kekal — termasuk akses pembangun web, jika ada. Bahaya yang anda laporkan akan kekal di peta demi keselamatan awam. Masukkan kata laluan anda untuk mengesahkan.",
       "confirm": "Padam secara kekal",
       "deleting": "Memadam…",
       "passwordRequiredTitle": "Kata laluan diperlukan",

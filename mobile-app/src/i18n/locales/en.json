@@ -18,6 +18,11 @@
       "yesFixed": "Yes, fixed",
       "stillBroken": "Still broken"
     },
+    "logoutConfirm": {
+      "title": "Sign out?",
+      "message": "You'll need to log in again to access your account.",
+      "confirm": "Sign out"
+    },
     "tabs": {
       "home": "Home",
       "map": "Map",
@@ -190,7 +195,7 @@
     "delete": {
       "link": "Delete account",
       "title": "Delete account",
-      "hint": "This permanently deletes your JalanGuard account — including web developer access, if you have any. Hazards you've reported stay on the map for public safety, but will no longer show your name. Enter your password to confirm.",
+      "hint": "This permanently deletes your JalanGuard account — including web developer access, if you have any. Hazards you've reported stay on the map for public safety. Enter your password to confirm.",
       "confirm": "Delete permanently",
       "deleting": "Deleting…",
       "passwordRequiredTitle": "Password required",

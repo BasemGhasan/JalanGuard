@@ -1,6 +1,7 @@
 export * from './appHeader.styles';
 export * from './authHero.styles';
 export * from './badgeChip.styles';
+export * from './confirmModal.styles';
 export * from './formField.styles';
 export * from './infoCard.styles';
 export * from './keyboardAwareScreen.styles';
