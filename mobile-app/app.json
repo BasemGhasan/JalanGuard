@@ -16,7 +16,8 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "JalanGuard needs camera access so you can photograph road hazards to report.",
-        "NSLocationWhenInUseUsageDescription": "JalanGuard needs your location to tag hazard reports with GPS coordinates."
+        "NSLocationWhenInUseUsageDescription": "JalanGuard needs your location to tag hazard reports with GPS coordinates.",
+        "NSPhotoLibraryUsageDescription": "JalanGuard needs access to your photos so you can add extra images of a hazard you've reported."
       }
     },
     "android": {
@@ -43,6 +44,12 @@
         "expo-location",
         {
           "locationWhenInUsePermission": "JalanGuard needs your location to tag hazard reports with GPS coordinates."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "JalanGuard needs access to your photos so you can add extra images of a hazard you've reported."
         }
       ]
     ]

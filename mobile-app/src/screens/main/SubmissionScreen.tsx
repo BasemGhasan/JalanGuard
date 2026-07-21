@@ -5,12 +5,14 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   Text,
   TextInput,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING } from '../../constants';
@@ -19,6 +21,9 @@ import { AiDetectionError, analyzeHazardPhoto, submitHazardReport } from '../../
 import type { AiDetectionResult, Severity, UserProfile } from '../../types';
 import type { BadgeTone } from '../../styles/components';
 import { submissionScreenStyles as s } from '../../styles/screens';
+
+/** Live photo is AI-verified; up to this many extra gallery photos can ride along unverified. */
+const MAX_GALLERY_PHOTOS = 3;
 
 type SubmissionScreenProps = {
   photoUri: string;
@@ -65,6 +70,7 @@ export function SubmissionScreen({
   const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [galleryUris, setGalleryUris] = useState<string[]>([]);
 
   const hasLocation = latitude !== null && longitude !== null;
 
@@ -90,6 +96,35 @@ export function SubmissionScreen({
   useEffect(() => {
     runAnalysis();
   }, [runAnalysis]);
+
+  const remainingGallerySlots = MAX_GALLERY_PHOTOS - galleryUris.length;
+
+  // Extra gallery photos ride along unverified — only offered once the live photo is AI-confirmed.
+  const handleAddPhotos = useCallback(async () => {
+    if (remainingGallerySlots <= 0) return;
+
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(t('submission.galleryPermissionTitle'), t('submission.galleryPermissionMessage'));
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsMultipleSelection: true,
+      selectionLimit: remainingGallerySlots,
+      quality: 0.7,
+    });
+
+    if (!result.canceled && result.assets.length > 0) {
+      const uris = result.assets.map((asset) => asset.uri);
+      setGalleryUris((prev) => [...prev, ...uris].slice(0, MAX_GALLERY_PHOTOS));
+    }
+  }, [remainingGallerySlots, t]);
+
+  const handleRemoveGalleryPhoto = useCallback((uri: string) => {
+    setGalleryUris((prev) => prev.filter((existing) => existing !== uri));
+  }, []);
 
   const gpsValue = hasLocation
     ? `${latitude!.toFixed(4)}, ${longitude!.toFixed(4)}`
@@ -126,7 +161,7 @@ export function SubmissionScreen({
           reportedBy: user.id,
           reporterName: user.name,
         },
-        [photoUri],
+        [photoUri, ...galleryUris],
       );
       Alert.alert(t('submission.successTitle'), t('submission.successMessage'));
       onSubmitted();
@@ -144,6 +179,7 @@ export function SubmissionScreen({
     longitude,
     description,
     photoUri,
+    galleryUris,
     onSubmitted,
     t,
   ]);
@@ -224,6 +260,31 @@ export function SubmissionScreen({
               )}
             </View>
             <Text style={s.noteText}>{t('submission.severityLockedHint')}</Text>
+
+            {/* Extra gallery photos — only offered once the live photo is AI-confirmed; these ride along unverified. */}
+            <Text style={s.sectionTitle}>{t('submission.additionalPhotos')}</Text>
+            <Text style={s.noteText}>{t('submission.additionalPhotosHint')}</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.galleryRow}>
+              {galleryUris.map((uri) => (
+                <View key={uri} style={s.galleryThumbWrap}>
+                  <Image source={{ uri }} style={s.galleryThumb} />
+                  <Pressable
+                    style={s.galleryRemoveBtn}
+                    onPress={() => handleRemoveGalleryPhoto(uri)}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('submission.removePhoto')}
+                  >
+                    <MaterialIcons name="close" size={14} color={COLORS.white} />
+                  </Pressable>
+                </View>
+              ))}
+              {remainingGallerySlots > 0 && (
+                <Pressable style={s.addPhotoTile} onPress={handleAddPhotos}>
+                  <MaterialIcons name="add-photo-alternate" size={22} color={COLORS.secondary} />
+                  <Text style={s.addPhotoText}>{t('submission.addPhotos')}</Text>
+                </Pressable>
+              )}
+            </ScrollView>
           </>
         )}
 
