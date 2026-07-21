@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { FlatList, Image, Pressable, ScrollView, Text, View } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { FlatList, Image, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { COLORS } from '../../constants';
@@ -28,6 +28,8 @@ const AUTO_RESOLVE_PERCENT = 80;
 export function HazardDetailScreen({ hazard, user, onBack }: HazardDetailScreenProps) {
   const { t } = useTranslation();
   const [photoIndex, setPhotoIndex] = useState(0);
+  const [lightboxVisible, setLightboxVisible] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const { summary, myVote, loading, error, voting, vote } = useHazardVotes(hazard?.id, user?.id);
 
@@ -35,6 +37,14 @@ export function HazardDetailScreen({ hazard, user, onBack }: HazardDetailScreenP
     if (!hazard) return [];
     return hazard.image_urls ?? [];
   }, [hazard]);
+
+  /** Opens the full-screen lightbox at the currently-visible carousel slide. */
+  const openLightbox = useCallback(() => {
+    setLightboxIndex(photoIndex);
+    setLightboxVisible(true);
+  }, [photoIndex]);
+
+  const closeLightbox = useCallback(() => setLightboxVisible(false), []);
 
   // Guard against a missing hazard instead of rendering mock placeholder data.
   if (!hazard) {
@@ -88,7 +98,15 @@ export function HazardDetailScreen({ hazard, user, onBack }: HazardDetailScreenP
             onMomentumScrollEnd={(e) =>
               setPhotoIndex(Math.round(e.nativeEvent.contentOffset.x / HERO_WIDTH))
             }
-            renderItem={({ item }) => <Image source={{ uri: item }} style={s.heroImage} />}
+            renderItem={({ item }) => (
+              /**
+               * Wrap each hero image in a Pressable so tapping opens the
+               * full-screen lightbox at the same carousel position.
+               */
+              <Pressable onPress={openLightbox} accessibilityRole="button" accessibilityLabel={t('hazardDetail.viewFullImage')}>
+                <Image source={{ uri: item }} style={s.heroImage} />
+              </Pressable>
+            )}
           />
         ) : (
           <View style={s.heroPlaceholder}>
@@ -107,7 +125,72 @@ export function HazardDetailScreen({ hazard, user, onBack }: HazardDetailScreenP
             </Text>
           </View>
         )}
+
+        {/* Tap-to-expand hint — only shown when there are images */}
+        {images.length > 0 && (
+          <View style={s.tapHint}>
+            <MaterialIcons name="zoom-out-map" size={14} color={COLORS.white} />
+            <Text style={s.tapHintText}>{t('hazardDetail.tapToExpand')}</Text>
+          </View>
+        )}
       </View>
+
+      {/* ── Full-screen image lightbox ───────────────────────────────────── */}
+      <Modal
+        visible={lightboxVisible}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={closeLightbox}
+      >
+        <View style={s.lightboxOverlay}>
+          {/* Close button */}
+          <Pressable
+            style={s.lightboxClose}
+            onPress={closeLightbox}
+            accessibilityRole="button"
+            accessibilityLabel={t('common.actions.close')}
+          >
+            <MaterialIcons name="close" size={24} color={COLORS.white} />
+          </Pressable>
+
+          {/* Image counter */}
+          {images.length > 1 && (
+            <View style={s.lightboxCounter}>
+              <Text style={s.lightboxCounterText}>
+                {t('hazardDetail.photoCount', { index: lightboxIndex + 1, total: images.length })}
+              </Text>
+            </View>
+          )}
+
+          {/* Full-size image — contains the whole image */}
+          <Image
+            source={{ uri: images[lightboxIndex] }}
+            style={s.lightboxImage}
+            resizeMode="contain"
+          />
+
+          {/* Previous / Next arrows for multi-image sets */}
+          {images.length > 1 && (
+            <View style={s.lightboxNav}>
+              <Pressable
+                style={[s.lightboxNavBtn, lightboxIndex === 0 && s.lightboxNavBtnDisabled]}
+                onPress={() => setLightboxIndex((i) => Math.max(0, i - 1))}
+                disabled={lightboxIndex === 0}
+              >
+                <MaterialIcons name="chevron-left" size={32} color={COLORS.white} />
+              </Pressable>
+              <Pressable
+                style={[s.lightboxNavBtn, lightboxIndex === images.length - 1 && s.lightboxNavBtnDisabled]}
+                onPress={() => setLightboxIndex((i) => Math.min(images.length - 1, i + 1))}
+                disabled={lightboxIndex === images.length - 1}
+              >
+                <MaterialIcons name="chevron-right" size={32} color={COLORS.white} />
+              </Pressable>
+            </View>
+          )}
+        </View>
+      </Modal>
 
       <ScrollView contentContainerStyle={s.content}>
         <View style={s.titleRow}>

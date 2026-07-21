@@ -1,6 +1,6 @@
 // 1. Imports — External
 import { useState, useMemo, useCallback } from "react";
-import { X } from "lucide-react";
+import { X, ZoomIn } from "lucide-react";
 
 // 1. Imports — Local
 import { COLORS, SPACING }   from "../../../constants/theme";
@@ -82,12 +82,25 @@ export function HazardCard({ hazard, onClose, startExpanded = false }: Readonly<
         {images.length > 0 && (
           isExpanded
             ? <ImageSlider images={images} alt={hazard.defect_type} />
-            : <img
-                src={images[0]}
-                alt={hazard.defect_type}
-                style={styles.thumbnail}
-                loading="lazy"
-              />
+            : (
+                <div style={styles.thumbnailWrap}>
+                  <img
+                    src={images[0]}
+                    alt={hazard.defect_type}
+                    style={styles.thumbnail}
+                    loading="lazy"
+                  />
+                  {/* Zoom overlay — clicking thumbnail in compact mode opens the
+                      ImageSlider lightbox by first expanding the card. */}
+                  <div
+                    style={styles.thumbnailZoomOverlay}
+                    onClick={(e) => { e.stopPropagation(); setIsExpanded(true); }}
+                    title="Click to view full size"
+                  >
+                    <ZoomIn size={16} color={COLORS.white} />
+                  </div>
+                </div>
+              )
         )}
 
         {/* ── Description: only visible in expanded mode ─────────────────── */}
@@ -161,6 +174,21 @@ const styles = {
     height:    130,
     objectFit: "cover" as const,
     display:   "block",
+  },
+  thumbnailWrap: {
+    position:  "relative" as const,
+    overflow:  "hidden" as const,
+    cursor:    "pointer" as const,
+  },
+  thumbnailZoomOverlay: {
+    position:        "absolute" as const,
+    inset:           0,
+    display:         "flex" as const,
+    alignItems:      "center" as const,
+    justifyContent:  "center" as const,
+    background:      "rgba(0,0,0,0)" as const,
+    transition:      "background 0.18s ease" as const,
+    cursor:          "zoom-in" as const,
   },
   descSection: {
     padding:    `${SPACING.sm}px ${SPACING.sm}px ${SPACING.xs}px`,

@@ -273,7 +273,9 @@
     "voteCount": "{{count}} votes",
     "consensusNeedsVotes": "{{count}} more votes needed before {{percent}}% agreement can resolve this automatically.",
     "consensusThreshold": "Reaching {{percent}}% agreement resolves this automatically.",
-    "resolvedBanner": "This hazard has been marked fixed and no longer appears on the map."
+    "resolvedBanner": "This hazard has been marked fixed and no longer appears on the map.",
+    "tapToExpand": "Tap to view full image",
+    "viewFullImage": "View full image"
   },
   "notifications": {
     "title": "Notifications",

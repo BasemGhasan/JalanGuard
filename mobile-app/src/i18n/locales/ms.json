@@ -273,7 +273,9 @@
     "voteCount": "{{count}} undian",
     "consensusNeedsVotes": "{{count}} undian lagi diperlukan sebelum persetujuan {{percent}}% boleh menyelesaikannya secara automatik.",
     "consensusThreshold": "Mencapai persetujuan {{percent}}% akan menyelesaikannya secara automatik.",
-    "resolvedBanner": "Bahaya ini telah ditanda sebagai dibaiki dan tidak lagi dipaparkan di peta."
+    "resolvedBanner": "Bahaya ini telah ditanda sebagai dibaiki dan tidak lagi dipaparkan di peta.",
+    "tapToExpand": "Ketik untuk lihat imej penuh",
+    "viewFullImage": "Lihat imej penuh"
   },
   "notifications": {
     "title": "Notifikasi",

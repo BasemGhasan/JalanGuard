@@ -185,6 +185,150 @@ path.leaflet-interactive:focus { outline: none; }
   transform:  scale(1.35);
 }
 
+/* Clickable cursor on slider images */
+.img-slider-img--clickable {
+  cursor: zoom-in;
+}
+
+/* Zoom hint badge (bottom-left of slider) */
+.img-slider-zoom-hint {
+  position:    absolute;
+  bottom:      8px;
+  left:        10px;
+  display:     flex;
+  align-items: center;
+  gap:         4px;
+  background:  rgba(0, 0, 0, 0.55);
+  color:       #fff;
+  font-size:   10px;
+  font-weight: 600;
+  padding:     2px 8px 2px 6px;
+  border-radius: 20px;
+  pointer-events: auto;
+  cursor:      zoom-in;
+  transition:  background 0.15s ease;
+  user-select: none;
+}
+.img-slider-zoom-hint:hover { background: rgba(0, 0, 0, 0.80); }
+
+/* Thumbnail zoom overlay hover (HazardCard compact mode) */
+.img-slider-zoom-overlay:hover {
+  background: rgba(0, 0, 0, 0.38) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* FULL-SCREEN IMAGE LIGHTBOX                                                  */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+.img-lightbox-backdrop {
+  position:        fixed;
+  inset:           0;
+  z-index:         9999;
+  background:      rgba(0, 0, 0, 0.94);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  animation:       lightbox-in 0.18s ease forwards;
+  cursor:          default;
+}
+
+@keyframes lightbox-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/*
+ * Portalled lightbox image — rendered directly on document.body so no
+ * ancestor transform can interfere with sizing.
+ * For portrait phone photos (9:16 / 3:4): max-height drives the scale,
+ * width follows the natural aspect ratio automatically via width:auto.
+ * For landscape images: max-width kicks in instead.
+ */
+.img-lightbox-img {
+  display:       block;
+  width:         auto;
+  height:        auto;
+  max-width:     90vw;
+  max-height:    85vh;
+  border-radius: 8px;
+  box-shadow:    0 24px 64px rgba(0, 0, 0, 0.80);
+  animation:     lightbox-img-in 0.22s ease-out forwards;
+  cursor:        default;
+  user-select:   none;
+}
+
+@keyframes lightbox-img-in {
+  from { transform: scale(0.92); opacity: 0.5; }
+  to   { transform: scale(1);    opacity: 1;   }
+}
+
+/* Close (×) button — top-right corner */
+.img-lightbox-close {
+  position:    absolute;
+  top:         16px;
+  right:       16px;
+  background:  rgba(255, 255, 255, 0.12);
+  border:      1px solid rgba(255, 255, 255, 0.20);
+  color:       #fff;
+  border-radius: 50%;
+  width:       40px;
+  height:      40px;
+  display:     flex;
+  align-items: center;
+  justify-content: center;
+  cursor:      pointer;
+  transition:  background 0.15s ease, transform 0.12s ease;
+  z-index:     10001;
+}
+.img-lightbox-close:hover {
+  background:  rgba(255, 255, 255, 0.25);
+  transform:   scale(1.08);
+}
+
+/* Counter badge — top-left corner */
+.img-lightbox-counter {
+  position:    absolute;
+  top:         18px;
+  left:        18px;
+  background:  rgba(0, 0, 0, 0.55);
+  color:       #fff;
+  font-size:   12px;
+  font-weight: 600;
+  padding:     4px 12px;
+  border-radius: 20px;
+  pointer-events: none;
+  z-index:     10001;
+}
+
+/* Prev / Next nav arrows */
+.img-lightbox-nav {
+  position:    absolute;
+  top:         50%;
+  transform:   translateY(-50%);
+  background:  rgba(255, 255, 255, 0.12);
+  border:      1px solid rgba(255, 255, 255, 0.20);
+  color:       #fff;
+  border-radius: 50%;
+  width:       48px;
+  height:      48px;
+  display:     flex;
+  align-items: center;
+  justify-content: center;
+  cursor:      pointer;
+  transition:  background 0.15s ease, transform 0.12s ease;
+  z-index:     10001;
+}
+.img-lightbox-nav:hover:not(.is-disabled) {
+  background:  rgba(255, 255, 255, 0.25);
+  transform:   translateY(-50%) scale(1.08);
+}
+.img-lightbox-nav.is-disabled {
+  opacity: 0.25;
+  cursor:  default;
+}
+.img-lightbox-prev { left:  16px; }
+.img-lightbox-next { right: 16px; }
+
 /* ══════════════════════════════════════════════════════════════════════════ */
 /* HAZARD CARD — draggable overlay                                            */
 /*                                                                            */
