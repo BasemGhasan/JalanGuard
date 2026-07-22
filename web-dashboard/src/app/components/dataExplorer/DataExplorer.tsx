@@ -146,19 +146,19 @@ export function DataExplorer() {
   const totalPages = Math.ceil(totalCount / itemsPerPage) || 1;
 
   return (
-    <div style={styles.page}>
+    <div style={styles.page} className="jg-explorer-page jg-page-shell">
 
       {/* ── Page header ─────────────────────────────────────────────────── */}
-      <div style={styles.header}>
+      <div style={styles.header} className="jg-explorer-header">
         <div>
-          <h1 style={styles.title}>Data Explorer</h1>
+          <h1 style={styles.title} className="jg-explorer-title">Data Explorer</h1>
           <p style={styles.subtitle}>
             Browse, filter, and inspect every hazard report in the JalanGuard database.
           </p>
         </div>
 
         {/* ── Page toggler ─────────────────────────────────────────────────── */}
-        <div style={styles.viewToggleContainer}>
+        <div style={styles.viewToggleContainer} className="jg-explorer-toggle">
           <ViewToggle
             value={admLevel}
             onChange={(value) => {
@@ -209,8 +209,9 @@ export function DataExplorer() {
       </div>
 
       {/* ── Pagination Controls (NEW) ─────────────────────────────────────── */}
-      <div style={styles.pagination}>
+      <div style={styles.pagination} className="jg-pagination">
         <button
+          className="jg-pagination-btn"
           style={{ ...styles.pageBtn, opacity: page === 1 ? 0.5 : 1 }}
           disabled={page === 1 || loading}
           onClick={() => setPage(p => p - 1)}
@@ -218,11 +219,12 @@ export function DataExplorer() {
           &larr; Previous
         </button>
 
-        <span style={styles.pageInfo}>
+        <span style={styles.pageInfo} className="jg-pagination-info">
           Page {page} of {totalPages} <span style={{ color: COLORS.textMuted }}>(Total: {totalCount})</span>
         </span>
 
         <button
+          className="jg-pagination-btn"
           style={{ ...styles.pageBtn, opacity: page >= totalPages ? 0.5 : 1 }}
           disabled={page >= totalPages || loading}
           onClick={() => setPage(p => p + 1)}

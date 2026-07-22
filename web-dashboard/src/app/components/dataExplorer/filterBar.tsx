@@ -64,9 +64,9 @@ function FilterSelect({ label, value, options, onChange }: FilterSelectProps) {
   );
 
   return (
-    <div style={selectStyles.wrap}>
+    <div style={selectStyles.wrap} className="jg-filter-field">
       <label style={selectStyles.label}>{label}</label>
-      <select value={value} onChange={handleChange} style={selectStyles.select}>
+      <select value={value} onChange={handleChange} style={selectStyles.select} className="jg-filter-select">
         {options.map((o) => (
           <option key={o.value} value={o.value} style={{ background: COLORS.primary }}>
             {o.label}
@@ -144,9 +144,9 @@ export function FilterBar({
   ], [location]);
 
   return (
-    <div style={styles.wrap}>
+    <div style={styles.wrap} className="jg-filterbar">
       {/* ── Dropdowns ────────────────────────────────────────────────────── */}
-      <div style={styles.filters}>
+      <div style={styles.filters} className="jg-filterbar-filters">
         <FilterSelect
           label="Severity" value={severity} options={severityOptions} onChange={onSeverity} />
         <FilterSelect
@@ -159,13 +159,13 @@ export function FilterBar({
         )}
         <FilterSelect
           label="Date Reported" value={dateRange} options={dateRangeOptions} onChange={onDateRange} />
-        <AppButton variant="primary" style={styles.button} onClick={resetFilters} title="Reset filters">
+        <AppButton variant="primary" className="jg-filterbar-reset" style={styles.button} onClick={resetFilters} title="Reset filters">
           <RotateCcw size={16} />
         </AppButton>
       </div>
 
       {/* ── Result count ─────────────────────────────────────────────────── */}
-      <p style={styles.count}>
+      <p style={styles.count} className="jg-filterbar-count">
         <span style={{ color: isFiltered ? COLORS.secondary : COLORS.textPrimary, fontWeight: 700 }}>
           {filteredCount}
         </span>

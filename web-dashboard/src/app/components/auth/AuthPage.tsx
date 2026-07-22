@@ -377,8 +377,8 @@ export function AuthPage({ onNavigate, initialView }: AuthPageProps) {
   const showsEmailField = view === "login" || view === "forgot";
 
   return (
-    <div style={styles.page}>
-      <Card style={styles.card} onKeyDown={handleKeyDown}>
+    <div style={styles.page} className="jg-auth-page jg-page-shell">
+      <Card style={styles.card} className="jg-auth-card" onKeyDown={handleKeyDown}>
 
         {/* ── Brand header ──────────────────────────────────────────────── */}
         <div style={styles.brand}>

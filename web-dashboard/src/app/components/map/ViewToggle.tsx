@@ -35,13 +35,21 @@ export function ViewToggle<T extends ToggleValue>({
   );
 
   return (
-    <div style={{ ...styles.wrapper, ...(position === "left" ? styles.wrapperLeft : {}) }}>
+    <div
+      style={{ ...styles.wrapper, ...(position === "left" ? styles.wrapperLeft : {}) }}
+      className={`jg-view-toggle jg-view-toggle--${position}`}
+    >
       {options.map(({ value: optionValue, label, Icon }) => {
         const isActive = value === optionValue;
         return (
           <button
             key={String(optionValue)}
             onClick={handleClick(optionValue)}
+            className="jg-view-toggle-btn"
+            /* title + aria-label keep the option identifiable on narrow
+               screens, where responsive.css hides the text label. */
+            title={label}
+            aria-label={label}
             style={{
               ...styles.btnBase,
               background: isActive ? COLORS.secondary : "transparent",
@@ -49,7 +57,7 @@ export function ViewToggle<T extends ToggleValue>({
             }}
           >
             <Icon size={16} />
-            {label}
+            <span className="jg-view-toggle-label">{label}</span>
           </button>
         );
       })}

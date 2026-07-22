@@ -81,7 +81,7 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ onClose,
                     {error && <p style={styles.errorText}>{error}</p>}
 
                     {/* Footer / Actions */}
-                    <div style={styles.actions}>
+                    <div style={styles.actions} className="jg-modal-actions">
                         <AppButton variant="outline" type="button" onClick={onClose} disabled={loading}>
                             Cancel
                         </AppButton>

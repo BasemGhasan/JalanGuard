@@ -28,20 +28,20 @@ export function DocsPage() {
   const iframeSrc = useMemo(() => DOCS_URL, []);
 
   return (
-    <div style={styles.page}>
+    <div style={styles.page} className="jg-page-shell">
       {/* ── Header bar ─────────────────────────────────────────────── */}
-      <div style={styles.header}>
+      <div style={styles.header} className="jg-docs-header">
         <div style={styles.titleWrap}>
           <BookOpen size={18} color={COLORS.secondary} />
           <div>
-            <h1 style={styles.title}>API Reference</h1>
+            <h1 style={styles.title} className="jg-docs-title">API Reference</h1>
             <p style={styles.subtitle}>
               Live Swagger documentation generated from the JalanGuard Open Data API.
             </p>
           </div>
         </div>
 
-        <a href={DOCS_URL} target="_blank" rel="noopener noreferrer" style={styles.openBtn}>
+        <a href={DOCS_URL} target="_blank" rel="noopener noreferrer" style={styles.openBtn} className="jg-docs-openbtn">
           Open in new tab
           <ExternalLink size={14} />
         </a>
@@ -60,7 +60,7 @@ export function DocsPage() {
       </div>
 
       {/* Fallback hint if the backend is not reachable */}
-      <p style={styles.hint}>
+      <p style={styles.hint} className="jg-docs-hint">
         Not loading? Ensure the API is running at{" "}
         <code style={styles.code}>{API_BASE_URL}</code>, or open the docs directly
         using the button above.

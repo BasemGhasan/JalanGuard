@@ -1,0 +1,557 @@
+/*
+ * responsive.css — mobile / small-screen adaptations.
+ *
+ * WHY THIS FILE EXISTS
+ * The dashboard styles every component with inline `style={}` objects built
+ * from constants/theme.ts. Inline styles cannot carry media queries, so the
+ * layout was desktop-only. Rather than rewrite every component into CSS
+ * modules (high risk), each component now also carries a stable `jg-*`
+ * className that acts purely as a hook for the breakpoint rules below.
+ *
+ * RULES OF ENGAGEMENT
+ *  - Only layout / sizing / spacing is overridden here. Colours, backgrounds
+ *    and any value that a component computes dynamically (active toggle fill,
+ *    hover states, disabled opacity) are never touched, so no !important here
+ *    can fight with React state.
+ *  - `!important` is required because these rules must beat inline styles.
+ *    It is used only on static geometry, never on dynamic values.
+ *
+ * BREAKPOINTS
+ *   <= 900px  tablet / small laptop — stacked page headers
+ *   <= 640px  phone landscape / large phone — compact chrome
+ *   <= 420px  small phone — tightest spacing
+ */
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* GLOBAL                                                                     */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+html {
+  /* Stop iOS Safari inflating text in rotated / narrow layouts. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  /* Nothing in this dashboard is meant to scroll sideways; a single stray
+     wide element should never shift the whole page. */
+  overflow-x: hidden;
+}
+
+/* Media (images, iframes, canvases) must never force horizontal overflow. */
+img,
+iframe {
+  max-width: 100%;
+}
+
+/* Long API keys / coordinates / emails must wrap rather than widen a card. */
+.jg-page-shell {
+  overflow-wrap: break-word;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* NAVBAR                                                                     */
+/*                                                                            */
+/* The 64px header height is a hard contract: MAP_CONFIG.containerHeight and  */
+/* every page's `calc(100vh - 64px)` depend on it. So the navbar never wraps  */
+/* or grows on mobile — instead its contents shrink, and the link row becomes */
+/* horizontally scrollable so items can never overlap the brand.              */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+.jg-navbar {
+  /* Honour the notch / rounded corners on iOS when held in landscape. */
+  padding-left: max(32px, env(safe-area-inset-left)) !important;
+  padding-right: max(32px, env(safe-area-inset-right)) !important;
+  gap: 12px;
+}
+
+.jg-navbar-brandwrap {
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.jg-navbar-nav {
+  min-width: 0;
+  /* Scroll instead of overflowing into the brand. */
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.jg-navbar-nav::-webkit-scrollbar {
+  display: none;
+}
+
+/* Links and the CTA must keep their own width inside the scroll strip. */
+.jg-navbar-nav > * {
+  flex-shrink: 0;
+}
+
+@media (max-width: 900px) {
+  .jg-navbar {
+    padding-left: max(16px, env(safe-area-inset-left)) !important;
+    padding-right: max(16px, env(safe-area-inset-right)) !important;
+  }
+
+  .jg-navbar-nav {
+    gap: 18px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .jg-navbar-logo {
+    height: 38px !important;
+  }
+
+  .jg-navbar-brand {
+    font-size: 16px !important;
+  }
+
+  /* "Open Data" is decorative — the first thing to go when space is tight. */
+  .jg-navbar-brandsub {
+    display: none;
+  }
+
+  .jg-navbar-nav {
+    gap: 14px !important;
+  }
+
+  .jg-navbar-link {
+    font-size: 13px !important;
+  }
+
+  .jg-navbar-cta {
+    padding: 8px 14px !important;
+    font-size: 13px !important;
+    /* The four nav items cannot fit one 64px row on a phone, so the row
+       scrolls (see .jg-navbar-nav). The primary CTA must not be the thing
+       that scrolls out of sight, so it sticks to the right edge of the
+       scrollport while the links slide underneath it. The first shadow is
+       the mask that hides links passing behind it; the second preserves the
+       amber glow from SHADOWS.glow that this rule would otherwise replace. */
+    position: sticky;
+    right: 0;
+    box-shadow:
+      -12px 0 10px -4px var(--jg-bg-deep),
+      0 0 20px rgba(217, 119, 6, 0.35) !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .jg-navbar {
+    padding-left: max(10px, env(safe-area-inset-left)) !important;
+    padding-right: max(10px, env(safe-area-inset-right)) !important;
+  }
+
+  .jg-navbar-logo {
+    height: 32px !important;
+  }
+
+  .jg-navbar-brandwrap {
+    gap: 8px !important;
+  }
+
+  .jg-navbar-nav {
+    gap: 12px !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* MAP OVERLAYS — ViewToggle + legend                                         */
+/*                                                                            */
+/* On the map page two toggles are absolutely positioned at top-left and      */
+/* top-right. Below ~520px their labels made them collide in the middle, so   */
+/* the labels are dropped and the icon alone identifies each option (the      */
+/* button keeps a title tooltip and an aria-label).                           */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 900px) {
+  .jg-view-toggle-btn {
+    padding: 9px 14px !important;
+    font-size: 13px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .jg-view-toggle {
+    top: 10px !important;
+  }
+
+  .jg-view-toggle--left {
+    left: 10px !important;
+  }
+
+  .jg-view-toggle--right {
+    right: 10px !important;
+  }
+
+  .jg-view-toggle-btn {
+    padding: 8px 11px !important;
+    gap: 6px !important;
+  }
+}
+
+@media (max-width: 520px) {
+  /* Icon-only: the two toggles can no longer reach each other. */
+  .jg-view-toggle-label {
+    display: none;
+  }
+
+  .jg-view-toggle-btn {
+    padding: 10px 12px !important;
+    gap: 0 !important;
+  }
+}
+
+/* Choropleth legend — shrink and keep clear of the bottom safe area. */
+@media (max-width: 640px) {
+  .jg-map-legend {
+    right: 10px !important;
+    bottom: calc(14px + env(safe-area-inset-bottom)) !important;
+    min-width: 0 !important;
+    max-width: calc(100vw - 20px);
+    padding: 10px 12px !important;
+  }
+
+  .jg-map-legend-heading {
+    margin-bottom: 8px !important;
+  }
+
+  .jg-map-legend-row {
+    margin-bottom: 6px !important;
+  }
+
+  .jg-map-legend-label {
+    font-size: 11px !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* HAZARD CARD (expanded modal)                                               */
+/*                                                                            */
+/* --card-width-exp is a fixed 560px in map.css. Below that viewport width    */
+/* the centred card hung off both edges. It now clamps to the viewport, and   */
+/* gains a max-height so a long description can't run past the fold with no   */
+/* way to reach the bottom rows.                                              */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+.hazard-card.is-expanded {
+  width: min(var(--card-width-exp), calc(100vw - 24px)) !important;
+  max-height: min(88vh, calc(100vh - 32px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+/* Compact (draggable) card — never wider than the screen. */
+.hazard-card:not(.is-expanded) {
+  max-width: calc(100vw - 24px);
+}
+
+@media (max-width: 420px) {
+  .hazard-card.is-expanded {
+    width: calc(100vw - 16px) !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* DATA EXPLORER                                                              */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 900px) {
+  .jg-explorer-page {
+    padding: 20px 16px !important;
+  }
+
+  /* Title block over the toggle instead of beside it. */
+  .jg-explorer-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 16px;
+    margin-bottom: 20px !important;
+  }
+
+  /* The toggle is absolutely positioned for the map; inside the explorer
+     header it must simply sit in the flow once the row has stacked. */
+  .jg-explorer-toggle {
+    position: static !important;
+    height: auto !important;
+    width: 100% !important;
+  }
+
+  .jg-explorer-toggle .jg-view-toggle {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
+    display: inline-flex !important;
+  }
+
+  .jg-explorer-title {
+    font-size: 24px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Labels stay visible here — the explorer toggle has the full row width,
+     so the icon-only rule that the map needs would only hurt legibility. */
+  .jg-explorer-toggle .jg-view-toggle-label {
+    display: inline !important;
+  }
+
+  .jg-explorer-toggle .jg-view-toggle-btn {
+    padding: 9px 12px !important;
+    gap: 6px !important;
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .jg-explorer-toggle .jg-view-toggle {
+    display: flex !important;
+    width: 100%;
+  }
+}
+
+/* ── Filter bar ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .jg-filterbar {
+    padding: 14px 16px !important;
+    gap: 12px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .jg-filterbar {
+    align-items: stretch !important;
+  }
+
+  .jg-filterbar-filters {
+    width: 100%;
+    gap: 12px !important;
+  }
+
+  /* Two dropdowns per row, each free to shrink with the viewport. */
+  .jg-filter-field {
+    flex: 1 1 calc(50% - 6px);
+    min-width: 0;
+  }
+
+  .jg-filter-select {
+    width: 100%;
+    min-width: 0 !important;
+    /* 16px stops iOS Safari zooming the page when the select is focused. */
+    font-size: 16px !important;
+  }
+
+  .jg-filterbar-reset {
+    align-self: flex-end;
+  }
+
+  .jg-filterbar-count {
+    align-self: flex-start !important;
+  }
+}
+
+@media (max-width: 420px) {
+  /* One per row — two 140px selects no longer fit side by side. */
+  .jg-filter-field {
+    flex: 1 1 100%;
+  }
+}
+
+/* ── Export links + pagination ───────────────────────────────────────────── */
+
+.jg-export-row {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .jg-pagination {
+    flex-wrap: wrap;
+    justify-content: center !important;
+    gap: 12px;
+  }
+
+  .jg-pagination-info {
+    order: -1;
+    width: 100%;
+    text-align: center;
+  }
+
+  .jg-pagination-btn {
+    flex: 1 1 auto;
+    padding: 10px 16px !important;
+  }
+}
+
+/* ── Table ───────────────────────────────────────────────────────────────── */
+
+.jg-table-scroll {
+  /* Momentum scrolling for the horizontally scrollable table on iOS. */
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 640px) {
+  .jg-table-scroll td,
+  .jg-table-scroll th {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* AUTH PAGE                                                                  */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+/* The card was a fixed 440px, which overflowed every phone. Fluid up to the
+   original width, so desktop is pixel-identical. */
+.jg-auth-card {
+  width: 100% !important;
+  max-width: 440px;
+}
+
+@media (max-width: 640px) {
+  .jg-auth-page {
+    padding: 24px 16px !important;
+  }
+
+  .jg-auth-card {
+    padding: 28px 20px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .jg-auth-card {
+    padding: 24px 16px !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* KEY PAGE (Developer Settings)                                              */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 900px) {
+  .jg-key-page {
+    padding: 32px 16px !important;
+  }
+
+  .jg-key-heading {
+    font-size: 30px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .jg-key-page {
+    padding: 24px 14px !important;
+  }
+
+  .jg-key-heading {
+    font-size: 26px !important;
+  }
+
+  /* The masked key is 60+ monospace characters; the input must be allowed to
+     shrink so the reveal / copy buttons stay on screen. */
+  .jg-key-row {
+    gap: 8px !important;
+    padding: 8px 8px 8px 12px !important;
+  }
+
+  .jg-key-input {
+    min-width: 0 !important;
+  }
+
+  .jg-key-iconbtn {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .jg-key-confirm-actions {
+    flex-wrap: wrap;
+  }
+}
+
+/* Profile card — avatar row wraps before the verified badge is squashed. */
+@media (max-width: 420px) {
+  .jg-profile-avatar-row {
+    flex-wrap: wrap;
+    gap: 12px !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* DOCS PAGE                                                                  */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 900px) {
+  .jg-docs-header {
+    flex-wrap: wrap;
+    padding: 16px !important;
+  }
+
+  .jg-docs-openbtn {
+    /* Full-width tap target once it has dropped onto its own line. */
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .jg-docs-title {
+    font-size: 20px !important;
+  }
+
+  .jg-docs-hint {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* MODALS                                                                     */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+  .jg-modal-backdrop {
+    padding: 16px !important;
+    /* Respect the home-indicator area on iOS. */
+    padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
+  }
+
+  .jg-modal-card {
+    /* A tall confirm dialog must scroll rather than run off the screen. */
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+/* NB: no padding override on .jg-modal-card — DeleteAccountModal renders with
+   `padded={false}` and owns its own inner spacing. */
+
+@media (max-width: 420px) {
+  /* "Remove Developer Access" beside "Cancel" is wider than a small phone. */
+  .jg-modal-actions {
+    flex-wrap: wrap;
+    justify-content: stretch !important;
+  }
+
+  .jg-modal-actions > * {
+    flex: 1 1 100%;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* FORM CONTROLS — iOS focus-zoom guard                                       */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    /* Below 16px iOS Safari zooms the viewport on focus and never zooms back,
+       which leaves the whole layout offset. */
+    font-size: 16px !important;
+  }
+}

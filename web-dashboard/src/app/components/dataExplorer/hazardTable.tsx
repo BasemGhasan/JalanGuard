@@ -197,7 +197,7 @@ export function HazardTable({ hazards, loading, error, onRowClick }: HazardTable
   }
 
   return (
-    <div style={{ overflowX: "auto" }}>
+    <div style={{ overflowX: "auto" }} className="jg-table-scroll">
       <table style={tableStyle}>
         <thead>
           <tr>

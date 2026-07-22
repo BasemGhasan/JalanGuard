@@ -109,13 +109,13 @@ export function KeyPage({ onNavigate }: Readonly<KeyPageProps>) {
 
   return (
     <>
-      <div style={styles.page}>
+      <div style={styles.page} className="jg-key-page jg-page-shell">
         <div style={styles.inner}>
 
           {/* ── Page header ───────────────────────────────────────────── */}
           <div style={styles.headerWrap}>
             <div style={styles.badge}>DASHBOARD</div>
-            <h1 style={styles.heading}>Developer Settings</h1>
+            <h1 style={styles.heading} className="jg-key-heading">Developer Settings</h1>
             <p style={styles.subheading}>
               Manage your account profile and API access keys.
             </p>
@@ -161,12 +161,13 @@ export function KeyPage({ onNavigate }: Readonly<KeyPageProps>) {
             {/* Key exists — reveal / copy / rotate */}
             {status === "ready" && (
               <>
-                <div style={styles.keyRow}>
+                <div style={styles.keyRow} className="jg-key-row">
                   <Key size={14} color={COLORS.textMuted} style={{ flexShrink: 0 }} />
                   <input
                     readOnly
                     value={displayValue}
                     style={styles.keyInput}
+                    className="jg-key-input"
                     aria-label="API key"
                   />
                   <button
@@ -174,6 +175,7 @@ export function KeyPage({ onNavigate }: Readonly<KeyPageProps>) {
                     disabled={isBusy}
                     title={isRevealed ? "Hide" : "Show"}
                     style={styles.iconBtn}
+                    className="jg-key-iconbtn"
                   >
                     {revealIcon}
                   </button>
@@ -182,6 +184,7 @@ export function KeyPage({ onNavigate }: Readonly<KeyPageProps>) {
                     disabled={isBusy}
                     title="Copy"
                     style={styles.iconBtn}
+                    className="jg-key-iconbtn"
                   >
                     {copied
                       ? <Check size={14} color={COLORS.success} />
@@ -219,7 +222,7 @@ export function KeyPage({ onNavigate }: Readonly<KeyPageProps>) {
                       The current key stops working immediately. Any integration using
                       it must be updated with the new key.
                     </p>
-                    <div style={styles.confirmActions}>
+                    <div style={styles.confirmActions} className="jg-key-confirm-actions">
                       <AppButton variant="outline" onClick={handleCancelConfirmRotate} disabled={isBusy}>
                         Cancel
                       </AppButton>

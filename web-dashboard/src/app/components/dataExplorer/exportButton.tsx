@@ -20,7 +20,7 @@ const FORMATS = [
 // 3. Component
 export function ExportButtons({ onExport }: Readonly<ExportButtonsProps>) {
     return (
-        <div style={styles.container}>
+        <div style={styles.container} className="jg-export-row">
             <span style={styles.label}>Export:</span>
             {FORMATS.map(({ key, label }, i) => (
                 <Fragment key={key}>

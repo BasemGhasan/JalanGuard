@@ -76,40 +76,40 @@ export function Navbar({ active, onNavigate }: NavbarProps) {
 
   return (
     <>
-      <header style={styles.header}>
-        <div style={styles.brandContainer}>
+      <header style={styles.header} className="jg-navbar">
+        <div style={styles.brandContainer} className="jg-navbar-brandwrap">
           {/* logo */}
-          <img src={logoImg} alt="JalanGuard Logo" style={styles.logo} />
+          <img src={logoImg} alt="JalanGuard Logo" style={styles.logo} className="jg-navbar-logo" />
           {/* Brand */}
-          <button style={styles.brand} onClick={() => globalThis.location.reload()}>
+          <button style={styles.brand} className="jg-navbar-brand" onClick={() => globalThis.location.reload()}>
             JalanGuard{" "}
-            <span style={styles.brandSub}>Open Data</span>
+            <span style={styles.brandSub} className="jg-navbar-brandsub">Open Data</span>
           </button>
         </div>
 
         {/* Nav links */}
-        <nav style={styles.nav}>
-          <button style={linkStyle("map")} onClick={handleNavToMap}>
+        <nav style={styles.nav} className="jg-navbar-nav">
+          <button style={linkStyle("map")} className="jg-navbar-link" onClick={handleNavToMap}>
             Live Map
           </button>
           {/* Documentation covers the developer API — meaningless without an
               API key, so it's hidden until there's a session to view it with. */}
           {isLoggedIn && (
-            <button style={linkStyle("docs")} onClick={handleNavToDocs}>
+            <button style={linkStyle("docs")} className="jg-navbar-link" onClick={handleNavToDocs}>
               Documentation
             </button>
           )}
-          <button style={linkStyle("explorer")} onClick={handleNavToExplorer}>
+          <button style={linkStyle("explorer")} className="jg-navbar-link" onClick={handleNavToExplorer}>
             Data Explorer
           </button>
 
           {/* Auth state: Logout ↔ Login */}
           {isLoggedIn ? (
-            <button style={styles.navLink} onClick={handleOpenLogout}>
+            <button style={styles.navLink} className="jg-navbar-link" onClick={handleOpenLogout}>
               Logout
             </button>
           ) : (
-            <button style={linkStyle("auth")} onClick={handleNavToAuth}>
+            <button style={linkStyle("auth")} className="jg-navbar-link" onClick={handleNavToAuth}>
               Login
             </button>
           )}
@@ -117,6 +117,7 @@ export function Navbar({ active, onNavigate }: NavbarProps) {
           {/* Auth state: My Dashboard ↔ Get API Key */}
           <AppButton
             variant="primary"
+            className="jg-navbar-cta"
             style={styles.ctaBtn}
             onClick={isLoggedIn ? handleMyDashboard : handleNavToAuth}
           >

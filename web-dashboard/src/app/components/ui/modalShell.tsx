@@ -43,8 +43,9 @@ export function ModalShell({
   );
 
   return (
-    <div style={styles.backdrop} onClick={handleBackdropClick}>
+    <div style={styles.backdrop} className="jg-modal-backdrop" onClick={handleBackdropClick}>
       <div
+        className="jg-modal-card"
         style={{
           ...styles.card,
           width,

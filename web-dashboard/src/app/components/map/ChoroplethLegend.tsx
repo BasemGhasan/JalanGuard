@@ -59,12 +59,12 @@ const styles = {
 /** Legend panel synced exactly to the dominantColor() severity tiers. */
 export function ChoroplethLegend() {
   return (
-    <div style={styles.wrapper}>
-      <p style={styles.heading}>Dominant Severity</p>
+    <div style={styles.wrapper} className="jg-map-legend">
+      <p style={styles.heading} className="jg-map-legend-heading">Dominant Severity</p>
       {LEGEND_TIERS.map(({ color, label }) => (
-        <div key={label} style={styles.row}>
+        <div key={label} style={styles.row} className="jg-map-legend-row">
           <div style={{ ...styles.swatch, background: color }} />
-          <span style={styles.rowLabel}>{label}</span>
+          <span style={styles.rowLabel} className="jg-map-legend-label">{label}</span>
         </div>
       ))}
     </div>

@@ -79,7 +79,7 @@ export function ProfileSection({ onNavigate }: Readonly<ProfileSectionProps>) {
     <Card>
       <SectionLabel icon={User} label="Profile" />
 
-      <div style={styles.avatarRow}>
+      <div style={styles.avatarRow} className="jg-profile-avatar-row">
         <div style={styles.avatar}>{initials}</div>
         <div style={styles.identity}>
           {loading ? <div style={styles.skeletonName} /> : <span style={styles.displayName}>{displayName || "No name set"}</span>}
